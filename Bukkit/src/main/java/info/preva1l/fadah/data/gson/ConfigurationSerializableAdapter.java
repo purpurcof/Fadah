@@ -20,7 +20,7 @@ public class ConfigurationSerializableAdapter implements JsonSerializer<Configur
             final JsonElement value = entry.getValue();
             final String name = entry.getKey();
 
-            if ("custom-model-data".equals(name) && value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber()) {
+            if (value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber() && (value.getAsNumber() instanceof Integer || value.getAsDouble() % 1 == 0)) {
                 map.put(name, value.getAsInt());
             }
 
