@@ -27,7 +27,6 @@ import info.preva1l.fadah.utils.logging.TransactionLogger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -101,6 +100,7 @@ public class NewListingMenu extends FastInv {
                         .name(getLang().getStringFormatted("time.name", "&aTime for listing to be active"))
                         .setAttributes(null)
                         .flags(ItemFlag.HIDE_ATTRIBUTES)
+                        .modelData(getLang().getInt("time.model-data"))
                         .addLore(getLang().getLore("time.lore", TimeUtil.formatTimeUntil(timeToDelete.toEpochMilli()))).build(), e -> {
             if (e.isRightClick()) {
                 if (e.isShiftClick()) {
