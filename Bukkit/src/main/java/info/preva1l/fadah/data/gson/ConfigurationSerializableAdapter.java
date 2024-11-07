@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ConfigurationSerializableAdapter implements JsonSerializer<ConfigurationSerializable>, JsonDeserializer<ConfigurationSerializable> {
-    final Type objectStringMapType = new TypeToken<Map<String, Object>>() {}.getType();
+    private static final Type OBJECT_STRING_MAP_TYPE = new TypeToken<Map<String, Object>>() {}.getType();
 
     @Override
     public ConfigurationSerializable deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
@@ -20,7 +20,11 @@ public class ConfigurationSerializableAdapter implements JsonSerializer<Configur
             final JsonElement value = entry.getValue();
             final String name = entry.getKey();
 
-            if (value.isJsonObject() && value.getAsJsonObject().has(ConfigurationSerialization.SERIALIZED_TYPE_KEY)) {
+            if ("custom-model-data".equals(name) && value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber()) {
+                map.put(name, value.getAsInt());
+            }
+
+            else if (value.isJsonObject() && value.getAsJsonObject().has(ConfigurationSerialization.SERIALIZED_TYPE_KEY)) {
                 map.put(name, this.deserialize(value, value.getClass(), context));
             } else {
                 map.put(name, context.deserialize(value, Object.class));
@@ -35,6 +39,6 @@ public class ConfigurationSerializableAdapter implements JsonSerializer<Configur
         final Map<String, Object> map = new LinkedHashMap<>();
         map.put(ConfigurationSerialization.SERIALIZED_TYPE_KEY, ConfigurationSerialization.getAlias(src.getClass()));
         map.putAll(src.serialize());
-        return context.serialize(map, objectStringMapType);
+        return context.serialize(map, OBJECT_STRING_MAP_TYPE);
     }
 }
