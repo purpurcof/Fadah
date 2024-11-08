@@ -56,7 +56,6 @@ public class SQLiteHandler implements DatabaseHandler {
             config.setJdbcUrl("jdbc:sqlite:" + databaseFile.getAbsolutePath());
             config.setConnectionTestQuery("SELECT 1");
             config.setMaxLifetime(60000);
-            config.setIdleTimeout(45000);
             config.setMaximumPoolSize(50);
             dataSource = new HikariDataSource(config);
             this.backupFlatFile(databaseFile);
