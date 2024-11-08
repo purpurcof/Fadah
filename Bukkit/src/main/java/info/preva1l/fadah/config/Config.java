@@ -41,6 +41,7 @@ public class Config {
     private int defaultMaxListings = 3;
     private String decimalFormat = "#,###.00";
     private boolean logToFile = true;
+    private boolean verbose = true;
 
     @Comment("Enable this if you are having de-sync issues with multi-server.")
     private boolean strictChecks = false;
