@@ -86,6 +86,10 @@ public final class Fadah extends JavaPlugin {
         hookManager = new HookManager();
         adventureAudience = BukkitAudiences.create(this);
 
+        getConsole().info("Enabling the API...");
+        AuctionHouseAPI.setInstance(new BukkitAuctionHouseAPI());
+        getConsole().info("API Enabled!");
+
         loadCurrencies();
         loadMenus();
         loadFiles();
@@ -105,10 +109,6 @@ public final class Fadah extends JavaPlugin {
 
         initLogger();
         setupMetrics();
-
-        getConsole().info("Enabling the API...");
-        AuctionHouseAPI.setInstance(new BukkitAuctionHouseAPI());
-        getConsole().info("API Enabled!");
 
         Bukkit.getConsoleSender().sendMessage(StringUtils.colorize("&2&l------------------------------"));
         Bukkit.getConsoleSender().sendMessage(StringUtils.colorize("&a Finally a Decent Auction House"));
