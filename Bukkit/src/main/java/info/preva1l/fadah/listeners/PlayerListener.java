@@ -1,5 +1,6 @@
 package info.preva1l.fadah.listeners;
 
+import com.github.puregero.multilib.regionized.RegionizedTask;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CollectionBoxCache;
 import info.preva1l.fadah.cache.ExpiredListingsCache;
@@ -14,7 +15,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
 import java.util.UUID;
@@ -52,7 +52,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onClose(InventoryCloseEvent event) {
-        BukkitTask task = InventoryEventHandler.tasksToQuit.get(event.getInventory());
+        RegionizedTask task = InventoryEventHandler.tasksToQuit.get(event.getInventory());
         if (task != null) {
             task.cancel();
         }

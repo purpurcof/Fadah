@@ -1,10 +1,10 @@
 package info.preva1l.fadah.utils.guis;
 
+import com.github.puregero.multilib.MultiLib;
+import com.github.puregero.multilib.regionized.RegionizedTask;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Menus;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public abstract class PaginatedFastInv extends FastInv {
                 31, 32, 33, 34, 38, 39, 40,
                 41, 42, 43);
 
-        BukkitTask task = Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(Fadah.getINSTANCE(), this::updatePagination, 20L, 20L);
+        RegionizedTask task = MultiLib.getAsyncScheduler().runAtFixedRate(Fadah.getINSTANCE(), t -> updatePagination(), 20L, 20L);
         InventoryEventHandler.tasksToQuit.put(getInventory(), task);
     }
 
@@ -37,7 +37,7 @@ public abstract class PaginatedFastInv extends FastInv {
         this.player = player;
         this.paginationMappings = paginationMappings;
 
-        BukkitTask task = Bukkit.getServer().getScheduler().runTaskTimerAsynchronously(Fadah.getINSTANCE(), this::updatePagination, 20L, 20L);
+        RegionizedTask task = MultiLib.getAsyncScheduler().runAtFixedRate(Fadah.getINSTANCE(), t -> updatePagination(), 20L, 20L);
         InventoryEventHandler.tasksToQuit.put(getInventory(), task);
     }
 
