@@ -60,7 +60,7 @@ public class CollectionBoxMenu extends PaginatedFastInv {
                         Lang.sendMessage(viewer, Lang.i().getPrefix() + Lang.i().getErrors().getInventoryFull());
                         return;
                     }
-                    if (!CollectionBoxCache.doesItemExist(player.getUniqueId(), collectableItem)) {
+                    if (!CollectionBoxCache.doesItemExist(owner.getUniqueId(), collectableItem)) {
                         Lang.sendMessage(viewer, Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist());
                         return;
                     }
@@ -103,7 +103,7 @@ public class CollectionBoxMenu extends PaginatedFastInv {
     @Override
     protected void updatePagination() {
         this.collectionBox.clear();
-        this.collectionBox.addAll(CollectionBoxCache.getCollectionBox(player.getUniqueId()));
+        this.collectionBox.addAll(CollectionBoxCache.getCollectionBox(owner.getUniqueId()));
         super.updatePagination();
     }
 

@@ -62,7 +62,7 @@ public class ExpiredListingsMenu extends PaginatedFastInv {
                         Lang.sendMessage(viewer, Lang.i().getPrefix() + Lang.i().getErrors().getInventoryFull());
                         return;
                     }
-                    if (!ExpiredListingsCache.doesItemExist(player.getUniqueId(), collectableItem)) {
+                    if (!ExpiredListingsCache.doesItemExist(owner.getUniqueId(), collectableItem)) {
                         Lang.sendMessage(viewer, StringUtils.colorize(Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist()));
                         return;
                     }
@@ -104,7 +104,7 @@ public class ExpiredListingsMenu extends PaginatedFastInv {
     @Override
     protected void updatePagination() {
         this.expiredItems.clear();
-        this.expiredItems.addAll(ExpiredListingsCache.getExpiredListings(player.getUniqueId()));
+        this.expiredItems.addAll(ExpiredListingsCache.getExpiredListings(owner.getUniqueId()));
         super.updatePagination();
     }
 
