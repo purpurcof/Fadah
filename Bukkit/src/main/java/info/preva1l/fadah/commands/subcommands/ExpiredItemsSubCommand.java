@@ -23,7 +23,7 @@ public class ExpiredItemsSubCommand extends SubCommand {
     @SubCommandArgs(name = "expired-items", permission = "fadah.expired-items")
     public void execute(@NotNull SubCommandArguments command) {
         if (!Config.i().isEnabled()) {
-            command.sender().sendMessage(Lang.i().getPrefix() + Lang.i().getErrors().getDisabled());
+            command.reply(Lang.i().getPrefix() + Lang.i().getErrors().getDisabled());
             return;
         }
         assert command.getPlayer() != null;
@@ -35,7 +35,7 @@ public class ExpiredItemsSubCommand extends SubCommand {
                     .thenAccept(var1 -> var1.ifPresent(list -> ExpiredListingsCache.update(finalOwner.getUniqueId(), list.collectableItems())));
         }
         if (owner.getUniqueId() != command.getPlayer().getUniqueId() && !HistoricItemsCache.playerExists(owner.getUniqueId())) {
-            command.sender().sendMessage(Lang.i().getPrefix() + Lang.i().getErrors().getPlayerNotFound()
+            command.reply(Lang.i().getPrefix() + Lang.i().getErrors().getPlayerNotFound()
                     .replace("%player%", command.args()[0]));
             return;
         }
