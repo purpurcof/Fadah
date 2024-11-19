@@ -26,7 +26,6 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void joinListener(AsyncPlayerPreLoginEvent e) {
-        System.out.println("skib");
         if (!DatabaseManager.getInstance().isConnected()) {
             e.setLoginResult(AsyncPlayerPreLoginEvent.Result.KICK_OTHER);
             e.setKickMessage(StringUtils.colorize(Lang.i().getPrefix() + Lang.i().getErrors().getDatabaseLoading()));
@@ -37,9 +36,7 @@ public class PlayerListener implements Listener {
             leave(e.getUniqueId());
             invalidateIfNoJoin.remove(e.getUniqueId());
         }, 1200L));
-        System.out.println("skib");
         Fadah.getINSTANCE().loadPlayerData(e.getUniqueId()).join();
-        System.out.println("skib");
     }
 
     @EventHandler
