@@ -1,6 +1,7 @@
 package info.preva1l.fadah.utils;
 
 import com.github.puregero.multilib.MultiLib;
+import com.github.puregero.multilib.regionized.RegionizedTask;
 import lombok.experimental.UtilityClass;
 import org.bukkit.plugin.Plugin;
 
@@ -43,8 +44,8 @@ public class TaskManager {
          * @param runnable The runnable, lambda supported yeh
          * @param delay    Time before running.
          */
-        public void runLater(Plugin plugin, Runnable runnable, long delay) {
-            MultiLib.getGlobalRegionScheduler().runDelayed(plugin,  t -> runnable.run(), delay);
+        public RegionizedTask runLater(Plugin plugin, Runnable runnable, long delay) {
+            return MultiLib.getGlobalRegionScheduler().runDelayed(plugin,  t -> runnable.run(), delay);
         }
     }
 

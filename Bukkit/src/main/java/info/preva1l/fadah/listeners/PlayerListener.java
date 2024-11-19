@@ -8,6 +8,7 @@ import info.preva1l.fadah.cache.HistoricItemsCache;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.utils.StringUtils;
+import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.guis.InventoryEventHandler;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,12 +17,12 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayerListener implements Listener {
-    private final List<UUID> loading = new CopyOnWriteArrayList<>();
+    private final Map<UUID, RegionizedTask> invalidateIfNoJoin = new HashMap<>();
 
     @EventHandler
     public void joinListener(AsyncPlayerPreLoginEvent e) {
@@ -31,23 +32,25 @@ public class PlayerListener implements Listener {
             return;
         }
 
-        loading.add(e.getUniqueId());
+        invalidateIfNoJoin.put(e.getUniqueId(), TaskManager.Sync.runLater(Fadah.getINSTANCE(), () -> {
+            leave(e.getUniqueId());
+            invalidateIfNoJoin.remove(e.getUniqueId());
+        }, 1200L));
+
         Fadah.getINSTANCE().loadPlayerData(e.getUniqueId()).join();
-        loading.remove(e.getUniqueId());
     }
 
     @EventHandler
     public void finalJoin(PlayerJoinEvent e) {
-        if (loading.contains(e.getPlayer().getUniqueId())) {
-            e.getPlayer().kickPlayer(StringUtils.colorize(Lang.i().getPrefix() + Lang.i().getErrors().getDatabaseLoading()));
+        RegionizedTask task = invalidateIfNoJoin.remove(e.getPlayer().getUniqueId());
+        if (task != null) {
+            task.cancel();
         }
     }
 
     @EventHandler
     public void leaveListener(PlayerQuitEvent e) {
-        CollectionBoxCache.invalidate(e.getPlayer().getUniqueId());
-        ExpiredListingsCache.invalidate(e.getPlayer().getUniqueId());
-        HistoricItemsCache.invalidate(e.getPlayer().getUniqueId());
+        leave(e.getPlayer().getUniqueId());
     }
 
     @EventHandler
@@ -56,5 +59,11 @@ public class PlayerListener implements Listener {
         if (task != null) {
             task.cancel();
         }
+    }
+
+    private void leave(UUID uuid) {
+        CollectionBoxCache.invalidate(uuid);
+        ExpiredListingsCache.invalidate(uuid);
+        HistoricItemsCache.invalidate(uuid);
     }
 }
