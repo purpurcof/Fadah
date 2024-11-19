@@ -7,6 +7,7 @@ import info.preva1l.fadah.data.handler.DatabaseHandler;
 import info.preva1l.fadah.data.handler.MongoHandler;
 import info.preva1l.fadah.data.handler.MySQLHandler;
 import info.preva1l.fadah.data.handler.SQLiteHandler;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -21,7 +22,7 @@ import java.util.concurrent.Executors;
 public final class DatabaseManager {
     private static DatabaseManager instance;
 
-    private final ExecutorService threadPool;
+    @Getter private final ExecutorService threadPool;
     private final Map<DatabaseType, Class<? extends DatabaseHandler>> databaseHandlers = new HashMap<>();
     private final DatabaseHandler handler;
 

@@ -218,91 +218,93 @@ public class NewListingMenu extends FastInv {
     private void startListing(Instant deletionDate, double price) {
         String category = CategoryCache.getCategoryForItem(itemToSell);
 
-        if (category == null || Restrictions.isRestrictedItem(itemToSell)) {
-            Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getRestricted());
-            return;
-        }
-
-        double tax = PermissionsData.getHighestDouble(PermissionsData.PermissionType.LISTING_TAX, player);
-
-        Listing listing = new CurrentListing(UUID.randomUUID(), player.getUniqueId(), player.getName(),
-                itemToSell, category, currency.getId(), price, tax, Instant.now().toEpochMilli(), deletionDate.toEpochMilli(), isBidding, Collections.emptyList());
-
-        ListingCreateEvent createEvent = new ListingCreateEvent(player, listing);
-        Bukkit.getServer().getPluginManager().callEvent(createEvent);
-
-        if (createEvent.isCancelled()) {
-            Lang.sendMessage(player, Lang.i().getPrefix() + createEvent.getCancelReason());
-            player.closeInventory();
-            return;
-        }
-
-        ListingCache.addListing(listing);
-        DatabaseManager.getInstance().save(Listing.class, listing);
-
-        if (Config.i().getBroker().isEnabled()) {
-            Message.builder()
-                    .type(Message.Type.LISTING_ADD)
-                    .payload(Payload.withUUID(listing.getId()))
-                    .build().send(Fadah.getINSTANCE().getBroker());
-        }
-
-        listingStarted = true;
-
-        player.closeInventory();
-
-        double taxAmount = PermissionsData.getHighestDouble(PermissionsData.PermissionType.LISTING_TAX, player);
-        String itemName = StringUtils.extractItemName(listing.getItemStack());
-        String message = String.join("\n", ListHelper.replace(Lang.i().getNotifications().getNewListing(),
-                Tuple.of("%item%", itemName),
-                Tuple.of("%price%", new DecimalFormat(Config.i().getFormatting().getNumbers()).format(listing.getPrice())),
-                Tuple.of("%time%", TimeUtil.formatTimeUntil(listing.getDeletionDate())),
-                Tuple.of("%current_listings%", PermissionsData.getCurrentListings(player) + ""),
-                Tuple.of("%max_listings%", PermissionsData.getHighestInt(PermissionsData.PermissionType.MAX_LISTINGS, player) + ""),
-                Tuple.of("%tax%", taxAmount + ""),
-                Tuple.of("%price_after_tax%", new DecimalFormat(Config.i().getFormatting().getNumbers()).format((taxAmount / 100) * price))
-        ));
-        Lang.sendMessage(player, message);
-
-        TransactionLogger.listingCreated(listing);
-
-        Config.Hooks.Discord discConf = Config.i().getHooks().getDiscord();
-        if ((discConf.isEnabled() && plugin.getHookManager().getHook(DiscordHook.class).isPresent()) &&
-                ((discConf.isEnabled() && advertise)
-                        || !discConf.isOnlySendOnAdvert())) {
-            plugin.getHookManager().getHook(DiscordHook.class).get().send(listing);
-        }
-
-        if (advertise) {
-            double advertPrice = PermissionsData.getHighestDouble(PermissionsData.PermissionType.ADVERT_PRICE, player);
-            if (!listing.getCurrency().canAfford(player, advertPrice)) {
-                Lang.sendMessage(player,Lang.i().getPrefix() + Lang.i().getErrors().getAdvertExpense());
+        Restrictions.isRestrictedItem(itemToSell).thenAccept(restricted -> {
+            if (category == null || restricted) {
+                Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getRestricted());
                 return;
             }
 
-            listing.getCurrency().withdraw(player, advertPrice);
+            double tax = PermissionsData.getHighestDouble(PermissionsData.PermissionType.LISTING_TAX, player);
 
-            String advertMessage = String.join("&r\n", ListHelper.replace(Lang.i().getNotifications().getAdvert(),
-                    Tuple.of("%player%", player.getName()),
-                    Tuple.of("%item%", itemName),
-                    Tuple.of("%price%", new DecimalFormat(Config.i().getFormatting().getNumbers()).format(listing.getPrice()))
-            ));
+            Listing listing = new CurrentListing(UUID.randomUUID(), player.getUniqueId(), player.getName(),
+                    itemToSell, category, currency.getId(), price, tax, Instant.now().toEpochMilli(), deletionDate.toEpochMilli(), isBidding, Collections.emptyList());
 
-            TaskManager.Async.run(Fadah.getINSTANCE(), () -> {
-                Component textComponent = MiniMessage.miniMessage().deserialize(StringUtils.legacyToMiniMessage(advertMessage));
-                textComponent = textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/ah view-listing " + listing.getId()));
-                for (Player announce : Bukkit.getOnlinePlayers()) {
-                    Fadah.getINSTANCE().getAdventureAudience().player(announce).sendMessage(textComponent);
-                }
-            });
+            ListingCreateEvent createEvent = new ListingCreateEvent(player, listing);
+            Bukkit.getServer().getPluginManager().callEvent(createEvent);
+
+            if (createEvent.isCancelled()) {
+                Lang.sendMessage(player, Lang.i().getPrefix() + createEvent.getCancelReason());
+                player.closeInventory();
+                return;
+            }
+
+            ListingCache.addListing(listing);
+            DatabaseManager.getInstance().save(Listing.class, listing);
 
             if (Config.i().getBroker().isEnabled()) {
                 Message.builder()
-                        .type(Message.Type.BROADCAST)
-                        .payload(Payload.withBroadcast(advertMessage, "/ah view-listing " + listing.getId()))
+                        .type(Message.Type.LISTING_ADD)
+                        .payload(Payload.withUUID(listing.getId()))
                         .build().send(Fadah.getINSTANCE().getBroker());
             }
-        }
+
+            listingStarted = true;
+
+            player.closeInventory();
+
+            double taxAmount = PermissionsData.getHighestDouble(PermissionsData.PermissionType.LISTING_TAX, player);
+            String itemName = StringUtils.extractItemName(listing.getItemStack());
+            String message = String.join("\n", ListHelper.replace(Lang.i().getNotifications().getNewListing(),
+                    Tuple.of("%item%", itemName),
+                    Tuple.of("%price%", new DecimalFormat(Config.i().getFormatting().getNumbers()).format(listing.getPrice())),
+                    Tuple.of("%time%", TimeUtil.formatTimeUntil(listing.getDeletionDate())),
+                    Tuple.of("%current_listings%", PermissionsData.getCurrentListings(player) + ""),
+                    Tuple.of("%max_listings%", PermissionsData.getHighestInt(PermissionsData.PermissionType.MAX_LISTINGS, player) + ""),
+                    Tuple.of("%tax%", taxAmount + ""),
+                    Tuple.of("%price_after_tax%", new DecimalFormat(Config.i().getFormatting().getNumbers()).format((taxAmount / 100) * price))
+            ));
+            Lang.sendMessage(player, message);
+
+            TransactionLogger.listingCreated(listing);
+
+            Config.Hooks.Discord discConf = Config.i().getHooks().getDiscord();
+            if ((discConf.isEnabled() && plugin.getHookManager().getHook(DiscordHook.class).isPresent()) &&
+                    ((discConf.isEnabled() && advertise)
+                            || !discConf.isOnlySendOnAdvert())) {
+                plugin.getHookManager().getHook(DiscordHook.class).get().send(listing);
+            }
+
+            if (advertise) {
+                double advertPrice = PermissionsData.getHighestDouble(PermissionsData.PermissionType.ADVERT_PRICE, player);
+                if (!listing.getCurrency().canAfford(player, advertPrice)) {
+                    Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getAdvertExpense());
+                    return;
+                }
+
+                listing.getCurrency().withdraw(player, advertPrice);
+
+                String advertMessage = String.join("&r\n", ListHelper.replace(Lang.i().getNotifications().getAdvert(),
+                        Tuple.of("%player%", player.getName()),
+                        Tuple.of("%item%", itemName),
+                        Tuple.of("%price%", new DecimalFormat(Config.i().getFormatting().getNumbers()).format(listing.getPrice()))
+                ));
+
+                TaskManager.Async.run(Fadah.getINSTANCE(), () -> {
+                    Component textComponent = MiniMessage.miniMessage().deserialize(StringUtils.legacyToMiniMessage(advertMessage));
+                    textComponent = textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/ah view-listing " + listing.getId()));
+                    for (Player announce : Bukkit.getOnlinePlayers()) {
+                        Fadah.getINSTANCE().getAdventureAudience().player(announce).sendMessage(textComponent);
+                    }
+                });
+
+                if (Config.i().getBroker().isEnabled()) {
+                    Message.builder()
+                            .type(Message.Type.BROADCAST)
+                            .payload(Payload.withBroadcast(advertMessage, "/ah view-listing " + listing.getId()))
+                            .build().send(Fadah.getINSTANCE().getBroker());
+                }
+            }
+        });
     }
 
     private void addNavigationButtons() {

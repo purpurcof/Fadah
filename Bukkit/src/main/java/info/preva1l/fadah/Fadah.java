@@ -345,7 +345,7 @@ public final class Fadah extends JavaPlugin {
             Optional<History> history = DatabaseManager.getInstance().get(History.class, uuid).join();
             history.ifPresent(list -> HistoricItemsCache.update(uuid, list.collectableItems()));
             return null;
-        });
+        }, DatabaseManager.getInstance().getThreadPool());
     }
 
     public void reload() {
