@@ -212,13 +212,13 @@ public class StringUtils {
             return item.getItemMeta().getDisplayName();
         }
         if (item.getItemMeta() != null && item.getItemMeta().hasLocalizedName()) {
-            return item.getItemMeta().getLocalizedName().replace("§", "&");
+            return item.getItemMeta().getLocalizedName();
         }
         String[] split = item.getType().name().toLowerCase().split("_");
         StringBuilder builder = new StringBuilder();
         for (String s : split) {
             builder.append(capitalize(s)).append(" ");
         }
-        return builder.toString().trim();
+        return builder.toString().trim().replace("§", "&");
     }
 }
