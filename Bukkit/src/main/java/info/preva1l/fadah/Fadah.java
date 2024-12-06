@@ -122,6 +122,7 @@ public final class Fadah extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        FastInvManager.closeAll(this);
         AuctionWatcher.getWatchingListings().values()
                 .forEach(watching -> DatabaseManager.getInstance().save(Watching.class, watching));
         DatabaseManager.getInstance().shutdown();
