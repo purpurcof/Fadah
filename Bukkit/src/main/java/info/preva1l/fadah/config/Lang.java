@@ -128,6 +128,16 @@ public class Lang {
             private List<String> aliases = List.of("visit");
         }
 
+        private Watch watch = new Watch();
+
+        @Getter
+        @Configuration
+        @NoArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class Watch {
+            private String description = "Watch for listings and get notified when one gets listed";
+            private List<String> aliases = List.of("listen");
+        }
+
         private Profile profile = new Profile();
 
         @Getter

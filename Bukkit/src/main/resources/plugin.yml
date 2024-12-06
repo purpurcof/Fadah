@@ -45,6 +45,8 @@ permissions:
     default: true
   fadah.active-listings:
     default: true
+  fadah.watch:
+    default: true
   fadah.manage.*:
     children:
       - fadah.manage.profile

@@ -42,10 +42,9 @@ public class FastInv implements InventoryHolder {
     /**
      * Create a new FastInv with a custom size.
      *
-     * @param size The size of the inventory.
      */
-    public FastInv(int size, LayoutManager.MenuType menuType) {
-        this(owner -> Bukkit.createInventory(owner, size), menuType);
+    public FastInv(LayoutManager.MenuType menuType) {
+        this(owner -> Bukkit.createInventory(owner, menuType.getLayout().guiSize(), menuType.getLayout().formattedTitle()), menuType);
     }
 
     /**

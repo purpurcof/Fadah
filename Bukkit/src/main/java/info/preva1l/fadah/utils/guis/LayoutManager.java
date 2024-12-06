@@ -134,6 +134,7 @@ public class LayoutManager {
         COLLECTION_BOX,
         ACTIVE_LISTINGS,
         VIEW_LISTINGS,
+        WATCH,
         /**
          * Guis without layouts
          */

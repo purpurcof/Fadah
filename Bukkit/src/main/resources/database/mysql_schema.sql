@@ -5,14 +5,14 @@ SET FOREIGN_KEY_CHECKS = 1;
 CREATE TABLE IF NOT EXISTS collection_boxV2
 (
     playerUUID VARCHAR(36) NOT NULL PRIMARY KEY,
-    items TEXT NOT NULL
+    items      TEXT        NOT NULL
 ) CHARACTER SET utf8
   COLLATE utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS expired_itemsV2
 (
     playerUUID VARCHAR(36) NOT NULL PRIMARY KEY,
-    items TEXT NOT NULL
+    items      TEXT        NOT NULL
 ) CHARACTER SET utf8
   COLLATE utf8_unicode_ci;
 
@@ -37,5 +37,12 @@ CREATE TABLE IF NOT EXISTS historyV2
 (
     playerUUID VARCHAR(36) NOT NULL PRIMARY KEY,
     items      TEXT        NOT NULL
+) CHARACTER SET utf8
+  COLLATE utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS watchers
+(
+    playerUUID VARCHAR(36) NOT NULL PRIMARY KEY,
+    watching   TEXT        NOT NULL
 ) CHARACTER SET utf8
   COLLATE utf8_unicode_ci;

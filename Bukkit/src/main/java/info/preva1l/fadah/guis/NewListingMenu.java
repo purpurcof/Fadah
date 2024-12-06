@@ -24,6 +24,7 @@ import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.TimeUtil;
 import info.preva1l.fadah.utils.guis.*;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
+import info.preva1l.fadah.watcher.AuctionWatcher;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -304,6 +305,8 @@ public class NewListingMenu extends FastInv {
                             .build().send(Fadah.getINSTANCE().getBroker());
                 }
             }
+
+            TaskManager.Async.run(Fadah.getINSTANCE(), () -> AuctionWatcher.alertWatchers(listing));
         });
     }
 

@@ -39,3 +39,10 @@ CREATE TABLE IF NOT EXISTS historyV2
     items      TEXT        NOT NULL
 ) CHARACTER SET utf8
   COLLATE utf8_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS watchers
+(
+    playerUUID VARCHAR(36) NOT NULL PRIMARY KEY,
+    watching   TEXT        NOT NULL
+) CHARACTER SET utf8
+  COLLATE utf8_unicode_ci;

@@ -8,11 +8,14 @@ import info.preva1l.fadah.data.handler.MongoHandler;
 import info.preva1l.fadah.data.handler.MySQLHandler;
 import info.preva1l.fadah.data.handler.SQLiteHandler;
 import lombok.Getter;
+import lombok.SneakyThrows;
+import org.jetbrains.annotations.Blocking;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This is the manager for all database interactions.
@@ -121,7 +124,11 @@ public final class DatabaseManager {
         return handler.isConnected();
     }
 
+    @SneakyThrows
+    @Blocking
     public void shutdown() {
+        threadPool.shutdown();
+        threadPool.awaitTermination(10, TimeUnit.SECONDS);
         handler.destroy();
     }
 

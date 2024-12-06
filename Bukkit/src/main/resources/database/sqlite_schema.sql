@@ -31,3 +31,9 @@ CREATE TABLE IF NOT EXISTS historyV2
     playerUUID TEXT NOT NULL PRIMARY KEY,
     items      TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS watchers
+(
+    playerUUID TEXT NOT NULL PRIMARY KEY,
+    watching   TEXT NOT NULL
+);

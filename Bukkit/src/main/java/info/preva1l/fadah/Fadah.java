@@ -38,6 +38,8 @@ import info.preva1l.fadah.utils.guis.FastInvManager;
 import info.preva1l.fadah.utils.guis.LayoutManager;
 import info.preva1l.fadah.utils.logging.TransactionLogFormatter;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
+import info.preva1l.fadah.watcher.AuctionWatcher;
+import info.preva1l.fadah.watcher.Watching;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -120,6 +122,8 @@ public final class Fadah extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        AuctionWatcher.getWatchingListings().values()
+                .forEach(watching -> DatabaseManager.getInstance().save(Watching.class, watching));
         DatabaseManager.getInstance().shutdown();
         if (broker != null) broker.destroy();
         if (metrics != null) metrics.shutdown();
