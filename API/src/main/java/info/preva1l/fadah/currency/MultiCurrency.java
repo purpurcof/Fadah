@@ -16,7 +16,5 @@ public interface MultiCurrency {
      *
      * @return true if the checks succeed false if they fail.
      */
-    default boolean preloadChecks() {
-        return true;
-    }
+     boolean preloadChecks();
 }
