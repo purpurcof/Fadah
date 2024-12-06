@@ -39,20 +39,28 @@ public class SellSubCommand extends SubCommand {
             return;
         }
 
-        int multi = 1;
+        double multi = 1;
 
         if (priceString.toLowerCase().endsWith("k")) {
             multi = 1000;
             priceString = priceString.replace("k", "");
             priceString = priceString.replace("K", "");
         } else if (priceString.toLowerCase().endsWith("m")) {
-            multi = 1000000;
+            multi = 1_000_000;
             priceString = priceString.replace("m", "");
             priceString = priceString.replace("M", "");
         } else if (priceString.toLowerCase().endsWith("b")) {
-            multi = 1000000000;
+            multi = 1_000_000_000;
             priceString = priceString.replace("b", "");
             priceString = priceString.replace("B", "");
+        } else if (priceString.toLowerCase().endsWith("t")) {
+            multi = 1_000_000_000_000L;
+            priceString = priceString.replace("t", "");
+            priceString = priceString.replace("T", "");
+        } else if (priceString.toLowerCase().endsWith("q")) {
+            multi = 1_000_000_000_000_000L;
+            priceString = priceString.replace("q", "");
+            priceString = priceString.replace("Q", "");
         }
 
         try {
