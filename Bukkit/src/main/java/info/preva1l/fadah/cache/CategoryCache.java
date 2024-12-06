@@ -29,7 +29,7 @@ public final class CategoryCache {
     public String getCatName(String id) {
         Category category = getCategory(id);
         if (category == null) {
-            return "Unknown";
+            return "N/A";
         }
         return category.name();
     }
@@ -40,6 +40,9 @@ public final class CategoryCache {
 
     @Nullable
     public String getCategoryForItem(ItemStack itemStack) {
+        if (categories.isEmpty()) {
+            return "N/A";
+        }
         for (Category category : getCategories()) {
             if (category.isCustomItems()) {
                 if (Config.i().getHooks().isEcoItems()
