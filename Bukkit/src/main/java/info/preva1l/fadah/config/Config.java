@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Getter
@@ -46,7 +46,7 @@ public class Config {
     @Comment("Enable this if you are having de-sync issues with multi-server.")
     private boolean strictChecks = false;
 
-    private Duration maxListingLength = Duration.ofDays(5);
+    private TimeLength maxListingLength = new TimeLength(10, ChronoUnit.DAYS);
 
     private ListingPrice listingPrice = new ListingPrice();
 
