@@ -49,10 +49,8 @@ public class MainMenu extends ScrollBarFastInv {
             listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
         }
         if (search != null) {
-            listings.removeIf(listing -> !(listing.getItemStack().getType().name().toUpperCase().contains(search.toUpperCase())
-                    || listing.getItemStack().getType().name().toUpperCase().contains(search.replace(" ", "_").toUpperCase()))
-                    && !checkForStringInItem(search.toUpperCase(), listing.getItemStack())
-                    && !checkForEnchantmentOnBook(search.toUpperCase(), listing.getItemStack()));
+            listings.removeIf(listing -> !(!checkForStringInItem(search.toUpperCase(), listing.getItemStack())
+                    && !checkForEnchantmentOnBook(search.toUpperCase(), listing.getItemStack())));
         }
 
         List<Integer> fillerSlots = getLayout().fillerSlots();
@@ -78,6 +76,7 @@ public class MainMenu extends ScrollBarFastInv {
     }
 
     private boolean checkForEnchantmentOnBook(String enchant, ItemStack enchantedBook) {
+        if (!Config.i().getSearch().isEnchantedBooks()) return false;
         if (enchantedBook.getType() == Material.ENCHANTED_BOOK) {
             for (Enchantment enchantment : enchantedBook.getEnchantments().keySet()) {
                 if (enchantment.getKey().getKey().toUpperCase().contains(enchant)) return true;
@@ -87,10 +86,23 @@ public class MainMenu extends ScrollBarFastInv {
     }
 
     private boolean checkForStringInItem(String toCheck, ItemStack item) {
-        if (item.hasItemMeta()) {
-            return item.getItemMeta().getDisplayName().toUpperCase().contains(toCheck.toUpperCase())
-                    || (item.getItemMeta().getLore() != null
-                    && item.getItemMeta().getLore().contains(toCheck.toUpperCase()));
+        if (Config.i().getSearch().isType()) {
+            if (item.getType().name().toUpperCase().contains(toCheck.toUpperCase())
+                    || item.getType().name().toUpperCase().contains(toCheck.replace(" ", "_").toUpperCase())) {
+                return true;
+            }
+        }
+
+        if (item.getItemMeta() != null) {
+            if (Config.i().getSearch().isName()) {
+                if (item.getItemMeta().getDisplayName().toUpperCase().contains(toCheck.toUpperCase())) {
+                    return true;
+                }
+            }
+
+            if (Config.i().getSearch().isLore()) {
+                return item.getItemMeta().getLore() != null && item.getItemMeta().getLore().contains(toCheck.toUpperCase());
+            }
         }
         return false;
     }
@@ -306,10 +318,8 @@ public class MainMenu extends ScrollBarFastInv {
         }
 
         if (search != null) {
-            listings.removeIf(listing -> !(listing.getItemStack().getType().name().toUpperCase().contains(search.toUpperCase())
-                    || listing.getItemStack().getType().name().toUpperCase().contains(search.replace(" ", "_").toUpperCase()))
-                    && !checkForStringInItem(search.toUpperCase(), listing.getItemStack())
-                    && !checkForEnchantmentOnBook(search.toUpperCase(), listing.getItemStack()));
+            listings.removeIf(listing -> !(!checkForStringInItem(search.toUpperCase(), listing.getItemStack())
+                    && !checkForEnchantmentOnBook(search.toUpperCase(), listing.getItemStack())));
         }
 
         super.updatePagination();

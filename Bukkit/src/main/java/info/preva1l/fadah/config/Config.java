@@ -78,6 +78,20 @@ public class Config {
         }
     }
 
+    @Comment("What the search function should check.")
+    private Search search = new Search();
+
+    @Getter
+    @Configuration
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class Search {
+        private boolean name = true;
+        private boolean lore = true;
+        private boolean type = true;
+        @Comment("Does not include enchants on items.")
+        private boolean enchantedBooks = true;
+    }
+
     private ListingAdverts listingAdverts = new ListingAdverts();
 
     @Getter
