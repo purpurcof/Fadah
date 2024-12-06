@@ -117,13 +117,13 @@ public class NewListingMenu extends FastInv {
 
             if (e.isLeftClick()) {
                 if (e.isShiftClick()) {
-                    if (timeToDelete.plus(30, ChronoUnit.MINUTES).toEpochMilli() > Instant.now().plus(10, ChronoUnit.DAYS).toEpochMilli())
+                    if (timeToDelete.plus(30, ChronoUnit.MINUTES).toEpochMilli() > Instant.now().plus(Config.i().getMaxListingLength()).toEpochMilli())
                         return;
                     timeToDelete = timeToDelete.plus(30, ChronoUnit.MINUTES);
                     setClock();
                     return;
                 }
-                if (timeToDelete.plus(1, ChronoUnit.HOURS).toEpochMilli() > Instant.now().plus(10, ChronoUnit.DAYS).toEpochMilli())
+                if (timeToDelete.plus(1, ChronoUnit.HOURS).toEpochMilli() > Instant.now().plus(Config.i().getMaxListingLength()).toEpochMilli())
                     return;
                 timeToDelete = timeToDelete.plus(1, ChronoUnit.HOURS);
                 setClock();
