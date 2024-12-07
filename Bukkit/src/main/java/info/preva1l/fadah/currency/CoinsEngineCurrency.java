@@ -23,7 +23,7 @@ public class CoinsEngineCurrency implements MultiCurrency {
             Currency subCur = new SubCurrency(id + "_" + eco.economy(), eco.displayName(), requiredPlugin) {
                 @Override
                 public void withdraw(OfflinePlayer player, double amountToTake) {
-                    CoinsEngineAPI.addBalance(player.getUniqueId(), getCurrency(), amountToTake);
+                    CoinsEngineAPI.removeBalance(player.getUniqueId(), getCurrency(), amountToTake);
                 }
 
                 @Override
