@@ -5,6 +5,7 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.data.PermissionsData;
 import info.preva1l.fadah.guis.NewListingMenu;
+import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.commands.SubCommand;
 import info.preva1l.fadah.utils.commands.SubCommandArgs;
 import info.preva1l.fadah.utils.commands.SubCommandArguments;
@@ -39,37 +40,15 @@ public class SellSubCommand extends SubCommand {
             return;
         }
 
-        double multi = 1;
-
-        if (priceString.toLowerCase().endsWith("k")) {
-            multi = 1000;
-            priceString = priceString.replace("k", "");
-            priceString = priceString.replace("K", "");
-        } else if (priceString.toLowerCase().endsWith("m")) {
-            multi = 1_000_000;
-            priceString = priceString.replace("m", "");
-            priceString = priceString.replace("M", "");
-        } else if (priceString.toLowerCase().endsWith("b")) {
-            multi = 1_000_000_000;
-            priceString = priceString.replace("b", "");
-            priceString = priceString.replace("B", "");
-        } else if (priceString.toLowerCase().endsWith("t")) {
-            multi = 1_000_000_000_000L;
-            priceString = priceString.replace("t", "");
-            priceString = priceString.replace("T", "");
-        } else if (priceString.toLowerCase().endsWith("q")) {
-            multi = 1_000_000_000_000_000L;
-            priceString = priceString.replace("q", "");
-            priceString = priceString.replace("Q", "");
-        }
+        double price = StringUtils.getAmountFromString(priceString);
 
         try {
-            if (Double.parseDouble(priceString) * multi < Config.i().getListingPrice().getMin()) {
+            if (price < Config.i().getListingPrice().getMin()) {
                 command.reply(Lang.i().getPrefix() + Lang.i().getCommands().getSell().getListingPrice().getMin()
                         .replace("%price%", Config.i().getListingPrice().getMin() + ""));
                 return;
             }
-            if (Double.parseDouble(priceString) * multi > Config.i().getListingPrice().getMax()) {
+            if (price > Config.i().getListingPrice().getMax()) {
                 command.reply(Lang.i().getPrefix() + Lang.i().getCommands().getSell().getListingPrice().getMax()
                         .replace("%price%", Config.i().getListingPrice().getMax() + ""));
                 return;
@@ -82,7 +61,7 @@ public class SellSubCommand extends SubCommand {
                         .replace("%max%", maxListings + ""));
                 return;
             }
-            new NewListingMenu(command.getPlayer(), Double.parseDouble(priceString) * multi).open(command.getPlayer());
+            new NewListingMenu(command.getPlayer(), price).open(command.getPlayer());
         } catch (NumberFormatException e) {
             command.reply(Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMustBeNumber());
         }

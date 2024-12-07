@@ -100,6 +100,7 @@ public class LayoutManager {
             case "historic-items.yml": yield MenuType.HISTORY;
             case "active-listings.yml": yield MenuType.ACTIVE_LISTINGS;
             case "view-listings.yml": yield MenuType.VIEW_LISTINGS;
+            case "watch.yml": yield MenuType.WATCH;
             default: throw new IllegalStateException("The config file %s is not related to a GuiLayout".formatted(fileName));
         };
     }
@@ -188,6 +189,11 @@ public class LayoutManager {
         PROFILE_COLLECTION_BOX,
         PROFILE_ACTIVE_LISTINGS,
         PROFILE_EXPIRED_LISTINGS,
+        /**
+         * Watch Menu Specific Items
+         */
+        MIN_PRICE,
+        MAX_PRICE,
         /**
          * Misc Items
          */

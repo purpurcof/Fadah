@@ -22,6 +22,6 @@ public class WatchSubCommand extends SubCommand {
         }
         assert command.getPlayer() != null;
 
-        new WatchMenu().open(command.getPlayer());
+        new WatchMenu(command.getPlayer()).open(command.getPlayer());
     }
 }

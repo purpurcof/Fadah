@@ -74,7 +74,7 @@ public class WatchersSQLiteDao implements Dao<Watching> {
                     VALUES (?,?)
                     ON CONFLICT(`playerUUID`) DO UPDATE SET
                         `watching` = excluded.`watching`;""")) {
-                statement.setString(1, watching.player().toString());
+                statement.setString(1, watching.getPlayer().toString());
                 statement.setString(2, GSON.toJson(watching));
                 statement.executeUpdate();
             } catch (Exception e) {

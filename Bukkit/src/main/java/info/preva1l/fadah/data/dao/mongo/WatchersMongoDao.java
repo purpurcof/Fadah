@@ -65,9 +65,9 @@ public class WatchersMongoDao implements Dao<Watching> {
     public void save(Watching watching) {
         try {
             MongoCollection<Document> collection = collectionHelper.getCollection("watchers");
-            Document document = new Document("playerUUID", watching.player().toString())
+            Document document = new Document("playerUUID", watching.getPlayer().toString())
                     .append("watching", GSON.toJson(watching));
-            collection.replaceOne(Filters.eq("playerUUID", watching.player().toString()), document, new ReplaceOptions().upsert(true));
+            collection.replaceOne(Filters.eq("playerUUID", watching.getPlayer().toString()), document, new ReplaceOptions().upsert(true));
         } catch (Exception e) {
             e.printStackTrace();
         }

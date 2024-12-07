@@ -40,7 +40,7 @@ dependencies {
     }
     compileOnly 'org.mongodb:mongodb-driver-sync:5.0.0'
 
-    implementation 'net.wesjd:anvilgui:1.10.2-SNAPSHOT' // Search Menu
+    implementation 'net.wesjd:anvilgui:1.10.3-SNAPSHOT' // Search Menu
 
     compileOnly 'org.mozilla:rhino:1.7.14'
 

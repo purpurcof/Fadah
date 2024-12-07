@@ -74,7 +74,7 @@ public class WatchersSQLDao implements Dao<Watching> {
                      VALUES (?, ?)
                      ON DUPLICATE KEY UPDATE
                          `watching` = VALUES(`watching`);""")) {
-                statement.setString(1, watching.player().toString());
+                statement.setString(1, watching.getPlayer().toString());
                 statement.setString(2, GSON.toJson(watching));
                 statement.executeUpdate();
             } catch (Exception e) {

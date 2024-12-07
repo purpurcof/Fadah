@@ -199,7 +199,8 @@ public final class Fadah extends JavaPlugin {
                 new BasicConfig(this, "menus/confirm.yml"),
                 new BasicConfig(this, "menus/collection-box.yml"),
                 new BasicConfig(this, "menus/profile.yml"),
-                new BasicConfig(this, "menus/view-listings.yml")
+                new BasicConfig(this, "menus/view-listings.yml"),
+                new BasicConfig(this, "menus/watch.yml")
         ).forEach(layoutManager::loadLayout);
     }
 
@@ -366,6 +367,7 @@ public final class Fadah extends JavaPlugin {
         Fadah.getINSTANCE().getLayoutManager().reloadLayout(LayoutManager.MenuType.COLLECTION_BOX);
         Fadah.getINSTANCE().getLayoutManager().reloadLayout(LayoutManager.MenuType.CONFIRM_PURCHASE);
         Fadah.getINSTANCE().getLayoutManager().reloadLayout(LayoutManager.MenuType.HISTORY);
+        Fadah.getINSTANCE().getLayoutManager().reloadLayout(LayoutManager.MenuType.WATCH);
         Fadah.getINSTANCE().getCategoriesFile().load();
         CategoryCache.update();
         loadBroker();

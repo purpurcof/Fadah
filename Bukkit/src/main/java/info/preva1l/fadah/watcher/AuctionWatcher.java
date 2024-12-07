@@ -4,6 +4,7 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.records.Listing;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -19,31 +20,41 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AuctionWatcher {
     @Getter private final Map<UUID, Watching> watchingListings = new ConcurrentHashMap<>();
 
-    public void watch(@NotNull Player player, @NotNull Watching watching) {
-        watchingListings.put(player.getUniqueId(), watching);
+    public void watch(@NotNull Watching watching) {
+        watchingListings.put(watching.getPlayer(), watching);
     }
 
     @Blocking
     public void alertWatchers(@NotNull Listing listing) {
         for (Map.Entry<UUID, Watching> entry : watchingListings.entrySet()) {
             Watching watching = entry.getValue();
-            if (watching.search() != null) {
-                if (checkForStringInItem(watching.search().toUpperCase(), listing.getItemStack())
-                        || checkForEnchantmentOnBook(watching.search().toUpperCase(), listing.getItemStack())) {
+            if (watching.getSearch() != null) {
+                if (checkForStringInItem(watching.getSearch().toUpperCase(), listing.getItemStack())
+                        || checkForEnchantmentOnBook(watching.getSearch().toUpperCase(), listing.getItemStack())) {
+                    if ((watching.getMinPrice() != -1 || watching.getMaxPrice() != -1) &&
+                            (watching.getMinPrice() == -1 || watching.getMinPrice() <= listing.getPrice()) &&
+                            (watching.getMaxPrice() == -1 || watching.getMaxPrice() >= listing.getPrice())) {
+                        sendAlert(entry.getKey(), listing);
+                        return;
+                    }
                     sendAlert(entry.getKey(), listing);
+                    return;
                 }
             }
 
-            if (watching.maxPrice() == null || watching.minPrice() == null) return;
-
-            if (watching.minPrice() < listing.getPrice() && watching.maxPrice() < listing.getPrice()) {
+            if ((watching.getMinPrice() != -1 || watching.getMaxPrice() != -1) &&
+                    (watching.getMinPrice() == -1 || watching.getMinPrice() <= listing.getPrice()) &&
+                    (watching.getMaxPrice() == -1 || watching.getMaxPrice() >= listing.getPrice())) {
                 sendAlert(entry.getKey(), listing);
             }
         }
     }
 
-    private void sendAlert(UUID player, Listing listing) {
-        // ceebs
+    private void sendAlert(UUID uuid, Listing listing) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null) return;
+
+        player.sendMessage("Skibidi Skibidi Hawk Tuah Hawk");
     }
 
     private boolean checkForEnchantmentOnBook(String enchant, ItemStack enchantedBook) {
