@@ -75,6 +75,14 @@ public class Lang {
                 "&fMoney Made: &a$%price%",
                 "&f----------------------------------------------"
         );
+        private List<String> watched = List.of(
+                "&f-------------------------------------------------------",
+                "&eA listing meeting your criteria has come on the market!",
+                "&fItem: &e%item%",
+                "&fPrice: &a$%price%",
+                "&7(Click this message to view the listing!)",
+                "&f-------------------------------------------------------"
+        );
         private String cancelled = "&cListing Cancelled!";
     }
 

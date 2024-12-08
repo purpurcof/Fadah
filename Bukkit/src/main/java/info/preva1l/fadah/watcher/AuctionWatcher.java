@@ -1,7 +1,11 @@
 package info.preva1l.fadah.watcher;
 
 import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.config.Lang;
+import info.preva1l.fadah.config.ListHelper;
+import info.preva1l.fadah.config.Tuple;
 import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.utils.StringUtils;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
@@ -12,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,7 +59,13 @@ public class AuctionWatcher {
         Player player = Bukkit.getPlayer(uuid);
         if (player == null) return;
 
-        player.sendMessage("Skibidi Skibidi Hawk Tuah Hawk");
+        String alertMessage = String.join("&r\n", ListHelper.replace(Lang.i().getNotifications().getWatched(),
+                Tuple.of("%player%", player.getName()),
+                Tuple.of("%item%", StringUtils.extractItemName(listing.getItemStack())),
+                Tuple.of("%price%", new DecimalFormat(Config.i().getFormatting().getNumbers()).format(listing.getPrice()))
+        ));
+
+        player.sendMessage(alertMessage);
     }
 
     private boolean checkForEnchantmentOnBook(String enchant, ItemStack enchantedBook) {

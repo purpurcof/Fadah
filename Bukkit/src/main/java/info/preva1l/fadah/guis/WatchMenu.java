@@ -59,7 +59,10 @@ public class WatchMenu extends FastInv {
                         .modelData(getLang().getInt("min-price.model-data"))
                         .lore(getLang().getLore("min-price.lore",
                                 new DecimalFormat(Config.i().getFormatting().getNumbers()).format(watching.getMinPrice()))).build(), e ->
-                        new SearchMenu(player, getLang().getString("min-price.placeholder", "100"), search -> {
+                        new SearchMenu(player, getLang().getString("min-price.placeholder", "Ex: 100"), search -> {
+                            if (search == null) {
+                                search = "-1";
+                            }
                             try {
                                 watching.setMinPrice(StringUtils.getAmountFromString(search));
                             } catch (NumberFormatException ex) {
@@ -77,7 +80,10 @@ public class WatchMenu extends FastInv {
                         .modelData(getLang().getInt("max-price.model-data"))
                         .lore(getLang().getLore("max-price.lore",
                                 new DecimalFormat(Config.i().getFormatting().getNumbers()).format(watching.getMaxPrice()))).build(), e ->
-                        new SearchMenu(player, getLang().getString("max-price.placeholder", "10k"), search -> {
+                        new SearchMenu(player, getLang().getString("max-price.placeholder", "Ex: 10k"), search -> {
+                            if (search == null) {
+                                search = "-1";
+                            }
                             try {
                                 watching.setMaxPrice(StringUtils.getAmountFromString(search));
                             } catch (NumberFormatException ex) {

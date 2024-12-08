@@ -6,6 +6,7 @@ import info.preva1l.fadah.utils.TaskManager;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 
@@ -43,6 +44,6 @@ public class SearchMenu implements Listener {
          *
          * @param query the search query
          */
-        void search(String query);
+        void search(@Nullable String query);
     }
 }
