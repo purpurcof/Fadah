@@ -69,7 +69,7 @@ public class NewListingMenu extends FastInv {
                 new ItemBuilder(getLang().getAsMaterial("create.icon", Material.EMERALD))
                         .name(getLang().getStringFormatted("create.name", "&aClick to create listing!"))
                         .modelData(getLang().getInt("create.model-data"))
-                        .addLore(getLang().getLore("create.lore",
+                        .addLore(getLang().getLore(player, "create.lore",
                                 new DecimalFormat(Config.i().getFormatting().getNumbers())
                                         .format(price)))
                         .setAttributes(null)
@@ -149,7 +149,7 @@ public class NewListingMenu extends FastInv {
                         .modelData(getLang().getInt("advert.model-data"))
                         .setAttributes(null)
                         .flags(ItemFlag.HIDE_ATTRIBUTES)
-                        .lore(getLang().getLore("advert.lore",
+                        .lore(getLang().getLore(player, "advert.lore",
                                 new DecimalFormat(Config.i().getFormatting().getNumbers())
                                         .format(PermissionsData.getHighestDouble(PermissionsData.PermissionType.ADVERT_PRICE, player)),
                                 postAdvert, dontPost)).build(), e -> {

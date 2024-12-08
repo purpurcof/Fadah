@@ -4,6 +4,7 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.utils.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -106,6 +107,10 @@ public class LanguageConfig {
     }
 
     public @NotNull List<String> getLore(String path, Object... replacements) {
+        return getLore(null, path, replacements);
+    }
+
+    public @NotNull List<String> getLore(Player player, String path, Object... replacements) {
         List<String> str = superSection.getStringList(path);
         if (str.isEmpty() || str.get(0).equals(path) || str.get(0).equals("null")) {
             return Collections.emptyList();
@@ -114,7 +119,7 @@ public class LanguageConfig {
         for (String line : str) {
             ret.add(StringUtils.formatPlaceholders(line, replacements));
         }
-        return StringUtils.colorizeList(ret);
+        return StringUtils.colorizeList(player, ret);
     }
 
     public @NotNull List<String> getLore(String path, List<String> def, Object... replacements) {

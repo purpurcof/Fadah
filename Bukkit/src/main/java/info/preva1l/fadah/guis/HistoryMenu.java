@@ -55,26 +55,26 @@ public class HistoryMenu extends PaginatedFastInv {
             ItemBuilder itemStack = new ItemBuilder(historicItem.getItemStack().clone());
             if (historicItem.getPurchaserUUID() != null) {
                 itemStack.addLore(historicItem.getAction() == HistoricItem.LoggedAction.LISTING_SOLD
-                        ? getLang().getLore("lore-with-buyer",
+                        ? getLang().getLore(player,"lore-with-buyer",
                         historicItem.getAction().getLocaleActionName(),
                         Bukkit.getOfflinePlayer(historicItem.getPurchaserUUID()).getName(),
                         new DecimalFormat(Config.i().getFormatting().getNumbers()).format(historicItem.getPrice()),
                         TimeUtil.formatTimeToVisualDate(historicItem.getLoggedDate()))
 
-                        : getLang().getLore("lore-with-seller",
+                        : getLang().getLore(player, "lore-with-seller",
                         historicItem.getAction().getLocaleActionName(),
                         Bukkit.getOfflinePlayer(historicItem.getPurchaserUUID()).getName(),
                         new DecimalFormat(Config.i().getFormatting().getNumbers()).format(historicItem.getPrice()),
                         TimeUtil.formatTimeToVisualDate(historicItem.getLoggedDate()))
                 );
             } else if (historicItem.getPrice() != null && historicItem.getPrice() != 0d) {
-                itemStack.addLore(getLang().getLore("lore-with-price",
+                itemStack.addLore(getLang().getLore(player, "lore-with-price",
                         historicItem.getAction().getLocaleActionName(),
                         new DecimalFormat(Config.i().getFormatting().getNumbers()).format(historicItem.getPrice()),
                         TimeUtil.formatTimeToVisualDate(historicItem.getLoggedDate())
                 ));
             } else {
-                itemStack.addLore(getLang().getLore("lore",
+                itemStack.addLore(getLang().getLore(player, "lore",
                         historicItem.getAction().getLocaleActionName(),
                         TimeUtil.formatTimeToVisualDate(historicItem.getLoggedDate())
                 ));

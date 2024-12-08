@@ -49,7 +49,7 @@ public class ViewListingsMenu extends PaginatedFastInv {
                     : getLang().getStringFormatted("listing.lore-buy.buy-it-now");
 
             ItemBuilder itemStack = new ItemBuilder(listing.getItemStack().clone())
-                    .addLore(getLang().getLore("listing.lore-body",
+                    .addLore(getLang().getLore(player, "listing.lore-body",
                             listing.getOwnerName(),
                             StringUtils.removeColorCodes(CategoryCache.getCatName(listing.getCategoryID())), buyMode,
                             new DecimalFormat(Config.i().getFormatting().getNumbers())

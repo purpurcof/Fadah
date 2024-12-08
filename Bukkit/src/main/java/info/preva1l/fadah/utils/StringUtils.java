@@ -4,7 +4,9 @@ import lombok.experimental.UtilityClass;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +29,14 @@ public class StringUtils {
      * @return Colorized List typeof String
      */
     public List<String> colorizeList(List<String> list) {
+        return colorizeList(null, list);
+    }
+
+    public List<String> colorizeList(@Nullable Player player, List<String> list) {
         if (list == null) return null;
         if (list.isEmpty()) return null;
         List<String> ret = new ArrayList<>();
-        for (String line : list) ret.add(colorize(line));
+        for (String line : list) ret.add(colorize(player, line));
         return ret;
     }
 
@@ -128,9 +134,13 @@ public class StringUtils {
      * @return Colorized String
      */
     public String colorize(String text) {
+        return colorize(null, text);
+    }
+
+    public String colorize(@Nullable Player player, String text) {
         text = miniMessageToLegacy(text);
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            text = PlaceholderAPI.setPlaceholders(null, text);
+            text = PlaceholderAPI.setPlaceholders(player, text);
         }
         Matcher matcher = HEX_PATTERN.matcher(text);
         StringBuilder buffer = new StringBuilder();

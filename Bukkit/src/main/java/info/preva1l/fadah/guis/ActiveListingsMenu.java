@@ -46,7 +46,7 @@ public class ActiveListingsMenu extends PaginatedFastInv {
     protected synchronized void fillPaginationItems() {
         for (Listing listing : listings) {
             ItemBuilder itemStack = new ItemBuilder(listing.getItemStack().clone())
-                    .addLore(getLang().getLore("lore", StringUtils.removeColorCodes(CategoryCache.getCatName(listing.getCategoryID())),
+                    .addLore(getLang().getLore(player, "lore", StringUtils.removeColorCodes(CategoryCache.getCatName(listing.getCategoryID())),
                             new DecimalFormat(Config.i().getFormatting().getNumbers()).format(listing.getPrice()),
                             TimeUtil.formatTimeUntil(listing.getDeletionDate())));
 

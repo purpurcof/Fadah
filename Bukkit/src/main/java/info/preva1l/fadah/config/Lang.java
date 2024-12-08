@@ -10,6 +10,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -371,7 +372,7 @@ public class Lang {
     }
 
     public static void sendMessage(CommandSender sender, String message) {
-        sender.sendMessage(StringUtils.colorize(message));
+        sender.sendMessage(StringUtils.colorize(sender instanceof Player player ? player : null, message));
     }
 
     public void save() {
