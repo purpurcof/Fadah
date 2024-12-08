@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 public final class CurrencyRegistry {
     private static Map<Integer, String> enumerator = new ConcurrentHashMap<>();
     private static Map<String, Currency> values = new ConcurrentHashMap<>();
-    public static final Currency VAULT = get("vault");
 
     public static void registerMulti(MultiCurrency currency) {
         if (!currency.getRequiredPlugin().isEmpty()) {
@@ -70,6 +69,11 @@ public final class CurrencyRegistry {
             values = new ConcurrentHashMap<>();
         }
         return values.get(currencyCode.toLowerCase());
+    }
+
+    public static void unregister(Currency currency) {
+        values.remove(currency.getId().toLowerCase());
+        enumerator.entrySet().removeIf(e -> e.getValue().equals(currency.getId().toLowerCase()));
     }
 
     public static Currency getNext(Currency current) {
