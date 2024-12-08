@@ -9,7 +9,7 @@ import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
 import info.preva1l.fadah.records.HistoricItem;
 import info.preva1l.fadah.records.History;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.StringUtils;
 import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;

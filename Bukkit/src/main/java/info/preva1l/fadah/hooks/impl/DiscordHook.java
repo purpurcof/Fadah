@@ -3,7 +3,7 @@ package info.preva1l.fadah.hooks.impl;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.hooks.Hook;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
 import lombok.Builder;

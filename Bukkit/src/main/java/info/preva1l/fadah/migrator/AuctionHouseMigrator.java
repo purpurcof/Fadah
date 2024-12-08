@@ -5,8 +5,8 @@ import com.spawnchunk.auctionhouse.modules.ListingType;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CategoryCache;
 import info.preva1l.fadah.records.CollectableItem;
-import info.preva1l.fadah.records.CurrentListing;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.BinListing;
+import info.preva1l.fadah.records.listing.Listing;
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 
@@ -41,7 +41,7 @@ public final class AuctionHouseMigrator implements Migrator {
             if (categoryId == null) {
                 categoryId = CategoryCache.getCategories().get(0).id();
             }
-            listings.add(new CurrentListing(id, owner, ownerName, itemStack, categoryId, "vault", price, 0,
+            listings.add(new BinListing(id, owner, ownerName, itemStack, categoryId, "vault", price, 0,
                     Instant.now().toEpochMilli(), expiry, false, List.of()));
         }
         return listings;

@@ -3,7 +3,7 @@ package info.preva1l.fadah.guis;
 import info.preva1l.fadah.filters.SortingDirection;
 import info.preva1l.fadah.filters.SortingMethod;
 import info.preva1l.fadah.records.Category;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.guis.*;
 import org.bukkit.Material;

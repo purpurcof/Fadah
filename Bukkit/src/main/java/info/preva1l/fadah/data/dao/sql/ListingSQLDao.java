@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import com.zaxxer.hikari.HikariDataSource;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.Dao;
-import info.preva1l.fadah.records.CurrentListing;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.BinListing;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.ItemSerializer;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.NotImplementedException;
@@ -59,7 +59,7 @@ public class ListingSQLDao implements Dao<Listing> {
                     final double tax = resultSet.getDouble("tax");
                     final ItemStack itemStack = ItemSerializer.deserialize(resultSet.getString("itemStack"))[0];
                     final boolean biddable = resultSet.getBoolean("biddable");
-                    return Optional.of(new CurrentListing(id, ownerUUID, ownerName, itemStack, categoryID, currency, price, tax, creationDate, deletionDate, biddable, List.of()));
+                    return Optional.of(new BinListing(id, ownerUUID, ownerName, itemStack, categoryID, currency, price, tax, creationDate, deletionDate, biddable, List.of()));
                 }
             }
         } catch (SQLException e) {
@@ -102,7 +102,7 @@ public class ListingSQLDao implements Dao<Listing> {
                     final double tax = resultSet.getDouble("tax");
                     final ItemStack itemStack = ItemSerializer.deserialize(resultSet.getString("itemStack"))[0];
                     final boolean biddable = resultSet.getBoolean("biddable");
-                    retrievedData.add(new CurrentListing(id, ownerUUID, ownerName, itemStack, categoryID, currency, price, tax, creationDate, deletionDate, biddable, List.of()));
+                    retrievedData.add(new BinListing(id, ownerUUID, ownerName, itemStack, categoryID, currency, price, tax, creationDate, deletionDate, biddable, List.of()));
                 }
                 return retrievedData;
             }

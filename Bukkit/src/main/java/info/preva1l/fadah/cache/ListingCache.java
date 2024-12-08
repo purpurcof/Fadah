@@ -1,7 +1,7 @@
 package info.preva1l.fadah.cache;
 
 import info.preva1l.fadah.data.DatabaseManager;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.Listing;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

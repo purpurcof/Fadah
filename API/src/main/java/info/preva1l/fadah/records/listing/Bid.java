@@ -1,4 +1,4 @@
-package info.preva1l.fadah.records;
+package info.preva1l.fadah.records.listing;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

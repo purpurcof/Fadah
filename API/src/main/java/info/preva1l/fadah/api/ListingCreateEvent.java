@@ -1,6 +1,6 @@
 package info.preva1l.fadah.api;
 
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.Listing;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;

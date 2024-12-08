@@ -12,7 +12,7 @@ import info.preva1l.fadah.data.fixers.v2.V2Fixer;
 import info.preva1l.fadah.records.CollectionBox;
 import info.preva1l.fadah.records.ExpiredItems;
 import info.preva1l.fadah.records.History;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.mongo.CacheHandler;
 import info.preva1l.fadah.utils.mongo.CollectionHelper;
 import info.preva1l.fadah.utils.mongo.MongoConnectionHandler;

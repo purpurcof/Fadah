@@ -17,8 +17,8 @@ import info.preva1l.fadah.filters.Restrictions;
 import info.preva1l.fadah.hooks.impl.DiscordHook;
 import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
-import info.preva1l.fadah.records.CurrentListing;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.BinListing;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.TimeUtil;
@@ -227,7 +227,7 @@ public class NewListingMenu extends FastInv {
 
             double tax = PermissionsData.getHighestDouble(PermissionsData.PermissionType.LISTING_TAX, player);
 
-            Listing listing = new CurrentListing(UUID.randomUUID(), player.getUniqueId(), player.getName(),
+            Listing listing = new BinListing(UUID.randomUUID(), player.getUniqueId(), player.getName(),
                     itemToSell, category, currency.getId(), price, tax, Instant.now().toEpochMilli(), deletionDate.toEpochMilli(), isBidding, Collections.emptyList());
 
             ListingCreateEvent createEvent = new ListingCreateEvent(player, listing);

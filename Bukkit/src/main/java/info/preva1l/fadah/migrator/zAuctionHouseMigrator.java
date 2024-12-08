@@ -9,8 +9,8 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CategoryCache;
 import info.preva1l.fadah.currency.CurrencyRegistry;
 import info.preva1l.fadah.records.CollectableItem;
-import info.preva1l.fadah.records.CurrentListing;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.BinListing;
+import info.preva1l.fadah.records.listing.Listing;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
@@ -56,7 +56,7 @@ public final class zAuctionHouseMigrator implements Migrator {
             }
             String currency = item.getEconomy().getCurrency();
             if (CurrencyRegistry.get(currency) == null) currency = "vault";
-            listings.add(new CurrentListing(id, owner, ownerName, itemStack, categoryId, currency, price, 0,
+            listings.add(new BinListing(id, owner, ownerName, itemStack, categoryId, currency, price, 0,
                     Instant.now().toEpochMilli(), expiry, false, List.of()));
         }
         return listings;

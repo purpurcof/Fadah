@@ -4,7 +4,7 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.ListHelper;
 import info.preva1l.fadah.config.Tuple;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.StringUtils;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;

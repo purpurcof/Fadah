@@ -14,7 +14,7 @@ import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.records.CollectionBox;
 import info.preva1l.fadah.records.ExpiredItems;
 import info.preva1l.fadah.records.History;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.guis.FastInvManager;

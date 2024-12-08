@@ -1,4 +1,4 @@
-package info.preva1l.fadah.records;
+package info.preva1l.fadah.records.listing;
 
 import info.preva1l.fadah.currency.Currency;
 import info.preva1l.fadah.currency.CurrencyRegistry;
@@ -42,19 +42,6 @@ public abstract class Listing {
         this.bids = bids;
     }
 
-    /**
-     * Add a new bid
-     * @param bidder the person bidding
-     * @param bidAmount the amount of the bid
-     * @return true if the bid was successful, false if the bid is not high enough
-     */
-    public boolean newBid(@NotNull Player bidder, double bidAmount) {
-        if (!biddable) throw new IllegalStateException("Tried to add a new bid to a BIN auction!");
-        if (bidAmount <= price) return false;
-        // implement
-        return false;
-    }
-
     public Currency getCurrency() {
         return CurrencyRegistry.get(currencyId);
     }
@@ -69,6 +56,14 @@ public abstract class Listing {
     }
 
     public abstract void purchase(@NotNull Player buyer);
+
+    /**
+     * Add a new bid
+     * @param bidder the person bidding
+     * @param bidAmount the amount of the bid
+     * @return true if the bid was successful, false if the bid is not high enough
+     */
+    public abstract boolean newBid(@NotNull Player bidder, double bidAmount);
 
     public abstract boolean cancel(@NotNull Player canceller);
 }

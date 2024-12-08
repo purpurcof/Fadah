@@ -8,7 +8,7 @@ import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.records.CollectableItem;
 import info.preva1l.fadah.records.CollectionBox;
 import info.preva1l.fadah.records.ExpiredItems;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.Listing;
 
 import java.util.List;
 import java.util.Map;

@@ -3,9 +3,9 @@ package info.preva1l.fadah.data.dao.mongo;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import info.preva1l.fadah.data.dao.Dao;
-import info.preva1l.fadah.records.Bid;
-import info.preva1l.fadah.records.CurrentListing;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.Bid;
+import info.preva1l.fadah.records.listing.BinListing;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.ItemSerializer;
 import info.preva1l.fadah.utils.mongo.CollectionHelper;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +54,7 @@ public class ListingMongoDao implements Dao<Listing> {
             final ItemStack itemStack = ItemSerializer.deserialize(doc.getString("itemStack"))[0];
             final boolean biddable = doc.getBoolean("biddable");
             final List<Bid> bids = List.of();
-            return Optional.of(new CurrentListing(id, owner, ownerName, itemStack, category, currency, price, tax, creationDate, deletionDate, biddable, bids));
+            return Optional.of(new BinListing(id, owner, ownerName, itemStack, category, currency, price, tax, creationDate, deletionDate, biddable, bids));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -93,7 +93,7 @@ public class ListingMongoDao implements Dao<Listing> {
                 final ItemStack itemStack = ItemSerializer.deserialize(doc.getString("itemStack"))[0];
                 final boolean biddable = doc.getBoolean("biddable");
                 final List<Bid> bids = List.of();
-                list.add(new CurrentListing(id, owner, ownerName, itemStack, category, currency, price, tax, creationDate, deletionDate, biddable, bids));
+                list.add(new BinListing(id, owner, ownerName, itemStack, category, currency, price, tax, creationDate, deletionDate, biddable, bids));
             }
             return list;
         } catch (Exception e) {

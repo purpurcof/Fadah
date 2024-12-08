@@ -1,4 +1,4 @@
-package info.preva1l.fadah.records;
+package info.preva1l.fadah.records.listing;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -17,6 +17,11 @@ public final class StaleListing extends Listing {
     @Override
     public void purchase(@NotNull Player buyer) {
         throw new IllegalStateException("Purchasing a listing is not possible when the listing is in a stale state!");
+    }
+
+    @Override
+    public boolean newBid(@NotNull Player bidder, double bidAmount) {
+        throw new IllegalStateException("Bidding on a listing is not possible when the listing is in a stale state!");
     }
 
     @Override

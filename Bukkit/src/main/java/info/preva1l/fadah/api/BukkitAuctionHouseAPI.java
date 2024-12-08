@@ -7,7 +7,7 @@ import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.records.Category;
 import info.preva1l.fadah.records.CollectableItem;
 import info.preva1l.fadah.records.HistoricItem;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.Listing;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 

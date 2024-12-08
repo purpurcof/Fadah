@@ -2,7 +2,7 @@ package info.preva1l.fadah.data;
 
 import info.preva1l.fadah.cache.ListingCache;
 import info.preva1l.fadah.config.Config;
-import info.preva1l.fadah.records.Listing;
+import info.preva1l.fadah.records.listing.Listing;
 import lombok.AllArgsConstructor;
 import lombok.experimental.UtilityClass;
 import org.bukkit.entity.Player;
