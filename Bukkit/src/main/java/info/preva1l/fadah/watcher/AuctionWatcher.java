@@ -36,9 +36,7 @@ public class AuctionWatcher {
             if (watching.getSearch() != null) {
                 if (checkForStringInItem(watching.getSearch().toUpperCase(), listing.getItemStack())
                         || checkForEnchantmentOnBook(watching.getSearch().toUpperCase(), listing.getItemStack())) {
-                    if ((watching.getMinPrice() != -1 || watching.getMaxPrice() != -1) &&
-                            (watching.getMinPrice() == -1 || watching.getMinPrice() <= listing.getPrice()) &&
-                            (watching.getMaxPrice() == -1 || watching.getMaxPrice() >= listing.getPrice())) {
+                    if (priceCheck(listing, watching)) {
                         sendAlert(entry.getKey(), listing);
                         return;
                     }
@@ -47,12 +45,16 @@ public class AuctionWatcher {
                 }
             }
 
-            if ((watching.getMinPrice() != -1 || watching.getMaxPrice() != -1) &&
-                    (watching.getMinPrice() == -1 || watching.getMinPrice() <= listing.getPrice()) &&
-                    (watching.getMaxPrice() == -1 || watching.getMaxPrice() >= listing.getPrice())) {
+            if (priceCheck(listing, watching)) {
                 sendAlert(entry.getKey(), listing);
             }
         }
+    }
+
+    private boolean priceCheck(Listing listing, Watching watching) {
+        return (watching.getMinPrice() != -1 || watching.getMaxPrice() != -1) &&
+                (watching.getMinPrice() == -1 || watching.getMinPrice() <= listing.getPrice()) &&
+                (watching.getMaxPrice() == -1 || watching.getMaxPrice() >= listing.getPrice());
     }
 
     private void sendAlert(UUID uuid, Listing listing) {
