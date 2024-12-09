@@ -211,6 +211,7 @@ public final class Fadah extends JavaPlugin {
     private void loadDataAndPopulateCaches() {
         DatabaseManager.getInstance(); // Make the connection happen during startup
         CategoryCache.update();
+        DatabaseManager.getInstance().getAll(Watching.class).join().forEach(AuctionWatcher::watch);
     }
 
     private void loadHooks() {
