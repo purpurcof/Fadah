@@ -3,7 +3,10 @@ package info.preva1l.fadah.currency;
 import info.preva1l.fadah.api.AuctionHouseAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -42,6 +45,7 @@ public final class CurrencyRegistry {
         if (enumerator == null) {
             enumerator = new ConcurrentHashMap<>();
         }
+        Logger.getLogger("Fadah").info("Currency Loaded: " + currency.getId());
 
         if (!currency.getRequiredPlugin().isEmpty()) {
             Plugin requiredPlugin = Bukkit.getPluginManager().getPlugin(currency.getRequiredPlugin());
@@ -71,12 +75,34 @@ public final class CurrencyRegistry {
         return values.get(currencyCode.toLowerCase());
     }
 
-    public static void unregister(Currency currency) {
+    @Blocking
+    public static void unregister(@NotNull Currency currency) {
         values.remove(currency.getId().toLowerCase());
-        enumerator.entrySet().removeIf(e -> e.getValue().equals(currency.getId().toLowerCase()));
+
+        int removedKey = -1;
+        for (Map.Entry<Integer, String> entry : enumerator.entrySet()) {
+            if (entry.getValue().equals(currency.getId().toLowerCase())) {
+                removedKey = entry.getKey();
+                break;
+            }
+        }
+
+        if (removedKey != -1) {
+            enumerator.remove(removedKey);
+            Map<Integer, String> updatedEnumerator = new LinkedHashMap<>();
+
+            for (Map.Entry<Integer, String> entry : enumerator.entrySet()) {
+                int currentKey = entry.getKey();
+                int newKey = currentKey > removedKey ? currentKey - 1 : currentKey;
+                updatedEnumerator.put(newKey, entry.getValue());
+            }
+
+            enumerator.clear();
+            enumerator.putAll(updatedEnumerator);
+        }
     }
 
-    public static Currency getNext(Currency current) {
+    public static Currency getNext(@NotNull Currency current) {
         Integer currentIndex = null;
         for (Map.Entry<Integer, String> entry : enumerator.entrySet()) {
             if (entry.getValue().equalsIgnoreCase(current.getId())) {
@@ -92,7 +118,7 @@ public final class CurrencyRegistry {
         return values.get(nextCurrencyId);
     }
 
-    public static Currency getPrevious(Currency current) {
+    public static Currency getPrevious(@NotNull Currency current) {
         Integer currentIndex = null;
         for (Map.Entry<Integer, String> entry : enumerator.entrySet()) {
             if (entry.getValue().equalsIgnoreCase(current.getId())) {
