@@ -27,8 +27,7 @@ public class BukkitSerializableAdapter implements JsonSerializer<ConfigurationSe
             return objs[0];
         } catch (Exception pass) {
             ConfigurationSerializable obj = legacyAdapter.deserialize(json, typeOfT, context);
-            if (obj != null) return obj;
-            throw new RuntimeException(pass);
+            return obj;
         }
     }
 
