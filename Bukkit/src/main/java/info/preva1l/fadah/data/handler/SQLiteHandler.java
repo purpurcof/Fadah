@@ -5,16 +5,14 @@ import com.zaxxer.hikari.HikariDataSource;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.data.dao.Dao;
-import info.preva1l.fadah.data.dao.sqlite.CollectionBoxSQLiteDao;
-import info.preva1l.fadah.data.dao.sqlite.ExpiredItemsSQLiteDao;
-import info.preva1l.fadah.data.dao.sqlite.HistorySQLiteDao;
-import info.preva1l.fadah.data.dao.sqlite.ListingSQLiteDao;
+import info.preva1l.fadah.data.dao.sqlite.*;
 import info.preva1l.fadah.data.fixers.v2.SQLiteFixerV2;
 import info.preva1l.fadah.data.fixers.v2.V2Fixer;
 import info.preva1l.fadah.records.CollectionBox;
 import info.preva1l.fadah.records.ExpiredItems;
 import info.preva1l.fadah.records.History;
 import info.preva1l.fadah.records.listing.Listing;
+import info.preva1l.fadah.watcher.Watching;
 import lombok.Getter;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -114,6 +112,7 @@ public class SQLiteHandler implements DatabaseHandler {
         daos.put(CollectionBox.class, new CollectionBoxSQLiteDao(dataSource));
         daos.put(ExpiredItems.class, new ExpiredItemsSQLiteDao(dataSource));
         daos.put(History.class, new HistorySQLiteDao(dataSource));
+        daos.put(Watching.class, new WatchersSQLiteDao(dataSource));
     }
 
     @Override

@@ -5,16 +5,14 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.data.DatabaseType;
 import info.preva1l.fadah.data.dao.Dao;
-import info.preva1l.fadah.data.dao.sql.CollectionBoxSQLDao;
-import info.preva1l.fadah.data.dao.sql.ExpiredItemsSQLDao;
-import info.preva1l.fadah.data.dao.sql.HistorySQLDao;
-import info.preva1l.fadah.data.dao.sql.ListingSQLDao;
+import info.preva1l.fadah.data.dao.sql.*;
 import info.preva1l.fadah.data.fixers.v2.MySQLFixerV2;
 import info.preva1l.fadah.data.fixers.v2.V2Fixer;
 import info.preva1l.fadah.records.CollectionBox;
 import info.preva1l.fadah.records.ExpiredItems;
 import info.preva1l.fadah.records.History;
 import info.preva1l.fadah.records.listing.Listing;
+import info.preva1l.fadah.watcher.Watching;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -119,6 +117,7 @@ public class MySQLHandler implements DatabaseHandler {
         daos.put(CollectionBox.class, new CollectionBoxSQLDao(dataSource));
         daos.put(ExpiredItems.class, new ExpiredItemsSQLDao(dataSource));
         daos.put(History.class, new HistorySQLDao(dataSource));
+        daos.put(Watching.class, new WatchersSQLDao(dataSource));
     }
 
     @Override

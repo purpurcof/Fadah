@@ -3,10 +3,7 @@ package info.preva1l.fadah.data.handler;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.data.dao.Dao;
-import info.preva1l.fadah.data.dao.mongo.CollectionBoxMongoDao;
-import info.preva1l.fadah.data.dao.mongo.ExpiredItemsMongoDao;
-import info.preva1l.fadah.data.dao.mongo.HistoryMongoDao;
-import info.preva1l.fadah.data.dao.mongo.ListingMongoDao;
+import info.preva1l.fadah.data.dao.mongo.*;
 import info.preva1l.fadah.data.fixers.v2.MongoFixerV2;
 import info.preva1l.fadah.data.fixers.v2.V2Fixer;
 import info.preva1l.fadah.records.CollectionBox;
@@ -16,6 +13,7 @@ import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.mongo.CacheHandler;
 import info.preva1l.fadah.utils.mongo.CollectionHelper;
 import info.preva1l.fadah.utils.mongo.MongoConnectionHandler;
+import info.preva1l.fadah.watcher.Watching;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,6 +60,7 @@ public class MongoHandler implements DatabaseHandler {
         daos.put(CollectionBox.class, new CollectionBoxMongoDao(collectionHelper));
         daos.put(ExpiredItems.class, new ExpiredItemsMongoDao(collectionHelper));
         daos.put(History.class, new HistoryMongoDao(collectionHelper));
+        daos.put(Watching.class, new WatchersMongoDao(collectionHelper));
     }
 
 
