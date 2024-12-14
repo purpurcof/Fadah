@@ -217,6 +217,8 @@ public class NewListingMenu extends FastInv {
     }
 
     private void startListing(Instant deletionDate, double price) {
+        if (listingStarted) return;
+        listingStarted = true;
         String category = CategoryCache.getCategoryForItem(itemToSell);
 
         Restrictions.isRestrictedItem(itemToSell).thenAccept(restricted -> TaskManager.Sync.run(Fadah.getINSTANCE(), () -> {
@@ -248,8 +250,6 @@ public class NewListingMenu extends FastInv {
                         .payload(Payload.withUUID(listing.getId()))
                         .build().send(Fadah.getINSTANCE().getBroker());
             }
-
-            listingStarted = true;
 
             player.closeInventory();
 
