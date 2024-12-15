@@ -67,7 +67,7 @@ public class AuctionWatcher {
                 Tuple.of("%price%", new DecimalFormat(Config.i().getFormatting().getNumbers()).format(listing.getPrice()))
         ));
 
-        player.sendMessage(alertMessage);
+        player.sendMessage(StringUtils.colorize(alertMessage));
     }
 
     private boolean checkForEnchantmentOnBook(String enchant, ItemStack enchantedBook) {
