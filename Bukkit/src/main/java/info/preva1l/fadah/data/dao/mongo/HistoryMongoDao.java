@@ -39,7 +39,7 @@ public class HistoryMongoDao implements Dao<History> {
                 final Double price = document.getDouble("price");
                 final ItemStack itemStack = ItemSerializer.deserialize(document.getString("itemStack"))[0];
                 final HistoricItem.LoggedAction loggedAction = HistoricItem.LoggedAction.values()[document.getInteger("loggedAction")];
-                final UUID purchaserUUID = document.getString("purchaserUUID") == null ? null : UUID.fromString(document.getString("purchaserUUID"));
+                final UUID purchaserUUID = document.get("purchaserUUID", UUID.class);
                 list.add(new HistoricItem(id, loggedDate, loggedAction, itemStack, price, purchaserUUID));
             } catch (Exception e) {
                 e.printStackTrace();

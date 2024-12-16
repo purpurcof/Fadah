@@ -86,9 +86,12 @@ public final class BinListing extends ActiveListing {
         if (seller != null) {
             Lang.sendMessage(seller, message);
         } else {
-            Message.builder()
-                    .type(Message.Type.NOTIFICATION)
-                    .payload(Payload.withNotification(this.getOwner(), message));
+            if (Config.i().getBroker().isEnabled()) {
+                Message.builder()
+                        .type(Message.Type.NOTIFICATION)
+                        .payload(Payload.withNotification(this.getOwner(), message))
+                        .build().send(Fadah.getINSTANCE().getBroker());
+            }
         }
 
         TransactionLogger.listingSold(this, buyer);

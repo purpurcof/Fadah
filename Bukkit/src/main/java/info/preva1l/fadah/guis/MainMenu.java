@@ -1,5 +1,6 @@
 package info.preva1l.fadah.guis;
 
+import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CategoryCache;
 import info.preva1l.fadah.cache.ListingCache;
 import info.preva1l.fadah.config.Config;
@@ -144,6 +145,10 @@ public class MainMenu extends ScrollBarFastInv {
     @Override
     protected synchronized void fillPaginationItems() {
         for (Listing listing : listings) {
+            if (listing.getCurrency() == null) {
+                Fadah.getConsole().severe("Cannot load listing %s because currency %s is not on this server!".formatted(listing.getId(), listing.getCurrencyId()));
+                continue;
+            }
             String buyMode = listing.isBiddable()
                     ? getLang().getStringFormatted("listing.lore-buy.bidding")
                     : getLang().getStringFormatted("listing.lore-buy.buy-it-now");

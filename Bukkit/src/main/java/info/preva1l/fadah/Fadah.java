@@ -145,6 +145,12 @@ public final class Fadah extends JavaPlugin {
                 if (listing == null) continue;
                 if (Instant.now().toEpochMilli() >= listing.getDeletionDate()) {
                     ListingCache.removeListing(listing);
+                    if (Config.i().getBroker().isEnabled()) {
+                        Message.builder()
+                                .type(Message.Type.LISTING_REMOVE)
+                                .payload(Payload.withUUID(listing.getId()))
+                                .build().send(Fadah.getINSTANCE().getBroker());
+                    }
                     DatabaseManager.getInstance().delete(Listing.class, listing);
 
                     CollectableItem collectableItem = new CollectableItem(listing.getItemStack(), Instant.now().toEpochMilli());
