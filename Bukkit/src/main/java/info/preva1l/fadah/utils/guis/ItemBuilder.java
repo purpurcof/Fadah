@@ -179,10 +179,10 @@ public class ItemBuilder {
     }
 
     public ItemBuilder skullOwner(OfflinePlayer player) {
-        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
+        if (item.getType() != Material.PLAYER_HEAD) return this;
+        SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
         skullMeta.setOwningPlayer(player);
-        skull.setItemMeta(skullMeta);
+        item.setItemMeta(skullMeta);
 
         return edit(item -> item.setItemMeta(skullMeta));
     }

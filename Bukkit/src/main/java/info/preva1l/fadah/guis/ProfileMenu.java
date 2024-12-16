@@ -34,7 +34,7 @@ public class ProfileMenu extends FastInv {
                 e -> new MainMenu(null, viewer, null, null, null).open(viewer));
 
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PROFILE_SUMMARY, -1),
-                new ItemBuilder(Material.PLAYER_HEAD).skullOwner(owner)
+                new ItemBuilder(getLang().getAsMaterial("profile-button.icon")).skullOwner(owner)
                         .modelData(getLang().getInt("profile-button.model-data"))
                         .name(getLang().getStringFormatted("profile-button.name", "&e&l{0} Profile",
                                 viewer.getUniqueId() == owner.getUniqueId()
