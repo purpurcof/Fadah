@@ -6,6 +6,8 @@ version: '${version}'
 
 softdepend: [PlaceholderAPI, EcoItems, zAuctionHouseV3, AuctionHouse, RedisEconomy, CoinsEngine, Vault]
 
+load: POSTWORLD
+
 folia-supported: true
 
 main: info.preva1l.fadah.Fadah
