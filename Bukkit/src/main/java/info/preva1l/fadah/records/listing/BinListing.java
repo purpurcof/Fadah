@@ -80,7 +80,8 @@ public final class BinListing extends ActiveListing {
         String formattedPrice = new DecimalFormat(Config.i().getFormatting().getNumbers()).format(this.getPrice() - taxed);
         String message = String.join("\n", ListHelper.replace(Lang.i().getNotifications().getSale(),
                 Tuple.of("%item%", itemName),
-                Tuple.of("%price%", formattedPrice)));
+                Tuple.of("%price%", formattedPrice),
+                Tuple.of("%buyer%", buyer.getName())));
 
         Player seller = Bukkit.getPlayer(this.getOwner());
         if (seller != null) {

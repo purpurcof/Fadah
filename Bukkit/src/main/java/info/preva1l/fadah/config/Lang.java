@@ -74,6 +74,7 @@ public class Lang {
                 "&eYou have sold an item on the Auction House!",
                 "&fItem: &e%item%",
                 "&fMoney Made: &a$%price%",
+                "&fBuyer: &a$%buyer%",
                 "&f----------------------------------------------"
         );
         private List<String> watched = List.of(
