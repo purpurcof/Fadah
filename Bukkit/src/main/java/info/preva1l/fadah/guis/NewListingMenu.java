@@ -46,7 +46,7 @@ public class NewListingMenu extends FastInv {
     private final Fadah plugin = Fadah.getINSTANCE();
     private final Player player;
     private ItemStack itemToSell;
-    private Instant timeToDelete;
+    private long timeOffsetMillis;
     private boolean listingStarted = false;
     private boolean advertise = Config.i().getListingAdverts().isEnabledByDefault();
     private boolean isBidding = false;
@@ -57,8 +57,9 @@ public class NewListingMenu extends FastInv {
                 LayoutManager.MenuType.NEW_LISTING.getLayout().guiTitle(), LayoutManager.MenuType.NEW_LISTING);
         this.player = player;
         this.itemToSell = player.getInventory().getItemInMainHand().clone();
-        this.timeToDelete = Instant.now().plus(2, ChronoUnit.DAYS);
+        this.timeOffsetMillis = 2 * 24 * 60 * 60 * 1000;
         this.currency = CurrencyRegistry.get(Config.i().getCurrency().getDefaultCurrency());
+        if (currency == null) currency = CurrencyRegistry.get("vault");
         List<Integer> fillerSlots = getLayout().fillerSlots();
         if (!fillerSlots.isEmpty()) {
             setItems(fillerSlots.stream().mapToInt(Integer::intValue).toArray(),
@@ -74,7 +75,7 @@ public class NewListingMenu extends FastInv {
                                         .format(price)))
                         .setAttributes(null)
                         .flags(ItemFlag.HIDE_ATTRIBUTES)
-                        .build(), e -> startListing(timeToDelete, price));
+                        .build(), e -> startListing(Instant.now().plus(timeOffsetMillis, ChronoUnit.MILLIS).toEpochMilli(), price));
         setClock();
         setAdvertButton();
         setCurrencyButton();
@@ -102,32 +103,32 @@ public class NewListingMenu extends FastInv {
                         .setAttributes(null)
                         .flags(ItemFlag.HIDE_ATTRIBUTES)
                         .modelData(getLang().getInt("time.model-data"))
-                        .addLore(getLang().getLore("time.lore", TimeUtil.formatTimeUntil(timeToDelete.toEpochMilli()))).build(), e -> {
+                        .addLore(getLang().getLore("time.lore", TimeUtil.formatTimeUntil(Instant.now().plusSeconds(1).plusMillis(timeOffsetMillis).toEpochMilli()))).build(), e -> {
                     if (e.isRightClick()) {
                         if (e.isShiftClick()) {
-                            if (timeToDelete.minus(30, ChronoUnit.MINUTES).toEpochMilli() <= Instant.now().toEpochMilli())
+                            if (timeOffsetMillis - 30 * 60 * 1000 < 0)
                                 return;
-                            timeToDelete = timeToDelete.minus(30, ChronoUnit.MINUTES);
+                            timeOffsetMillis -= 30 * 60 * 1000;
                             setClock();
                             return;
                         }
-                        if (timeToDelete.minus(1, ChronoUnit.HOURS).toEpochMilli() <= Instant.now().toEpochMilli())
+                        if (timeOffsetMillis - 60 * 60 * 1000 < 0)
                             return;
-                        timeToDelete = timeToDelete.minus(1, ChronoUnit.HOURS);
+                        timeOffsetMillis -= 60 * 60 * 1000;
                         setClock();
                     }
 
                     if (e.isLeftClick()) {
                         if (e.isShiftClick()) {
-                            if (timeToDelete.plus(30, ChronoUnit.MINUTES).toEpochMilli() > Instant.now().plus(Config.i().getMaxListingLength().toDuration()).toEpochMilli())
+                            if (timeOffsetMillis + 30 * 60 * 1000 > Config.i().getMaxListingLength().toDuration().toMillis())
                                 return;
-                            timeToDelete = timeToDelete.plus(30, ChronoUnit.MINUTES);
+                            timeOffsetMillis += 30 * 60 * 1000;
                             setClock();
                             return;
                         }
-                        if (timeToDelete.plus(1, ChronoUnit.HOURS).toEpochMilli() > Instant.now().plus(Config.i().getMaxListingLength().toDuration()).toEpochMilli())
+                        if (timeOffsetMillis + 60 * 60 * 1000 > Config.i().getMaxListingLength().toDuration().toMillis())
                             return;
-                        timeToDelete = timeToDelete.plus(1, ChronoUnit.HOURS);
+                        timeOffsetMillis += 60 * 60 * 1000;
                         setClock();
                     }
                 });
@@ -217,7 +218,7 @@ public class NewListingMenu extends FastInv {
         );
     }
 
-    private void startListing(Instant deletionDate, double price) {
+    private void startListing(long deletionDate, double price) {
         if (listingStarted) return;
         listingStarted = true;
         String category = CategoryCache.getCategoryForItem(itemToSell);
@@ -231,7 +232,7 @@ public class NewListingMenu extends FastInv {
             double tax = PermissionsData.getHighestDouble(PermissionsData.PermissionType.LISTING_TAX, player);
 
             Listing listing = new BinListing(UUID.randomUUID(), player.getUniqueId(), player.getName(),
-                    itemToSell, category, currency.getId(), price, tax, Instant.now().toEpochMilli(), deletionDate.toEpochMilli(), isBidding, Collections.emptyList());
+                    itemToSell, category, currency.getId(), price, tax, Instant.now().toEpochMilli(), deletionDate, isBidding, Collections.emptyList());
 
             ListingCreateEvent createEvent = new ListingCreateEvent(player, listing);
             TaskManager.Sync.run(Fadah.getINSTANCE(), () -> Bukkit.getServer().getPluginManager().callEvent(createEvent));
