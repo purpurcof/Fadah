@@ -22,8 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MainMenu extends ScrollBarFastInv {
     private Category category;
@@ -38,7 +38,7 @@ public class MainMenu extends ScrollBarFastInv {
                     @Nullable SortingMethod sortingMethod, @Nullable SortingDirection sortingDirection) {
         super(LayoutManager.MenuType.MAIN.getLayout().guiSize(), LayoutManager.MenuType.MAIN.getLayout().guiTitle(), player, LayoutManager.MenuType.MAIN);
         this.category = category;
-        this.listings = new ArrayList<>(ListingCache.getListings().values());
+        this.listings = new CopyOnWriteArrayList<>(ListingCache.getListings().values());
 
         this.search = search;
         this.sortingMethod = (sortingMethod == null ? SortingMethod.AGE : sortingMethod);
@@ -50,8 +50,7 @@ public class MainMenu extends ScrollBarFastInv {
             listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
         }
         if (search != null) {
-            listings.removeIf(listing -> !(!checkForStringInItem(search.toUpperCase(), listing.getItemStack())
-                    && !checkForEnchantmentOnBook(search.toUpperCase(), listing.getItemStack())));
+            listings.removeIf(listing -> !(doesItemHaveString(search, listing.getItemStack()) || doesBookHaveEnchant(search, listing.getItemStack())));
         }
 
         List<Integer> fillerSlots = getLayout().fillerSlots();
@@ -76,17 +75,23 @@ public class MainMenu extends ScrollBarFastInv {
         addPaginationControls();
     }
 
-    private boolean checkForEnchantmentOnBook(String enchant, ItemStack enchantedBook) {
+    /**
+     * @return true if the item contains the search
+     */
+    private boolean doesBookHaveEnchant(String enchant, ItemStack enchantedBook) {
         if (!Config.i().getSearch().isEnchantedBooks()) return false;
         if (enchantedBook.getType() == Material.ENCHANTED_BOOK) {
             for (Enchantment enchantment : enchantedBook.getEnchantments().keySet()) {
-                if (enchantment.getKey().getKey().toUpperCase().contains(enchant)) return true;
+                if (enchantment.getKey().getKey().toUpperCase().contains(enchant.toUpperCase())) return true;
             }
         }
         return false;
     }
 
-    private boolean checkForStringInItem(String toCheck, ItemStack item) {
+    /**
+     * @return true if the item contains the search
+     */
+    private boolean doesItemHaveString(String toCheck, ItemStack item) {
         if (Config.i().getSearch().isType()) {
             if (item.getType().name().toUpperCase().contains(toCheck.toUpperCase())
                     || item.getType().name().toUpperCase().contains(toCheck.replace(" ", "_").toUpperCase())) {
@@ -321,10 +326,8 @@ public class MainMenu extends ScrollBarFastInv {
         if (category != null) {
             listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
         }
-
         if (search != null) {
-            listings.removeIf(listing -> !(!checkForStringInItem(search.toUpperCase(), listing.getItemStack())
-                    && !checkForEnchantmentOnBook(search.toUpperCase(), listing.getItemStack())));
+            listings.removeIf(listing -> !(doesItemHaveString(search, listing.getItemStack()) || doesBookHaveEnchant(search, listing.getItemStack())));
         }
 
         super.updatePagination();
