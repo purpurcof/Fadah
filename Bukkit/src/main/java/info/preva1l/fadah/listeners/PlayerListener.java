@@ -7,11 +7,14 @@ import info.preva1l.fadah.cache.ExpiredListingsCache;
 import info.preva1l.fadah.cache.HistoricItemsCache;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.guis.NewListingMenu;
 import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.guis.InventoryEventHandler;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -50,6 +53,14 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void leaveListener(PlayerQuitEvent e) {
         leave(e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void pickupItem(EntityPickupItemEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (player.getOpenInventory().getTopInventory().getHolder() instanceof NewListingMenu) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
