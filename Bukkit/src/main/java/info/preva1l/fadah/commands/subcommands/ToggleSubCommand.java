@@ -19,7 +19,6 @@ public class ToggleSubCommand extends SubCommand {
     public void execute(@NotNull SubCommandArguments command) {
         if (Fadah.getINSTANCE().getBroker() != null) {
             Message.builder().type(Message.Type.TOGGLE).build().send(Fadah.getINSTANCE().getBroker());
-            return;
         }
         FastInvManager.closeAll(plugin);
         boolean enabled = Config.i().isEnabled();
