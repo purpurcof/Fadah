@@ -57,7 +57,7 @@ public class NewListingMenu extends FastInv {
                 LayoutManager.MenuType.NEW_LISTING.getLayout().guiTitle(), LayoutManager.MenuType.NEW_LISTING);
         this.player = player;
         this.itemToSell = player.getInventory().getItemInMainHand().clone();
-        this.timeOffsetMillis = 2 * 24 * 60 * 60 * 1000;
+        this.timeOffsetMillis = Config.i().getDefaultListingLength().toMillis();
         this.currency = CurrencyRegistry.get(Config.i().getCurrency().getDefaultCurrency());
         if (currency == null) currency = CurrencyRegistry.get("vault");
         List<Integer> fillerSlots = getLayout().fillerSlots();
@@ -120,13 +120,13 @@ public class NewListingMenu extends FastInv {
 
                     if (e.isLeftClick()) {
                         if (e.isShiftClick()) {
-                            if (timeOffsetMillis + 30 * 60 * 1000 > Config.i().getMaxListingLength().toDuration().toMillis())
+                            if (timeOffsetMillis + 30 * 60 * 1000 > Config.i().getMaxListingLength().toMillis())
                                 return;
                             timeOffsetMillis += 30 * 60 * 1000;
                             setClock();
                             return;
                         }
-                        if (timeOffsetMillis + 60 * 60 * 1000 > Config.i().getMaxListingLength().toDuration().toMillis())
+                        if (timeOffsetMillis + 60 * 60 * 1000 > Config.i().getMaxListingLength().toMillis())
                             return;
                         timeOffsetMillis += 60 * 60 * 1000;
                         setClock();
