@@ -225,6 +225,8 @@ public class NewListingMenu extends FastInv {
 
         Restrictions.isRestrictedItem(itemToSell).thenAccept(restricted -> TaskManager.Sync.run(Fadah.getINSTANCE(), () -> {
             if (category == null || restricted) {
+                listingStarted = false;
+                player.closeInventory();
                 Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getRestricted());
                 return;
             }
@@ -238,6 +240,7 @@ public class NewListingMenu extends FastInv {
             TaskManager.Sync.run(Fadah.getINSTANCE(), () -> Bukkit.getServer().getPluginManager().callEvent(createEvent));
 
             if (createEvent.isCancelled()) {
+                listingStarted = false;
                 Lang.sendMessage(player, Lang.i().getPrefix() + createEvent.getCancelReason());
                 player.closeInventory();
                 return;

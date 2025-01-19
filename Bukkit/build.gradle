@@ -15,34 +15,32 @@ dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
 
     // Support mini message format
-    compileOnly 'net.kyori:adventure-text-minimessage:4.17.0'
-    compileOnly 'net.kyori:adventure-api:4.17.0'
-    compileOnly 'net.kyori:adventure-platform-bukkit:4.3.3'
+    compileOnly "net.kyori:adventure-text-minimessage:$minimessage_version"
+    compileOnly "net.kyori:adventure-api:$minimessage_version"
+    compileOnly "net.kyori:adventure-platform-bukkit:$mm_platform_version"
 
-    compileOnly 'de.exlll:configlib-yaml:4.5.0' // Configs
+    compileOnly "de.exlll:configlib-yaml:$configlib_version" // Configs
 
     implementation "com.github.puregero:multilib:1.2.4" // Folia & Shreddedpaper support
 
     implementation 'net.william278:desertwell:2.0.4' // Update Checker & About Page
 
     // Cross Server Support
-    compileOnly 'redis.clients:jedis:5.1.0'
-    compileOnly 'org.apache.commons:commons-pool2:2.12.0'
+    compileOnly "redis.clients:jedis:$jedis_version"
+    compileOnly "org.apache.commons:commons-pool2:$acp2_version"
 
     compileOnly 'me.clip:placeholderapi:2.11.6' // Placeholder support
 
     // Database
-    compileOnly 'com.zaxxer:HikariCP:6.0.0'
-    compileOnly 'org.xerial:sqlite-jdbc:3.45.2.0'
-    compileOnly 'com.mysql:mysql-connector-j:8.3.0'
-    compileOnly('org.mariadb.jdbc:mariadb-java-client:3.3.3') {
-        exclude group: '*', module: '*'
-    }
-    compileOnly 'org.mongodb:mongodb-driver-sync:5.0.0'
+    compileOnly "com.zaxxer:HikariCP:$hikari_version"
+    compileOnly "org.xerial:sqlite-jdbc:$sqlite_version"
+    compileOnly "com.mysql:mysql-connector-j:$mysql_version"
+    compileOnly "org.mariadb.jdbc:mariadb-java-client:$mariadb_version"
+    compileOnly "org.mongodb:mongodb-driver-sync:$mongo_version"
 
     implementation 'net.wesjd:anvilgui:1.10.4-SNAPSHOT' // Search Menu
 
-    compileOnly 'org.mozilla:rhino:1.7.14'
+    compileOnly "org.mozilla:rhino:$rhino_version"
 
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7' // Economy Hook
 
@@ -51,7 +49,7 @@ dependencies {
     compileOnly 'com.willfp:libreforge:4.58.1'
     compileOnly 'com.willfp:eco:6.56.0'
     compileOnly 'com.willfp:EcoItems:5.43.1'
-    compileOnly 'com.influxdb:influxdb-client-java:3.3.0' // InfluxDB logging
+    compileOnly "com.influxdb:influxdb-client-java:$influxdb_version" // InfluxDB logging
     // Currency
     compileOnly 'com.github.Emibergo02:RedisEconomy:4.3.9'
     compileOnly files('../libs/CoinsEngine-2.3.5.jar')
