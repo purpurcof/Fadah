@@ -20,6 +20,7 @@ import info.preva1l.fadah.hooks.HookManager;
 import info.preva1l.fadah.hooks.impl.DiscordHook;
 import info.preva1l.fadah.hooks.impl.EcoItemsHook;
 import info.preva1l.fadah.hooks.impl.InfluxDBHook;
+import info.preva1l.fadah.hooks.impl.PapiHook;
 import info.preva1l.fadah.listeners.PlayerListener;
 import info.preva1l.fadah.migrator.AuctionHouseMigrator;
 import info.preva1l.fadah.migrator.MigratorManager;
@@ -229,6 +230,10 @@ public final class Fadah extends JavaPlugin {
 
         if (Config.i().getHooks().getDiscord().isEnabled()) {
             getHookManager().registerHook(new DiscordHook());
+        }
+
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            getHookManager().registerHook(new PapiHook());
         }
 
         getConsole().info("Hooked into %s plugins!".formatted(getHookManager().hookCount()));
