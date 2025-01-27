@@ -57,9 +57,13 @@ public class NewListingMenu extends FastInv {
                 LayoutManager.MenuType.NEW_LISTING.getLayout().guiTitle(), LayoutManager.MenuType.NEW_LISTING);
         this.player = player;
         this.itemToSell = player.getInventory().getItemInMainHand().clone();
+        MultiLib.getEntityScheduler(player).execute(plugin,
+                () -> player.getInventory().setItemInMainHand(new ItemStack(Material.AIR)),
+                () -> this.itemToSell = new ItemStack(Material.AIR),
+                0L);
         this.timeOffsetMillis = Config.i().getDefaultListingLength().toMillis();
         this.currency = CurrencyRegistry.get(Config.i().getCurrency().getDefaultCurrency());
-        if (currency == null) currency = CurrencyRegistry.get("vault");
+        if (currency == null) currency = CurrencyRegistry.getAll().getFirst();
         List<Integer> fillerSlots = getLayout().fillerSlots();
         if (!fillerSlots.isEmpty()) {
             setItems(fillerSlots.stream().mapToInt(Integer::intValue).toArray(),
@@ -82,10 +86,6 @@ public class NewListingMenu extends FastInv {
         //setModeButton();
         addNavigationButtons();
 
-        MultiLib.getEntityScheduler(player).execute(plugin,
-                () -> player.getInventory().setItemInMainHand(new ItemStack(Material.AIR)),
-                () -> this.itemToSell = new ItemStack(Material.AIR),
-                0L);
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_ITEM, -1), itemToSell);
     }
 
@@ -223,7 +223,7 @@ public class NewListingMenu extends FastInv {
         listingStarted = true;
         String category = CategoryCache.getCategoryForItem(itemToSell);
 
-        Restrictions.isRestrictedItem(itemToSell).thenAccept(restricted -> TaskManager.Sync.run(Fadah.getINSTANCE(), () -> {
+        Restrictions.isRestrictedItem(itemToSell).thenAccept(restricted -> {
             if (category == null || restricted) {
                 listingStarted = false;
                 player.closeInventory();
@@ -295,13 +295,11 @@ public class NewListingMenu extends FastInv {
                         Tuple.of("%price%", new DecimalFormat(Config.i().getFormatting().getNumbers()).format(listing.getPrice()))
                 ));
 
-                TaskManager.Async.run(Fadah.getINSTANCE(), () -> {
-                    Component textComponent = MiniMessage.miniMessage().deserialize(StringUtils.legacyToMiniMessage(advertMessage));
-                    textComponent = textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/ah view-listing " + listing.getId()));
-                    for (Player announce : Bukkit.getOnlinePlayers()) {
-                        Fadah.getINSTANCE().getAdventureAudience().player(announce).sendMessage(textComponent);
-                    }
-                });
+                Component textComponent = MiniMessage.miniMessage().deserialize(StringUtils.legacyToMiniMessage(advertMessage));
+                textComponent = textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/ah view-listing " + listing.getId()));
+                for (Player announce : Bukkit.getOnlinePlayers()) {
+                    Fadah.getINSTANCE().getAdventureAudience().player(announce).sendMessage(textComponent);
+                }
 
                 if (Config.i().getBroker().isEnabled()) {
                     Message.builder()
@@ -312,7 +310,7 @@ public class NewListingMenu extends FastInv {
             }
 
             TaskManager.Async.run(Fadah.getINSTANCE(), () -> AuctionWatcher.alertWatchers(listing));
-        }));
+        });
     }
 
     private void addNavigationButtons() {
