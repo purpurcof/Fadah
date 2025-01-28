@@ -56,11 +56,12 @@ public class NewListingMenu extends FastInv {
         super(LayoutManager.MenuType.NEW_LISTING.getLayout().guiSize(),
                 LayoutManager.MenuType.NEW_LISTING.getLayout().guiTitle(), LayoutManager.MenuType.NEW_LISTING);
         this.player = player;
-        this.itemToSell = player.getInventory().getItemInMainHand().clone();
+        var temp = player.getInventory().getItemInMainHand().clone();
         MultiLib.getEntityScheduler(player).execute(plugin,
                 () -> player.getInventory().setItemInMainHand(new ItemStack(Material.AIR)),
                 () -> this.itemToSell = new ItemStack(Material.AIR),
                 0L);
+        this.itemToSell = temp;
         this.timeOffsetMillis = Config.i().getDefaultListingLength().toMillis();
         this.currency = CurrencyRegistry.get(Config.i().getCurrency().getDefaultCurrency());
         if (currency == null) currency = CurrencyRegistry.getAll().getFirst();
