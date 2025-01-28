@@ -5,6 +5,7 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.api.ListingCreateEvent;
 import info.preva1l.fadah.cache.CategoryCache;
 import info.preva1l.fadah.cache.ListingCache;
+import info.preva1l.fadah.commands.subcommands.SellSubCommand;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.ListHelper;
@@ -94,6 +95,7 @@ public class NewListingMenu extends FastInv {
     protected void onClose(InventoryCloseEvent event) {
         super.onClose(event);
         if (!listingStarted) player.getInventory().setItemInMainHand(itemToSell);
+        SellSubCommand.running.remove(player.getUniqueId());
     }
 
     private void setClock() {

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'info.preva1l'
-version = "2.8.1-HOTFIX"
+version = "2.8.2"
 
 ext {
     set 'version', version.toString()
