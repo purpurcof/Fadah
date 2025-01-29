@@ -7,7 +7,7 @@ group = 'info.preva1l'
 version = "2.8.2"
 
 ext {
-    set 'version', version.toString()
+    set 'version', rootProject.version.toString()
     set 'configlib_version', configlib_version.toString()
     set 'rhino_version', rhino_version.toString()
     set 'acp2_version', acp2_version.toString()
@@ -97,7 +97,7 @@ subprojects {
     }
 
     jar.dependsOn shadowJar
-    clean.delete "$rootDir/target"
+    project.delete "$rootDir/target"
 }
 
 logger.lifecycle("Building Fadah ${version}")
