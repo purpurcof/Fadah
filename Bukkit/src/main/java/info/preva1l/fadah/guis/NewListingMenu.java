@@ -226,7 +226,7 @@ public class NewListingMenu extends FastInv {
         listingStarted = true;
         String category = CategoryCache.getCategoryForItem(itemToSell);
 
-        Restrictions.isRestrictedItem(itemToSell).thenAccept(restricted -> TaskManager.Sync.run(Fadah.getINSTANCE(), () -> {
+        Restrictions.isRestrictedItem(itemToSell).thenAcceptAsync(restricted -> TaskManager.Sync.run(Fadah.getINSTANCE(), () -> {
             if (category == null || restricted) {
                 listingStarted = false;
                 player.closeInventory();
@@ -313,7 +313,7 @@ public class NewListingMenu extends FastInv {
             }
 
             TaskManager.Async.run(Fadah.getINSTANCE(), () -> AuctionWatcher.alertWatchers(listing));
-        }));
+        }), DatabaseManager.getInstance().getThreadPool());
     }
 
     private void addNavigationButtons() {
