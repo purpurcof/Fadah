@@ -60,7 +60,7 @@ allprojects {
 
     processResources {
         def tokenMap = rootProject.ext.properties
-        filesMatching(['**/*.json', '**/*.yml']) {
+        filesMatching(['**/*.json', '**/plugin.yml']) {
             expand tokenMap
         }
     }
