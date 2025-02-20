@@ -20,6 +20,7 @@ import info.preva1l.fadah.migrator.MigrationProvider;
 import info.preva1l.fadah.migrator.MigratorManager;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.multiserver.RedisBroker;
+import info.preva1l.fadah.processor.DefaultProcessorArgsProvider;
 import info.preva1l.fadah.records.listing.ListingExpiryProvider;
 import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
@@ -43,7 +44,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 public final class Fadah extends JavaPlugin implements MigrationProvider, CurrencyProvider, ListingExpiryProvider,
-        CommandProvider, MetricsProvider, LoggingProvider, HookProvider, DataProvider {
+        CommandProvider, MetricsProvider, LoggingProvider, HookProvider, DataProvider, DefaultProcessorArgsProvider {
     private static final int SPIGOT_ID = 116157;
     @Getter private static Fadah INSTANCE;
     @Getter @Setter private static NamespacedKey customItemKey;
@@ -74,6 +75,7 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
         AuctionHouseAPI.setInstance(new BukkitAuctionHouseAPI());
         getConsole().info("API Enabled!");
 
+        registerDefaultProcessorArgs();
         loadCurrencies();
         loadMenus();
         loadFiles();
