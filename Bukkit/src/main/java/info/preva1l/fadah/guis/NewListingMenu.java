@@ -46,7 +46,7 @@ import java.util.UUID;
 public class NewListingMenu extends FastInv {
     private final Fadah plugin = Fadah.getINSTANCE();
     private final Player player;
-    private ItemStack itemToSell;
+    private final ItemStack itemToSell;
     private long timeOffsetMillis;
     private boolean listingStarted = false;
     private boolean advertise = Config.i().getListingAdverts().isEnabledByDefault();
@@ -58,10 +58,7 @@ public class NewListingMenu extends FastInv {
                 LayoutManager.MenuType.NEW_LISTING.getLayout().guiTitle(), LayoutManager.MenuType.NEW_LISTING);
         this.player = player;
         var temp = player.getInventory().getItemInMainHand().clone();
-        MultiLib.getEntityScheduler(player).execute(plugin,
-                () -> player.getInventory().setItemInMainHand(new ItemStack(Material.AIR)),
-                () -> this.itemToSell = new ItemStack(Material.AIR),
-                0L);
+        player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
         this.itemToSell = temp;
         this.timeOffsetMillis = Config.i().getDefaultListingLength().toMillis();
         this.currency = CurrencyRegistry.get(Config.i().getCurrency().getDefaultCurrency());
@@ -94,8 +91,10 @@ public class NewListingMenu extends FastInv {
     @Override
     protected void onClose(InventoryCloseEvent event) {
         super.onClose(event);
-        if (!listingStarted) player.getInventory().setItemInMainHand(itemToSell);
-        SellSubCommand.running.remove(player.getUniqueId());
+        MultiLib.getEntityScheduler(player).run(Fadah.getINSTANCE(), t -> {
+            if (!listingStarted) player.getInventory().setItemInMainHand(itemToSell);
+            SellSubCommand.running.remove(player.getUniqueId());
+        }, () -> player.sendMessage(StringUtils.colorize("&A critical error has occurred while trying to obtain the correct thread.")));
     }
 
     private void setClock() {
@@ -244,7 +243,7 @@ public class NewListingMenu extends FastInv {
                             );
 
                             ListingCreateEvent createEvent = new ListingCreateEvent(player, listing);
-                            TaskManager.Sync.run(Fadah.getINSTANCE(), () -> Bukkit.getServer().getPluginManager().callEvent(createEvent));
+                            Bukkit.getServer().getPluginManager().callEvent(createEvent);
 
                             if (createEvent.isCancelled()) {
                                 listingStarted = false;
@@ -254,7 +253,7 @@ public class NewListingMenu extends FastInv {
                             }
 
                             ListingCache.addListing(listing);
-                            DatabaseManager.getInstance().save(Listing.class, listing).thenRun(() -> {
+                            DatabaseManager.getInstance().save(Listing.class, listing).thenRunAsync(() -> {
                                 if (Config.i().getBroker().isEnabled()) {
                                     Message.builder()
                                             .type(Message.Type.LISTING_ADD)
@@ -262,7 +261,7 @@ public class NewListingMenu extends FastInv {
                                             .build()
                                             .send(Fadah.getINSTANCE().getBroker());
                                 }
-                            });
+                            }, DatabaseManager.getInstance().getThreadPool());
 
                             player.closeInventory();
 

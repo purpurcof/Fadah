@@ -1,5 +1,6 @@
 package info.preva1l.fadah.commands.subcommands;
 
+import com.github.puregero.multilib.MultiLib;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
@@ -75,7 +76,10 @@ public class SellSubCommand extends SubCommand {
                 running.remove(command.getPlayer().getUniqueId());
                 return;
             }
-            new NewListingMenu(command.getPlayer(), price).open(command.getPlayer());
+            MultiLib.getEntityScheduler(command.getPlayer()).run(Fadah.getINSTANCE(),
+                    t -> new NewListingMenu(command.getPlayer(), price).open(command.getPlayer()),
+                    () -> command.reply("&A critical error has occurred while trying to obtain the correct thread."));
+
         } catch (NumberFormatException e) {
             command.reply(Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMustBeNumber());
             running.remove(command.getPlayer().getUniqueId());
