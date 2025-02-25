@@ -18,6 +18,7 @@ public interface MigrationProvider {
 
         if (Bukkit.getServer().getPluginManager().getPlugin("AuctionHouse") != null) {
             getMigrationManager().loadMigrator(new AuctionHouseMigrator());
+            getMigrationManager().loadMigrator(new AkarianAuctionHouseMigrator());
         }
 
         Fadah.getConsole().info("%s Migrators Loaded!".formatted(getMigrationManager().getMigratorNames().size()));

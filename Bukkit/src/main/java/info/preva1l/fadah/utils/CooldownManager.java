@@ -43,7 +43,7 @@ public class CooldownManager {
     @Getter
     @AllArgsConstructor
     public enum Cooldown {
-        SORT(Duration.of(1, ChronoUnit.SECONDS))
+        SORT(Duration.of(100, ChronoUnit.MILLIS))
         ;
 
         private final Duration length;
