@@ -1,13 +1,14 @@
 package info.preva1l.fadah.guis;
 
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.cache.CategoryCache;
-import info.preva1l.fadah.cache.ListingCache;
+import info.preva1l.fadah.cache.CacheAccess;
+import info.preva1l.fadah.cache.CategoryRegistry;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.filters.SortingDirection;
 import info.preva1l.fadah.filters.SortingMethod;
 import info.preva1l.fadah.records.Category;
+import info.preva1l.fadah.records.listing.BidListing;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.CooldownManager;
 import info.preva1l.fadah.utils.StringUtils;
@@ -23,11 +24,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class MainMenu extends ScrollBarFastInv {
     private Category category;
     private final List<Listing> listings;
+    private final Lock lock = new ReentrantLock();
 
     // Filters
     private final String search;
@@ -38,27 +41,24 @@ public class MainMenu extends ScrollBarFastInv {
                     @Nullable SortingMethod sortingMethod, @Nullable SortingDirection sortingDirection) {
         super(LayoutManager.MenuType.MAIN.getLayout().guiSize(), LayoutManager.MenuType.MAIN.getLayout().guiTitle(), player, LayoutManager.MenuType.MAIN);
         this.category = category;
-        this.listings = new CopyOnWriteArrayList<>(ListingCache.getListings().values());
+        this.listings = CacheAccess.getAll(Listing.class);
 
         this.search = search;
         this.sortingMethod = (sortingMethod == null ? SortingMethod.AGE : sortingMethod);
         this.sortingDirection = (sortingDirection == null ? SortingDirection.ASCENDING : sortingDirection);
 
+        lock.lock();
         listings.sort(this.sortingMethod.getSorter(this.sortingDirection));
 
         if (category != null) {
             listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
         }
         if (search != null) {
-            listings.removeIf(listing -> !(doesItemHaveString(search, listing.getItemStack()) || doesBookHaveEnchant(search, listing.getItemStack())));
+            listings.removeIf(listing -> !(StringUtils.doesItemHaveString(search, listing.getItemStack()) || doesBookHaveEnchant(search, listing.getItemStack())));
         }
+        lock.unlock();
 
-        List<Integer> fillerSlots = getLayout().fillerSlots();
-        if (!fillerSlots.isEmpty()) {
-            setItems(fillerSlots.stream().mapToInt(Integer::intValue).toArray(),
-                    GuiHelper.constructButton(GuiButtonType.BORDER));
-        }
-
+        fillers();
         setScrollbarSlots(getLayout().scrollbarSlots());
         setPaginationMappings(getLayout().paginationSlots());
 
@@ -88,34 +88,9 @@ public class MainMenu extends ScrollBarFastInv {
         return false;
     }
 
-    /**
-     * @return true if the item contains the search
-     */
-    private boolean doesItemHaveString(String toCheck, ItemStack item) {
-        if (Config.i().getSearch().isType()) {
-            if (item.getType().name().toUpperCase().contains(toCheck.toUpperCase())
-                    || item.getType().name().toUpperCase().contains(toCheck.replace(" ", "_").toUpperCase())) {
-                return true;
-            }
-        }
-
-        if (item.getItemMeta() != null) {
-            if (Config.i().getSearch().isName()) {
-                if (item.getItemMeta().getDisplayName().toUpperCase().contains(toCheck.toUpperCase())) {
-                    return true;
-                }
-            }
-
-            if (Config.i().getSearch().isLore()) {
-                return item.getItemMeta().getLore() != null && item.getItemMeta().getLore().contains(toCheck.toUpperCase());
-            }
-        }
-        return false;
-    }
-
     @Override
     public void fillScrollbarItems() {
-        for (Category cat : CategoryCache.getCategories()) {
+        for (Category cat : CategoryRegistry.getCategories()) {
             ItemBuilder itemBuilder = new ItemBuilder(cat.icon())
                     .name(StringUtils.colorize(cat.name()))
                     .addLore(StringUtils.colorizeList(cat.description()))
@@ -149,19 +124,20 @@ public class MainMenu extends ScrollBarFastInv {
 
     @Override
     protected synchronized void fillPaginationItems() {
+        lock.lock();
         for (Listing listing : listings) {
             if (listing.getCurrency() == null) {
                 Fadah.getConsole().severe("Cannot load listing %s because currency %s is not on this server!".formatted(listing.getId(), listing.getCurrencyId()));
                 continue;
             }
-            String buyMode = listing.isBiddable()
+            String buyMode = listing instanceof BidListing
                     ? getLang().getStringFormatted("listing.lore-buy.bidding")
                     : getLang().getStringFormatted("listing.lore-buy.buy-it-now");
 
             ItemBuilder itemStack = new ItemBuilder(listing.getItemStack().clone())
                     .addLore(getLang().getLore(player, "listing.lore-body",
                             listing.getOwnerName(),
-                            StringUtils.removeColorCodes(CategoryCache.getCatName(listing.getCategoryID())), buyMode,
+                            StringUtils.removeColorCodes(CategoryRegistry.getCatName(listing.getCategoryID())), buyMode,
                             new DecimalFormat(Config.i().getFormatting().getNumbers())
                                     .format(listing.getPrice()), TimeUtil.formatTimeUntil(listing.getDeletionDate()),
                             listing.getCurrency().getName()));
@@ -191,42 +167,13 @@ public class MainMenu extends ScrollBarFastInv {
                     return;
                 }
 
-                if (listing.isOwner(player)) {
-                    Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getOwnListings());
-                    return;
-                }
-
-                if (!listing.getCurrency().canAfford(player, listing.getPrice())) {
-                    Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getTooExpensive());
-                    return;
-                }
-
-                if (ListingCache.getListing(listing.getId()) == null) { // todo: re-add strict checks
-                    Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist());
-                    return;
-                }
+                if (!listing.canBuy(player)) return;
 
                 new ConfirmPurchaseMenu(listing, player, category, search,
                         sortingMethod, sortingDirection, false, null).open(player);
             }));
         }
-    }
-
-    @Override
-    protected void addPaginationControls() {
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_ONE, -1),
-                GuiHelper.constructButton(GuiButtonType.BORDER));
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_TWO,-1),
-                GuiHelper.constructButton(GuiButtonType.BORDER));
-        if (page > 0) {
-            setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_ONE, -1),
-                    GuiHelper.constructButton(GuiButtonType.PREVIOUS_PAGE), e -> previousPage());
-        }
-
-        if (listings != null && listings.size() >= index + 1) {
-            setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_TWO,-1),
-                    GuiHelper.constructButton(GuiButtonType.NEXT_PAGE), e -> nextPage());
-        }
+        lock.unlock();
     }
 
     private void addNavigationButtons() {
@@ -319,7 +266,7 @@ public class MainMenu extends ScrollBarFastInv {
     @Override
     protected void updatePagination() {
         this.listings.clear();
-        this.listings.addAll(ListingCache.getListings().values());
+        this.listings.addAll(CacheAccess.getAll(Listing.class));
 
         listings.sort(this.sortingMethod.getSorter(this.sortingDirection));
 
@@ -327,7 +274,7 @@ public class MainMenu extends ScrollBarFastInv {
             listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
         }
         if (search != null) {
-            listings.removeIf(listing -> !(doesItemHaveString(search, listing.getItemStack()) || doesBookHaveEnchant(search, listing.getItemStack())));
+            listings.removeIf(listing -> !(StringUtils.doesItemHaveString(search, listing.getItemStack()) || doesBookHaveEnchant(search, listing.getItemStack())));
         }
 
         super.updatePagination();

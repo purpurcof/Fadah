@@ -1,13 +1,11 @@
 package info.preva1l.fadah.migrator;
 
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.cache.CollectionBoxCache;
-import info.preva1l.fadah.cache.ExpiredListingsCache;
-import info.preva1l.fadah.cache.ListingCache;
+import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.data.DatabaseManager;
-import info.preva1l.fadah.records.CollectableItem;
-import info.preva1l.fadah.records.CollectionBox;
-import info.preva1l.fadah.records.ExpiredItems;
+import info.preva1l.fadah.records.collection.CollectableItem;
+import info.preva1l.fadah.records.collection.CollectionBox;
+import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.records.listing.Listing;
 
 import java.util.List;
@@ -24,7 +22,7 @@ public interface Migrator {
             List<Listing> listings = migrateListings();
 
             for (Listing listing : listings) {
-                ListingCache.addListing(listing);
+                CacheAccess.add(Listing.class, listing);
                 DatabaseManager.getInstance().save(Listing.class, listing);
                 migratedListings++;
             }
@@ -34,10 +32,9 @@ public interface Migrator {
             Map<UUID, List<CollectableItem>> collectionBoxes = migrateCollectionBoxes();
 
             for (UUID owner : collectionBoxes.keySet()) {
-                for (CollectableItem item : collectionBoxes.get(owner)) {
-                    CollectionBoxCache.addItem(owner, item);
-                    DatabaseManager.getInstance().save(CollectionBox.class, new CollectionBox(owner, collectionBoxes.get(owner)));
-                }
+                CollectionBox box = DatabaseManager.getInstance().get(CollectionBox.class, owner).join()
+                        .orElse(new CollectionBox(owner, collectionBoxes.get(owner)));
+                DatabaseManager.getInstance().save(CollectionBox.class, box);
                 migratedCollectionBoxes++;
             }
             Fadah.getConsole().info("Migrated %s collection boxes!".formatted(migratedCollectionBoxes));
@@ -47,8 +44,7 @@ public interface Migrator {
 
             for (UUID owner : expiredItems.keySet()) {
                 for (CollectableItem item : expiredItems.get(owner)) {
-                    ExpiredListingsCache.addItem(owner, item);
-                    DatabaseManager.getInstance().save(ExpiredItems.class, ExpiredItems.of(owner));
+                    CacheAccess.getNotNull(ExpiredItems.class, owner).add(item);
                 }
                 migratedExpiredItems++;
             }

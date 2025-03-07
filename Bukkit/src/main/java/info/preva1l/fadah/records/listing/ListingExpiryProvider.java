@@ -3,53 +3,42 @@ package info.preva1l.fadah.records.listing;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.api.ListingEndEvent;
 import info.preva1l.fadah.api.ListingEndReason;
-import info.preva1l.fadah.cache.ExpiredListingsCache;
-import info.preva1l.fadah.cache.ListingCache;
-import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.data.DatabaseManager;
-import info.preva1l.fadah.multiserver.Message;
-import info.preva1l.fadah.multiserver.Payload;
-import info.preva1l.fadah.records.CollectableItem;
-import info.preva1l.fadah.records.ExpiredItems;
+import info.preva1l.fadah.records.collection.CollectableItem;
+import info.preva1l.fadah.records.collection.ExpiredItems;
+import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
 import org.bukkit.Bukkit;
-
-import java.time.Instant;
-import java.util.UUID;
 
 public interface ListingExpiryProvider {
     default Runnable listingExpiryTask() {
         return () -> {
-            for (UUID key : ListingCache.getListings().keySet()) {
-                Listing listing = ListingCache.getListing(key);
-                if (listing == null) continue;
-                if (Instant.now().toEpochMilli() >= listing.getDeletionDate()) {
-                    ListingCache.removeListing(listing);
-                    if (Config.i().getBroker().isEnabled()) {
-                        Message.builder()
-                                .type(Message.Type.LISTING_REMOVE)
-                                .payload(Payload.withUUID(listing.getId()))
-                                .build().send(Fadah.getINSTANCE().getBroker());
-                    }
-                    DatabaseManager.getInstance().delete(Listing.class, listing);
+            for (Listing listing : CacheAccess.getAll(Listing.class)) {
+                if (System.currentTimeMillis() < listing.getDeletionDate()) continue;
 
-                    CollectableItem collectableItem = new CollectableItem(listing.getItemStack(), Instant.now().toEpochMilli());
-                    ExpiredItems items = ExpiredItems.of(listing.getOwner());
-                    items.collectableItems().add(collectableItem);
-                    ExpiredListingsCache.addItem(listing.getOwner(), collectableItem);
-                    DatabaseManager.getInstance().save(ExpiredItems.class, items);
+                CacheAccess.invalidate(Listing.class, listing);
 
-                    if (Config.i().getBroker().isEnabled()) {
-                        Message.builder()
-                                .type(Message.Type.EXPIRED_LISTINGS_UPDATE)
-                                .payload(Payload.withUUID(listing.getOwner()))
-                                .build().send(Fadah.getINSTANCE().getBroker());
-                    }
+                CollectableItem collectableItem = new CollectableItem(listing.getItemStack(), System.currentTimeMillis());
 
-                    TransactionLogger.listingExpired(listing);
+                CacheAccess.get(ExpiredItems.class, listing.owner)
+                        .ifPresentOrElse(
+                                cache -> cache.add(collectableItem),
+                                () -> DatabaseManager.getInstance()
+                                        .get(ExpiredItems.class, listing.owner)
+                                        .thenCompose(items -> {
+                                            var expiredItems = items.orElseGet(() -> ExpiredItems.empty(listing.owner));
+                                            return DatabaseManager.getInstance().save(ExpiredItems.class, expiredItems);
+                                        })
+                        );
 
-                    Bukkit.getServer().getPluginManager().callEvent(new ListingEndEvent(listing, ListingEndReason.EXPIRED));
-                }
+                TransactionLogger.listingExpired(listing);
+
+                TaskManager.Sync.run(Fadah.getINSTANCE(), () ->
+                        Bukkit.getServer().getPluginManager().callEvent(
+                                new ListingEndEvent(listing, ListingEndReason.EXPIRED)
+                        )
+                );
             }
         };
     }

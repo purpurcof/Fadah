@@ -1,9 +1,10 @@
 package info.preva1l.fadah.guis;
 
-import info.preva1l.fadah.cache.CategoryCache;
-import info.preva1l.fadah.cache.ListingCache;
+import info.preva1l.fadah.cache.CacheAccess;
+import info.preva1l.fadah.cache.CategoryRegistry;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
+import info.preva1l.fadah.records.listing.BidListing;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TimeUtil;
@@ -12,7 +13,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ViewListingsMenu extends PaginatedFastInv {
@@ -26,14 +26,10 @@ public class ViewListingsMenu extends PaginatedFastInv {
                         : owner.getName()+"'s", owner.getName()+"'s"), viewer, LayoutManager.MenuType.VIEW_LISTINGS,
                 List.of(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34));
         this.owner = owner;
-        this.listings = new ArrayList<>(ListingCache.getListings().values());
+        this.listings = CacheAccess.getAll(Listing.class);
         listings.removeIf(listing -> !listing.isOwner(owner.getUniqueId()));
 
-        List<Integer> fillerSlots = getLayout().fillerSlots();
-        if (!fillerSlots.isEmpty()) {
-            setItems(fillerSlots.stream().mapToInt(Integer::intValue).toArray(),
-                    GuiHelper.constructButton(GuiButtonType.BORDER));
-        }
+        fillers();
         addNavigationButtons();
         fillPaginationItems();
         populatePage();
@@ -44,14 +40,14 @@ public class ViewListingsMenu extends PaginatedFastInv {
     @Override
     protected synchronized void fillPaginationItems() {
         for (Listing listing : listings) {
-            String buyMode = listing.isBiddable()
+            String buyMode = listing instanceof BidListing
                     ? getLang().getStringFormatted("listing.lore-buy.bidding")
                     : getLang().getStringFormatted("listing.lore-buy.buy-it-now");
 
             ItemBuilder itemStack = new ItemBuilder(listing.getItemStack().clone())
                     .addLore(getLang().getLore(player, "listing.lore-body",
                             listing.getOwnerName(),
-                            StringUtils.removeColorCodes(CategoryCache.getCatName(listing.getCategoryID())), buyMode,
+                            StringUtils.removeColorCodes(CategoryRegistry.getCatName(listing.getCategoryID())), buyMode,
                             new DecimalFormat(Config.i().getFormatting().getNumbers())
                                     .format(listing.getPrice()), TimeUtil.formatTimeUntil(listing.getDeletionDate())));
 
@@ -80,20 +76,7 @@ public class ViewListingsMenu extends PaginatedFastInv {
                     return;
                 }
 
-                if (listing.isOwner(player)) {
-                    Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getOwnListings());
-                    return;
-                }
-
-                if (!listing.getCurrency().canAfford(player, listing.getPrice())) {
-                    Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getTooExpensive());
-                    return;
-                }
-
-                if (ListingCache.getListing(listing.getId()) == null) { // todo: re-add strict checks
-                    Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist());
-                    return;
-                }
+                if (!listing.canBuy(player)) return;
 
                 new ConfirmPurchaseMenu(listing, player, null, null,
                         null, null, true, owner).open(player);
@@ -102,26 +85,9 @@ public class ViewListingsMenu extends PaginatedFastInv {
     }
 
     @Override
-    protected void addPaginationControls() {
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_ONE, -1),
-                GuiHelper.constructButton(GuiButtonType.BORDER));
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_TWO,-1),
-                GuiHelper.constructButton(GuiButtonType.BORDER));
-        if (page > 0) {
-            setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_ONE, -1),
-                    GuiHelper.constructButton(GuiButtonType.PREVIOUS_PAGE), e -> previousPage());
-        }
-
-        if (listings != null && listings.size() >= index + 1) {
-            setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_TWO,-1),
-                    GuiHelper.constructButton(GuiButtonType.NEXT_PAGE), e -> nextPage());
-        }
-    }
-
-    @Override
     protected void updatePagination() {
         this.listings.clear();
-        this.listings.addAll(ListingCache.getListings().values());
+        this.listings.addAll(CacheAccess.getAll(Listing.class));
         listings.removeIf(listing -> !listing.isOwner(owner.getUniqueId()));
         super.updatePagination();
     }

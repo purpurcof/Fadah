@@ -7,11 +7,10 @@ import info.preva1l.fadah.data.dao.mongo.*;
 import info.preva1l.fadah.data.fixers.v2.MongoFixerV2;
 import info.preva1l.fadah.data.fixers.v2.V2Fixer;
 import info.preva1l.fadah.data.fixers.v3.V3Fixer;
-import info.preva1l.fadah.records.CollectionBox;
-import info.preva1l.fadah.records.ExpiredItems;
-import info.preva1l.fadah.records.History;
+import info.preva1l.fadah.records.collection.CollectionBox;
+import info.preva1l.fadah.records.collection.ExpiredItems;
+import info.preva1l.fadah.records.history.History;
 import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.mongo.CacheHandler;
 import info.preva1l.fadah.utils.mongo.CollectionHelper;
 import info.preva1l.fadah.utils.mongo.MongoConnectionHandler;
 import info.preva1l.fadah.watcher.Watching;
@@ -38,8 +37,7 @@ public class MongoHandler implements DatabaseHandler {
             @NotNull String database = conf.getDatabase();
             Fadah.getConsole().info("Connecting to: " + connectionURI);
             connectionHandler = new MongoConnectionHandler(connectionURI, database);
-            CacheHandler cacheHandler = new CacheHandler(connectionHandler);
-            collectionHelper = new CollectionHelper(connectionHandler.getDatabase(), cacheHandler);
+            collectionHelper = new CollectionHelper(connectionHandler.getDatabase());
             connected = true;
         } catch (Exception e) {
             destroy();
@@ -66,12 +64,6 @@ public class MongoHandler implements DatabaseHandler {
         daos.put(Watching.class, new WatchersMongoDao(collectionHelper));
     }
 
-
-    @Override
-    public void wipeDatabase() {
-        // nothing yet
-    }
-
     @Override
     public <T> List<T> getAll(Class<T> clazz) {
         return (List<T>) getDao(clazz).getAll();
@@ -95,11 +87,6 @@ public class MongoHandler implements DatabaseHandler {
     @Override
     public <T> void delete(Class<T> clazz, T t) {
         getDao(clazz).delete(t);
-    }
-
-    @Override
-    public <T> void deleteSpecific(Class<T> clazz, T t, Object o) {
-        getDao(clazz).deleteSpecific(t, o);
     }
 
     /**

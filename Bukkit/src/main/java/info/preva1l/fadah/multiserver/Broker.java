@@ -4,17 +4,9 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.cache.CollectionBoxCache;
-import info.preva1l.fadah.cache.ExpiredListingsCache;
-import info.preva1l.fadah.cache.HistoricItemsCache;
-import info.preva1l.fadah.cache.ListingCache;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
-import info.preva1l.fadah.data.DatabaseManager;
-import info.preva1l.fadah.records.CollectionBox;
-import info.preva1l.fadah.records.ExpiredItems;
-import info.preva1l.fadah.records.History;
-import info.preva1l.fadah.records.listing.Listing;
+import info.preva1l.fadah.data.DatabaseType;
 import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.guis.FastInvManager;
@@ -30,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.TimeUnit;
 
 public abstract class Broker {
+    private static Broker instance;
+    @Getter private boolean connected = false;
 
     protected static final Object DUMMY_VALUE = new Object();
 
@@ -45,49 +39,6 @@ public abstract class Broker {
 
     protected void handle(@NotNull Message message) {
         switch (message.getType()) {
-            case LISTING_ADD -> message.getPayload()
-                    .getUUID().ifPresentOrElse(uuid -> {
-                        DatabaseManager.getInstance().get(Listing.class, uuid)
-                                .thenAccept(listing -> listing.ifPresent(ListingCache::addListing));
-                        }, () -> {
-                        throw new IllegalStateException("Listing add message received with no listing UUID!");
-                    });
-
-            case LISTING_REMOVE -> message.getPayload()
-                    .getUUID().ifPresentOrElse(uuid -> {
-                        Listing listing = ListingCache.getListing(uuid);
-                        if (listing == null) {
-                            throw new IllegalStateException("Listing remove message received, but we do not have the same listing?");
-                        }
-                        ListingCache.removeListing(listing);
-                        }, () -> {
-                        throw new IllegalStateException("Listing remove message received with no listing UUID!");
-                    });
-
-            case COLLECTION_BOX_UPDATE -> message.getPayload()
-                    .getUUID().ifPresentOrElse(uuid -> {
-                        DatabaseManager.getInstance().get(CollectionBox.class, uuid)
-                                .thenAccept(var1 -> var1.ifPresent(list -> CollectionBoxCache.update(uuid, list.collectableItems())));
-                        }, () -> {
-                        throw new IllegalStateException("Collection box update message received with no player UUID!");
-                    });
-
-            case EXPIRED_LISTINGS_UPDATE -> message.getPayload()
-                    .getUUID().ifPresentOrElse(uuid -> {
-                        DatabaseManager.getInstance().get(ExpiredItems.class, uuid)
-                                .thenAccept(var1 -> var1.ifPresent(list -> ExpiredListingsCache.update(uuid, list.collectableItems())));
-                        }, () -> {
-                        throw new IllegalStateException("Expired listings update message received with no player UUID!");
-                    });
-
-            case HISTORY_UPDATE -> message.getPayload()
-                    .getUUID().ifPresentOrElse(uuid -> {
-                        DatabaseManager.getInstance().get(History.class, uuid)
-                                .thenAccept(history -> history.ifPresent(items -> HistoricItemsCache.update(uuid, items.collectableItems())));
-                        }, () -> {
-                        throw new IllegalStateException("History update message received with no player UUID!");
-                    });
-
             case NOTIFICATION -> message.getPayload()
                     .getNotification().ifPresentOrElse(notification -> {
                         Player player = Bukkit.getPlayer(notification.getPlayer());
@@ -99,17 +50,16 @@ public abstract class Broker {
                     });
 
             case BROADCAST -> message.getPayload()
-                    .getBroadcast().ifPresentOrElse(broadcast -> {
-                        TaskManager.Async.run(Fadah.getINSTANCE(), () -> {
-                            Component textComponent = MiniMessage.miniMessage().deserialize(StringUtils.legacyToMiniMessage(broadcast.getMessage()));
-                            if (broadcast.getClickCommand() != null) {
-                                textComponent = textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, broadcast.getClickCommand()));
-                            }
-                            for (Player announce : Bukkit.getOnlinePlayers()) {
-                                Fadah.getINSTANCE().getAdventureAudience().player(announce).sendMessage(textComponent);
-                            }
-                        });
-                    }, () -> {
+                    .getBroadcast().ifPresentOrElse(broadcast ->
+                            TaskManager.Async.run(Fadah.getINSTANCE(), () -> {
+                                Component textComponent = MiniMessage.miniMessage().deserialize(StringUtils.legacyToMiniMessage(broadcast.getMessage()));
+                                if (broadcast.getClickCommand() != null) {
+                                    textComponent = textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, broadcast.getClickCommand()));
+                                }
+                                for (Player announce : Bukkit.getOnlinePlayers()) {
+                                    Fadah.getINSTANCE().getAdventureAudience().player(announce).sendMessage(textComponent);
+                                }
+                            }), () -> {
                         throw new IllegalStateException("Broadcast message received with no broadcast info!");
                     });
 
@@ -144,5 +94,34 @@ public abstract class Broker {
         REDIS("Redis"),
         ;
         private final String displayName;
+    }
+
+    public void load() {
+        Config.Broker settings = Config.i().getBroker();
+        if (settings.isEnabled()) {
+            Fadah.getConsole().info("Connecting to Broker...");
+            Fadah.getConsole().info("Broker Type: %s".formatted(settings.getType().getDisplayName()));
+            if (Config.i().getDatabase().getType() == DatabaseType.SQLITE) {
+                Fadah.getConsole().severe("------------------------------------------");
+                Fadah.getConsole().severe("Broker has not been enabled as the selected");
+                Fadah.getConsole().severe("       database is not compatible!");
+                Fadah.getConsole().severe("------------------------------------------");
+                return;
+            }
+            connect();
+            connected = true;
+            Fadah.getConsole().info("Successfully connected to broker!");
+            return;
+        }
+        Fadah.getConsole().info("Not connecting to broker. (Not Enabled)");
+    }
+
+    public static Broker getInstance() {
+        if (instance == null) {
+            instance = switch (Config.i().getBroker().getType()) {
+                case REDIS -> new RedisBroker(Fadah.getINSTANCE());
+            };
+        }
+        return instance;
     }
 }

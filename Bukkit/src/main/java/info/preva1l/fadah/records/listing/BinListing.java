@@ -1,18 +1,17 @@
 package info.preva1l.fadah.records.listing;
 
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.api.ListingPurchaseEvent;
-import info.preva1l.fadah.cache.CollectionBoxCache;
-import info.preva1l.fadah.cache.ListingCache;
+import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.ListHelper;
 import info.preva1l.fadah.config.Tuple;
 import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
-import info.preva1l.fadah.records.CollectableItem;
-import info.preva1l.fadah.records.CollectionBox;
+import info.preva1l.fadah.records.collection.CollectableItem;
+import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
 import org.bukkit.Bukkit;
@@ -22,14 +21,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.time.Instant;
-import java.util.List;
+import java.util.SortedSet;
 import java.util.UUID;
 
 public final class BinListing extends ActiveListing {
     public BinListing(@NotNull UUID id, @NotNull UUID owner, @NotNull String ownerName,
                       @NotNull ItemStack itemStack, @NotNull String categoryID, @NotNull String currency, double price,
-                      double tax, long creationDate, long deletionDate, boolean biddable, List<Bid> bids) {
-        super(id, owner, ownerName, itemStack, categoryID, currency, price, tax, creationDate, deletionDate, biddable, bids);
+                      double tax, long creationDate, long deletionDate, SortedSet<Bid> bids) {
+        super(id, owner, ownerName, itemStack, categoryID, currency, price, tax, creationDate, deletionDate, bids);
     }
 
     @Override
@@ -38,40 +37,24 @@ public final class BinListing extends ActiveListing {
             buyer.sendMessage(Lang.i().getPrefix() + Lang.i().getErrors().getTooExpensive());
             return;
         }
-        if (ListingCache.getListing(this.getId()) == null) { // todo: readd strict checks
+
+        if (CacheAccess.get(Listing.class, this.getId()).isEmpty()) {
             buyer.sendMessage(Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist());
             return;
         }
+
         // Money Transfer
         getCurrency().withdraw(buyer, this.getPrice());
         double taxed = (this.getTax()/100) * this.getPrice();
         getCurrency().add(Bukkit.getOfflinePlayer(this.getOwner()), this.getPrice() - taxed);
 
         // Remove Listing
-        ListingCache.removeListing(this);
-        if (Config.i().getBroker().isEnabled()) {
-            Message.builder()
-                    .type(Message.Type.LISTING_REMOVE)
-                    .payload(Payload.withUUID(this.getId()))
-                    .build().send(Fadah.getINSTANCE().getBroker());
-        }
+        CacheAccess.invalidate(Listing.class, this);
         DatabaseManager.getInstance().delete(Listing.class, this);
 
         // Add to collection box
         ItemStack itemStack = this.getItemStack().clone();
-        CollectableItem collectableItem = new CollectableItem(itemStack, Instant.now().toEpochMilli());
-        CollectionBox box = CollectionBox.of(buyer.getUniqueId());
-        box.collectableItems().add(collectableItem);
-        CollectionBoxCache.addItem(buyer.getUniqueId(), collectableItem);
-        DatabaseManager.getInstance().save(CollectionBox.class, box);
-
-        // Send Cache Updates
-        if (Config.i().getBroker().isEnabled()) {
-            Message.builder()
-                    .type(Message.Type.COLLECTION_BOX_UPDATE)
-                    .payload(Payload.withUUID(buyer.getUniqueId()))
-                    .build().send(Fadah.getINSTANCE().getBroker());
-        }
+        CacheAccess.getNotNull(CollectionBox.class, buyer.getUniqueId()).add(new CollectableItem(itemStack, Instant.now().toEpochMilli()));
 
         // Notify Both Players
         Lang.sendMessage(buyer, String.join("\n", Lang.i().getNotifications().getNewItem()));
@@ -87,11 +70,11 @@ public final class BinListing extends ActiveListing {
         if (seller != null) {
             Lang.sendMessage(seller, message);
         } else {
-            if (Config.i().getBroker().isEnabled()) {
+            if (Broker.getInstance().isConnected()) {
                 Message.builder()
                         .type(Message.Type.NOTIFICATION)
                         .payload(Payload.withNotification(this.getOwner(), message))
-                        .build().send(Fadah.getINSTANCE().getBroker());
+                        .build().send(Broker.getInstance());
             }
         }
 

@@ -1,7 +1,6 @@
 package info.preva1l.fadah.data;
 
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.cache.ListingCache;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.data.handler.DatabaseHandler;
 import info.preva1l.fadah.data.handler.MongoHandler;
@@ -90,25 +89,6 @@ public final class DatabaseManager {
         }, threadPool);
     }
 
-    public <T> CompletableFuture<Void> deleteSpecific(Class<T> clazz, T t, Object o) {
-        if (!isConnected()) {
-            Fadah.getConsole().severe("Tried to perform database action when the database is not connected!");
-            return CompletableFuture.completedFuture(null);
-        }
-        return CompletableFuture.supplyAsync(() -> {
-            handler.deleteSpecific(clazz, t, o);
-            return null;
-        }, threadPool);
-    }
-
-    public CompletableFuture<Boolean> needsFixing(UUID player) {
-        if (!isConnected()) {
-            Fadah.getConsole().severe("Tried to perform database action when the database is not connected!");
-            return CompletableFuture.completedFuture(null);
-        }
-        return CompletableFuture.supplyAsync(() -> handler.needsFixing(player), threadPool);
-    }
-
     public CompletableFuture<Void> fixPlayerData(UUID player) {
         if (!isConnected()) {
             Fadah.getConsole().severe("Tried to perform database action when the database is not connected!");
@@ -150,7 +130,6 @@ public final class DatabaseManager {
         if (instance == null) {
             instance = new DatabaseManager();
             instance.handler.connect();
-            ListingCache.update();
         }
         return instance;
     }

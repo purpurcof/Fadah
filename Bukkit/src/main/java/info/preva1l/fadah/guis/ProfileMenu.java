@@ -9,8 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
 public class ProfileMenu extends FastInv {
     private final Player viewer;
     private final OfflinePlayer owner;
@@ -23,12 +21,7 @@ public class ProfileMenu extends FastInv {
         this.viewer = viewer;
         this.owner = owner;
 
-        List<Integer> fillerSlots = getLayout().fillerSlots();
-        if (!fillerSlots.isEmpty()) {
-            setItems(fillerSlots.stream().mapToInt(Integer::intValue).toArray(),
-                    GuiHelper.constructButton(GuiButtonType.BORDER));
-        }
-
+        fillers();
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.BACK, -1),
                 GuiHelper.constructButton(GuiButtonType.BACK),
                 e -> new MainMenu(null, viewer, null, null, null).open(viewer));
@@ -101,7 +94,7 @@ public class ProfileMenu extends FastInv {
                                 ? Lang.i().getWords().getYour() : owner.getName() + "'s")).build(), e -> {
                     if ((viewer.getUniqueId() != owner.getUniqueId() && viewer.hasPermission("fadah.manage.expired-listings"))
                             || viewer.getUniqueId() == owner.getUniqueId()) {
-                        new ExpiredListingsMenu(viewer, owner, 0).open(viewer);
+                        new ExpiredListingsMenu(viewer, owner).open(viewer);
                     }
                 });
     }
