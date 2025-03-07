@@ -3,6 +3,7 @@ package info.preva1l.fadah.utils;
 import info.preva1l.fadah.config.Config;
 import lombok.experimental.UtilityClass;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -20,7 +21,7 @@ import java.util.regex.Pattern;
  */
 @UtilityClass
 public class StringUtils {
-    private final LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.legacyAmpersand();
+    private final LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.builder().character('&').build();
     private final Pattern HEX_PATTERN = Pattern.compile("&#(\\w{5}[0-9a-fA-F])");
     private final Pattern MM_HEX_PATTERN = Pattern.compile("<#[a-fA-F0-9]{6}>");
     private final Pattern SECTION_SYMBOL_PATTERN = Pattern.compile("§[0-9a-fA-Fk-orK-OR]");
@@ -98,7 +99,7 @@ public class StringUtils {
      * @return string with mini modernMessage formatting (not colorized)
      */
     public String legacyToMiniMessage(String message) {
-        return legacyComponentSerializer.serialize(legacyComponentSerializer.deserialize(message.replace('§', '&')));
+        return MiniMessage.miniMessage().serialize(legacyComponentSerializer.deserialize(message.replace('§', '&')));
     }
 
     /**
@@ -127,7 +128,7 @@ public class StringUtils {
 
     /**
      * Strip color codes from a string, including hex codes, codes starting with the section symbol (§),
-     * and codes starting with an ampersand (&).
+     * and codes starting with an ampersand.
      *
      * @param str String with color codes.
      * @return String without color codes.

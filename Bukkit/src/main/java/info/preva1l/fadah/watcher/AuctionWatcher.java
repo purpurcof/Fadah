@@ -8,6 +8,9 @@ import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.StringUtils;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -62,7 +65,7 @@ public class AuctionWatcher {
                 (watching.getMaxPrice() == -1 || watching.getMaxPrice() >= listing.getPrice());
     }
 
-    private void sendAlert(UUID uuid, Listing listing) {
+    public void sendAlert(UUID uuid, Listing listing) {
         Player player = Bukkit.getPlayer(uuid);
         if (player == null) return;
 
@@ -72,7 +75,10 @@ public class AuctionWatcher {
                 Tuple.of("%price%", new DecimalFormat(Config.i().getFormatting().getNumbers()).format(listing.getPrice()))
         ));
 
-        player.sendMessage(StringUtils.colorize(alertMessage));
+        Component textComponent = MiniMessage.miniMessage().deserialize(StringUtils.legacyToMiniMessage(alertMessage));
+        textComponent = textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/ah view-listing " + listing.getId()));
+
+        player.sendMessage(textComponent);
     }
 
     private boolean checkForEnchantmentOnBook(String enchant, ItemStack enchantedBook) {

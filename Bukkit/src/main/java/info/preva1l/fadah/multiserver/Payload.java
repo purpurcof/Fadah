@@ -20,6 +20,10 @@ public class Payload {
     @Expose
     private Broadcast broadcast;
 
+    @Nullable
+    @Expose
+    private WatchNotification watchNotification;
+
     /**
      * Returns an empty cross-server message payload.
      *
@@ -70,6 +74,20 @@ public class Payload {
         return payload;
     }
 
+    /**
+     * Returns a payload containing a recipient and a listing id.
+     *
+     * @param playerUUID the player to send the message to
+     * @param listingId the listing
+     * @return a payload containing the message
+     */
+    @NotNull
+    public static Payload withNotification(@NotNull UUID playerUUID, @NotNull UUID listingId) {
+        final Payload payload = new Payload();
+        payload.watchNotification = new WatchNotification(playerUUID, listingId);
+        return payload;
+    }
+
     public Optional<UUID> getUUID() {
         return Optional.ofNullable(uuid);
     }
@@ -79,4 +97,6 @@ public class Payload {
     }
 
     public Optional<Broadcast> getBroadcast() { return Optional.ofNullable(broadcast); }
+
+    public Optional<WatchNotification> getWatchNotification() { return Optional.ofNullable(watchNotification); }
 }

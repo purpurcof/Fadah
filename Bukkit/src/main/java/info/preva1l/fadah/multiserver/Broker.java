@@ -4,12 +4,15 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import info.preva1l.fadah.Fadah;
+import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.data.DatabaseType;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.guis.FastInvManager;
+import info.preva1l.fadah.watcher.AuctionWatcher;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -57,11 +60,18 @@ public abstract class Broker {
                                     textComponent = textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, broadcast.getClickCommand()));
                                 }
                                 for (Player announce : Bukkit.getOnlinePlayers()) {
-                                    Fadah.getINSTANCE().getAdventureAudience().player(announce).sendMessage(textComponent);
+                                    announce.sendMessage(textComponent);
                                 }
                             }), () -> {
                         throw new IllegalStateException("Broadcast message received with no broadcast info!");
                     });
+
+            case WATCHER -> message.getPayload()
+                    .getWatchNotification()
+                    .ifPresent(watchNotification ->
+                            CacheAccess.get(Listing.class, watchNotification.getListing())
+                                    .ifPresent(listing ->
+                                            AuctionWatcher.sendAlert(watchNotification.getPlayer(), listing)));
 
             case RELOAD -> {
                 Fadah.getINSTANCE().reload();

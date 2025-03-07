@@ -24,6 +24,7 @@ public class Message {
     public enum Type {
         NOTIFICATION,
         BROADCAST,
+        WATCHER,
         RELOAD,
         TOGGLE,
     }
