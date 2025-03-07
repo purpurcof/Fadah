@@ -3,7 +3,7 @@ plugins {
     id 'com.gradleup.shadow' version '8.3.6'
 }
 
-group = 'info.preva1l'
+group = 'info.preva1l.fadah'
 version = "2.8.3"
 
 ext {
@@ -37,6 +37,12 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+        repositories {
+            maven {
+                url "https://repo.preva1l.info/releases/"
+                name "FinallyADecent"
+            }
+        }
     }
 
     dependencies {
@@ -47,7 +53,8 @@ allprojects {
 
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.12.0'
         testImplementation 'org.junit.jupiter:junit-jupiter-params:5.12.0'
-        testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.12.0'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.12.0'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.12.0'
 
         testCompileOnly 'org.jetbrains:annotations:26.0.2'
         testCompileOnly 'org.projectlombok:lombok:1.18.36'
@@ -73,25 +80,53 @@ subprojects {
     shadowJar {
         destinationDirectory.set(file("$rootDir/target"))
         archiveClassifier.set('')
-        //minimize()
     }
 
-    task sourceJar(type: Jar) {
-        from sourceSets.main.allSource
-        archiveClassifier.set('sources')
+    java {
+        withSourcesJar()
+        withJavadocJar()
     }
 
-    task javadocJar(type: Jar) {
-        from javadoc
-        archiveClassifier.set('javadoc')
+    sourcesJar {
+        destinationDirectory.set(file("$rootDir/target"))
     }
+
+    javadocJar {
+        destinationDirectory.set(file("$rootDir/target"))
+    }
+
+    shadowJar.dependsOn(sourcesJar, javadocJar)
 
     publishing {
+        def user = findProperty("fad_username")
+        def pass = findProperty("fad_password")
+
+        if (project.name != "API") return
+
+        if (!user || !pass) {
+            println "Skipping publishing: Credentials are missing."
+            return
+        }
+
+        repositories {
+            maven {
+                url = uri("https://repo.preva1l.info/releases/")
+                name = "FinallyADecent"
+                credentials {
+                    username = user
+                    password = pass
+                }
+            }
+        }
+
         publications {
-            mavenJava(MavenPublication) {
+            create("mavenJava", MavenPublication) {
+                groupId = 'info.preva1l'
+                artifactId = 'fadah'
+                version = "$rootProject.version"
                 artifact shadowJar
-                artifact(tasks.named('sourceJar'))
-                artifact(tasks.named('javadocJar'))
+                artifact sourcesJar
+                artifact javadocJar
             }
         }
     }

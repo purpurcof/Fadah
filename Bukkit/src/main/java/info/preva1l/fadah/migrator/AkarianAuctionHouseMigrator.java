@@ -1,8 +1,8 @@
 package info.preva1l.fadah.migrator;
 
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.cache.CategoryCache;
-import info.preva1l.fadah.records.CollectableItem;
+import info.preva1l.fadah.cache.CategoryRegistry;
+import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.listing.BinListing;
 import info.preva1l.fadah.records.listing.Listing;
 import lombok.Getter;
@@ -31,11 +31,11 @@ public final class AkarianAuctionHouseMigrator implements Migrator {
             ItemStack item = oldListing.getItemStack();
             double price = oldListing.getPrice();
 
-            String categoryId = CategoryCache.getCategoryForItem(item).join();
+            String categoryId = CategoryRegistry.getCategoryForItem(item).join();
 
             long expiry = oldListing.getEnd();
             listings.add(new BinListing(id, owner, ownerName, item, categoryId, "vault", price, 0,
-                    Instant.now().toEpochMilli(), expiry, false, List.of()));
+                    Instant.now().toEpochMilli(), expiry, new TreeSet<>()));
         }
 
         return listings;

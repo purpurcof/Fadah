@@ -51,7 +51,7 @@ public abstract class AuctionHouseAPI {
      * @param uuid a valid listing uuid
      * @return the listing or null if none found
      * @since 1.0
-     * @deprecated replaced with {@link AuctionHouseAPI#listingManager()} & {@link ListingManager#get(UUID)}
+     * @deprecated replaced with {@link AuctionHouseAPI#listingManager()} and {@link ListingManager#get(UUID)}
      */
     @Deprecated(since = "2.9")
     public Listing getListing(UUID uuid) {
@@ -73,7 +73,7 @@ public abstract class AuctionHouseAPI {
      * @param id a valid category id
      * @return the category or null if none found
      * @since 1.0
-     * @deprecated replaced with {@link AuctionHouseAPI#categoryManager()} & {@link CategoryManager#get(String)}
+     * @deprecated replaced with {@link AuctionHouseAPI#categoryManager()} and {@link CategoryManager#get(String)}
      */
     @Deprecated(since = "2.9")
     public Category getCategory(String id) {
