@@ -10,7 +10,6 @@ import org.bukkit.plugin.Plugin;
  * Easy creation of Bukkit Tasks
  */
 @SuppressWarnings("unused")
-@UtilityClass
 public class TaskManager {
     /**
      * Synchronous Tasks
@@ -23,8 +22,8 @@ public class TaskManager {
          * @param plugin   The current plugin
          * @param runnable The runnable, lambda supported yeh
          */
-        public void run(Plugin plugin, Runnable runnable) {
-            MultiLib.getGlobalRegionScheduler().run(plugin,  t -> runnable.run());
+        public RegionizedTask run(Plugin plugin, Runnable runnable) {
+            return MultiLib.getGlobalRegionScheduler().run(plugin,  t -> runnable.run());
         }
 
         /**
@@ -34,8 +33,8 @@ public class TaskManager {
          * @param plugin   The current plugin
          * @param runnable The runnable, lambda supported yeh
          */
-        public void run(Plugin plugin, Entity entity, Runnable runnable) {
-            MultiLib.getEntityScheduler(entity).run(plugin,  t -> runnable.run(), () -> run(plugin, runnable));
+        public RegionizedTask run(Plugin plugin, Entity entity, Runnable runnable) {
+            return MultiLib.getEntityScheduler(entity).run(plugin,  t -> runnable.run(), () -> run(plugin, runnable));
         }
 
         /**
@@ -45,8 +44,8 @@ public class TaskManager {
          * @param runnable The runnable, lambda supported yeh
          * @param interval Time between each run
          */
-        public void runTask(Plugin plugin, Runnable runnable, long interval) {
-            MultiLib.getGlobalRegionScheduler().runAtFixedRate(plugin,  t -> runnable.run(), 0L, interval);
+        public RegionizedTask runTask(Plugin plugin, Runnable runnable, long interval) {
+            return MultiLib.getGlobalRegionScheduler().runAtFixedRate(plugin,  t -> runnable.run(), 0L, interval);
         }
 
         /**
@@ -72,8 +71,8 @@ public class TaskManager {
          * @param plugin   The current plugin
          * @param runnable The runnable, lambda supported yeh
          */
-        public static void run(Plugin plugin, Runnable runnable) {
-            MultiLib.getAsyncScheduler().runNow(plugin, task -> runnable.run());
+        public RegionizedTask run(Plugin plugin, Runnable runnable) {
+            return MultiLib.getAsyncScheduler().runNow(plugin, task -> runnable.run());
         }
 
         /**
@@ -83,8 +82,8 @@ public class TaskManager {
          * @param runnable The runnable, lambda supported yeh
          * @param interval Time between each run
          */
-        public void runTask(Plugin plugin, Runnable runnable, long interval) {
-            MultiLib.getAsyncScheduler().runAtFixedRate(plugin, task -> runnable.run(), 0L, interval);
+        public RegionizedTask runTask(Plugin plugin, Runnable runnable, long interval) {
+            return MultiLib.getAsyncScheduler().runAtFixedRate(plugin, task -> runnable.run(), 0L, interval);
         }
 
         /**
@@ -94,8 +93,8 @@ public class TaskManager {
          * @param runnable The runnable, lambda supported yeh
          * @param delay    Time before running.
          */
-        public void runLater(Plugin plugin, Runnable runnable, long delay) {
-            MultiLib.getAsyncScheduler().runDelayed(plugin, task -> runnable.run(), delay);
+        public RegionizedTask runLater(Plugin plugin, Runnable runnable, long delay) {
+            return MultiLib.getAsyncScheduler().runDelayed(plugin, task -> runnable.run(), delay);
         }
     }
 }
