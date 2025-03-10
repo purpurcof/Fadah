@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 @Require("PlaceholderAPI")
 public class PapiHook {
     @OnStart
-    protected boolean onEnable() {
+    public boolean onEnable() {
         return new Expansion().register();
     }
 
