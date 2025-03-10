@@ -118,27 +118,27 @@ public class SQLiteHandler implements DatabaseHandler {
     }
 
     @Override
-    public <T> List<T> getAll(Class<T> clazz) {
+    public synchronized <T> List<T> getAll(Class<T> clazz) {
         return (List<T>) getDao(clazz).getAll();
     }
 
     @Override
-    public <T> Optional<T> get(Class<T> clazz, UUID id) {
+    public synchronized <T> Optional<T> get(Class<T> clazz, UUID id) {
         return (Optional<T>) getDao(clazz).get(id);
     }
 
     @Override
-    public <T> void save(Class<T> clazz, T t) {
+    public synchronized <T> void save(Class<T> clazz, T t) {
         getDao(clazz).save(t);
     }
 
     @Override
-    public <T> void update(Class<T> clazz, T t, String[] params) {
+    public synchronized <T> void update(Class<T> clazz, T t, String[] params) {
         getDao(clazz).update(t, params);
     }
 
     @Override
-    public <T> void delete(Class<T> clazz, T t) {
+    public synchronized <T> void delete(Class<T> clazz, T t) {
         getDao(clazz).delete(t);
     }
 

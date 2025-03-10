@@ -48,6 +48,7 @@ public class PlayerListener implements Listener {
         }
         if (e.getPlayer().hasPermission("fadah.manage.profile") && Config.i().isUpdateChecker()) {
             var checked = Fadah.getINSTANCE().getChecked();
+            if (checked == null) return;
             e.getPlayer().sendMessage(StringUtils.colorize("&f[Fadah] Fadah is &#D63C3COUTDATED&f! " +
                     "&7Current: &#D63C3C%s &7Latest: &#18D53A%s".formatted(checked.getCurrentVersion(), checked.getLatestVersion())));
         }

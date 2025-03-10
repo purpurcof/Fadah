@@ -7,23 +7,23 @@ import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
-import info.preva1l.fadah.hooks.Hook;
-import info.preva1l.fadah.hooks.Reloadable;
+import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.hooker.annotation.*;
 
 import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
+@Hook(id = "influxdb")
 @Reloadable(async = true)
-public class InfluxDBHook extends Hook {
+@Require(type = "config", value = "influxdb")
+public class InfluxDBHook {
     private InfluxDBClient client;
     private WriteApiBlocking writeApi;
 
-    @Override
-    public boolean onEnable() {
+    @OnStart
+    public boolean onStart() {
         Config.Hooks.InfluxDB conf = Config.i().getHooks().getInfluxdb();
-        if (!conf.isEnabled()) {
-            return false;
-        }
         try {
             String url = conf.getUri();
             String token = conf.getToken();
@@ -39,14 +39,16 @@ public class InfluxDBHook extends Hook {
     }
 
     public void log(String message) {
-        Point point = Point.measurement("Transaction-Logs")
-                .time(Instant.now(), WritePrecision.MS)
-                .addField("message", message);
-        writeApi.writePoint(point);
+        CompletableFuture.runAsync(() -> {
+            Point point = Point.measurement("Transaction-Logs")
+                    .time(Instant.now(), WritePrecision.MS)
+                    .addField("message", message);
+            writeApi.writePoint(point);
+        }, DatabaseManager.getInstance().getThreadPool());
     }
 
-    @Override
-    public void onDisable() {
+    @OnStop
+    public void onStop() {
         if (client == null) return;
         client.close();
     }

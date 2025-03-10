@@ -24,6 +24,7 @@ import info.preva1l.fadah.utils.config.BasicConfig;
 import info.preva1l.fadah.utils.guis.FastInvManager;
 import info.preva1l.fadah.utils.guis.LayoutManager;
 import info.preva1l.fadah.utils.logging.LoggingProvider;
+import info.preva1l.hooker.Hooker;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -59,6 +60,7 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
         INSTANCE = this;
         pluginVersion = Version.fromString(getDescription().getVersion());
         console = getLogger();
+        loadHooks();
     }
 
     @Override
@@ -81,7 +83,7 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
 
         Broker.getInstance().load();
 
-        loadHooks();
+        Hooker.enable();
         loadMigrators();
 
         initLogger(this);
@@ -98,7 +100,6 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
     @Override
     public void onDisable() {
         FastInvManager.closeAll(this);
-        disableHooks();
         DatabaseManager.getInstance().shutdown();
         if (Config.i().getBroker().isEnabled()) Broker.getInstance().destroy();
         shutdownMetrics();

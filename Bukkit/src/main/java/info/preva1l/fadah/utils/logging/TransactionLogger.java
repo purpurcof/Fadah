@@ -3,12 +3,12 @@ package info.preva1l.fadah.utils.logging;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.data.DatabaseManager;
-import info.preva1l.fadah.hooks.HookManager;
 import info.preva1l.fadah.hooks.impl.InfluxDBHook;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.StringUtils;
+import info.preva1l.hooker.Hooker;
 import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -38,7 +38,7 @@ public class TransactionLogger {
 
         Fadah.getINSTANCE().getTransactionLogger().info(logMessage);
 
-        HookManager.i().getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
+        Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }
 
     public void listingSold(Listing listing, Player buyer) {
@@ -75,7 +75,7 @@ public class TransactionLogger {
 
         Fadah.getINSTANCE().getTransactionLogger().info(logMessage);
 
-        HookManager.i().getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
+        Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }
 
     public void listingRemoval(Listing listing, boolean isAdmin) {
@@ -102,7 +102,7 @@ public class TransactionLogger {
 
         Fadah.getINSTANCE().getTransactionLogger().info(logMessage);
 
-        HookManager.i().getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
+        Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }
 
     public void listingExpired(Listing listing) {
@@ -128,7 +128,7 @@ public class TransactionLogger {
 
         Fadah.getINSTANCE().getTransactionLogger().info(logMessage);
 
-        HookManager.i().getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
+        Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }
 
     private void fetchAndSaveHistory(UUID owner, HistoricItem historicItem) {

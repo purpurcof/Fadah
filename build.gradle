@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'info.preva1l.fadah'
-version = "2.8.3"
+version = "2.9.0"
 
 ext {
     set 'version', rootProject.version.toString()

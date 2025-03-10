@@ -10,6 +10,7 @@ import org.bukkit.plugin.Plugin;
  * Easy creation of Bukkit Tasks
  */
 @SuppressWarnings("unused")
+@UtilityClass
 public class TaskManager {
     /**
      * Synchronous Tasks

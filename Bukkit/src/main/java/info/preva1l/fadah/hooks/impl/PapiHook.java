@@ -1,21 +1,20 @@
 package info.preva1l.fadah.hooks.impl;
 
 import info.preva1l.fadah.data.PermissionsData;
-import info.preva1l.fadah.hooks.Hook;
+import info.preva1l.hooker.annotation.Hook;
+import info.preva1l.hooker.annotation.OnStart;
+import info.preva1l.hooker.annotation.Require;
 import lombok.Getter;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-@Getter
-public class PapiHook extends Hook {
-    @Override
+@Hook(id = "placeholders")
+@Require("PlaceholderAPI")
+public class PapiHook {
+    @OnStart
     protected boolean onEnable() {
-        Plugin plugin = Bukkit.getPluginManager().getPlugin("PlaceholderAPI");
-        if (plugin == null || !plugin.isEnabled()) return false;
         return new Expansion().register();
     }
 

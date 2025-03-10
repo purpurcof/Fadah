@@ -8,10 +8,12 @@ import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.records.history.History;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.guis.FastInvManager;
 import info.preva1l.fadah.utils.guis.LayoutManager;
 import info.preva1l.fadah.watcher.AuctionWatcher;
 import info.preva1l.fadah.watcher.Watching;
+import info.preva1l.hooker.Hooker;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -37,14 +39,21 @@ public interface DataProvider {
                 LayoutManager.MenuType.WATCH
         ).forEach(plugin.getLayoutManager()::reloadLayout);
         CategoryRegistry.loadCategories();
-        plugin.loadHooks();
+        Hooker.reload();
     }
 
     default void loadDataAndPopulateCaches() {
         DatabaseManager.getInstance(); // Make the connection happen during startup
         CacheAccess.init();
         CategoryRegistry.loadCategories();
+
+        DatabaseManager.getInstance().getAll(Listing.class)
+                .thenAccept(listings ->
+                        listings.forEach(listing ->
+                                CacheAccess.add(Listing.class, listing)));
     }
+
+
 
     default CompletableFuture<Void> loadPlayerData(UUID uuid) {
         DatabaseManager db = DatabaseManager.getInstance();

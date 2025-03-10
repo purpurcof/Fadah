@@ -1,17 +1,20 @@
 package info.preva1l.fadah.hooks.impl;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
-import info.preva1l.fadah.hooks.Hook;
-import info.preva1l.fadah.hooks.Reloadable;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.hooker.annotation.Hook;
+import info.preva1l.hooker.annotation.OnStart;
+import info.preva1l.hooker.annotation.Reloadable;
+import info.preva1l.hooker.annotation.Require;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Material;
-import org.json.simple.JSONObject;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.awt.*;
@@ -24,17 +27,18 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
+@Hook(id = "discord")
 @Reloadable
-public class DiscordHook extends Hook {
+@Require(type = "config", value = "discord")
+@Getter
+public class DiscordHook {
     private Config.Hooks.Discord conf = Config.i().getHooks().getDiscord();
-    private DecimalFormat df = new DecimalFormat("#.##");
+    private DecimalFormat df = new DecimalFormat(Config.i().getFormatting().getNumbers());
 
-    @Override
-    public boolean onEnable() {
+    @OnStart
+    public void onStart() {
         conf = Config.i().getHooks().getDiscord();
         df = new DecimalFormat(Config.i().getFormatting().getNumbers());
-        return conf.isEnabled();
     }
 
     public void send(Listing listing) {
@@ -132,22 +136,22 @@ public class DiscordHook extends Hook {
                 throw new IllegalArgumentException("Set content or add at least one EmbedObject");
             }
 
-            JSONObject json = new JSONObject();
+            JsonObject json = new JsonObject();
 
-            json.put("content", this.content);
-            json.put("username", this.username);
-            json.put("avatar_url", this.avatarUrl);
-            json.put("tts", this.tts);
+            json.addProperty("content", this.content);
+            json.addProperty("username", this.username);
+            json.addProperty("avatar_url", this.avatarUrl);
+            json.addProperty("tts", this.tts);
 
             if (!this.embeds.isEmpty()) {
-                List<JSONObject> embedObjects = new ArrayList<>();
+                JsonArray embedObjects = new JsonArray();
 
                 for (EmbedObject embed : this.embeds) {
-                    JSONObject jsonEmbed = new JSONObject();
+                    JsonObject jsonEmbed = new JsonObject();
 
-                    jsonEmbed.put("title", embed.getTitle());
-                    jsonEmbed.put("description", embed.getDescription());
-                    jsonEmbed.put("url", embed.getUrl());
+                    jsonEmbed.addProperty("title", embed.getTitle());
+                    jsonEmbed.addProperty("description", embed.getDescription().replace("\\n", "\n"));
+                    jsonEmbed.addProperty("url", embed.getUrl());
 
                     if (embed.getColor() != null) {
                         Color color = embed.getColor();
@@ -155,7 +159,7 @@ public class DiscordHook extends Hook {
                         rgb = (rgb << 8) + color.getGreen();
                         rgb = (rgb << 8) + color.getBlue();
 
-                        jsonEmbed.put("color", rgb);
+                        jsonEmbed.addProperty("color", rgb);
                     }
 
                     EmbedObject.Footer footer = embed.getFooter();
@@ -165,52 +169,52 @@ public class DiscordHook extends Hook {
                     List<EmbedObject.Field> fields = embed.getFields();
 
                     if (footer != null) {
-                        JSONObject jsonFooter = new JSONObject();
+                        JsonObject jsonFooter = new JsonObject();
 
-                        jsonFooter.put("text", footer.getText());
-                        jsonFooter.put("icon_url", footer.getIconUrl());
-                        jsonEmbed.put("footer", jsonFooter);
+                        jsonFooter.addProperty("text", footer.getText());
+                        jsonFooter.addProperty("icon_url", footer.getIconUrl());
+                        jsonEmbed.add("footer", jsonFooter);
                     }
 
                     if (image != null) {
-                        JSONObject jsonImage = new JSONObject();
+                        JsonObject jsonImage = new JsonObject();
 
-                        jsonImage.put("url", image.getUrl());
-                        jsonEmbed.put("image", jsonImage);
+                        jsonImage.addProperty("url", image.getUrl());
+                        jsonEmbed.add("image", jsonImage);
                     }
 
                     if (thumbnail != null) {
-                        JSONObject jsonThumbnail = new JSONObject();
+                        JsonObject jsonThumbnail = new JsonObject();
 
-                        jsonThumbnail.put("url", thumbnail.getUrl());
-                        jsonEmbed.put("thumbnail", jsonThumbnail);
+                        jsonThumbnail.addProperty("url", thumbnail.getUrl());
+                        jsonEmbed.add("thumbnail", jsonThumbnail);
                     }
 
                     if (author != null) {
-                        JSONObject jsonAuthor = new JSONObject();
+                        JsonObject jsonAuthor = new JsonObject();
 
-                        jsonAuthor.put("name", author.getName());
-                        jsonAuthor.put("url", author.getUrl());
-                        jsonAuthor.put("icon_url", author.getIconUrl());
-                        jsonEmbed.put("author", jsonAuthor);
+                        jsonAuthor.addProperty("name", author.getName());
+                        jsonAuthor.addProperty("url", author.getUrl());
+                        jsonAuthor.addProperty("icon_url", author.getIconUrl());
+                        jsonEmbed.add("author", jsonAuthor);
                     }
 
-                    List<JSONObject> jsonFields = new ArrayList<>();
+                    JsonArray jsonFields = new JsonArray();
                     for (EmbedObject.Field field : fields) {
-                        JSONObject jsonField = new JSONObject();
+                        JsonObject jsonField = new JsonObject();
 
-                        jsonField.put("name", field.getName());
-                        jsonField.put("value", field.getValue());
-                        jsonField.put("inline", field.isInline());
+                        jsonField.addProperty("name", field.getName());
+                        jsonField.addProperty("value", field.getValue());
+                        jsonField.addProperty("inline", field.isInline());
 
                         jsonFields.add(jsonField);
                     }
 
-                    jsonEmbed.put("fields", jsonFields.toArray());
+                    jsonEmbed.add("fields", jsonFields);
                     embedObjects.add(jsonEmbed);
                 }
 
-                json.put("embeds", embedObjects.toArray());
+                json.add("embeds", embedObjects);
             }
 
             URL url = URI.create(this.url).toURL();

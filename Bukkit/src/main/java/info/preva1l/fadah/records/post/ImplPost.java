@@ -10,7 +10,6 @@ import info.preva1l.fadah.config.Tuple;
 import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.data.PermissionsData;
 import info.preva1l.fadah.filters.Restrictions;
-import info.preva1l.fadah.hooks.HookManager;
 import info.preva1l.fadah.hooks.impl.DiscordHook;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.multiserver.Message;
@@ -22,6 +21,7 @@ import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.TimeUtil;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
 import info.preva1l.fadah.watcher.AuctionWatcher;
+import info.preva1l.hooker.Hooker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -76,7 +76,7 @@ public final class ImplPost extends Post {
             if (notifyPlayer) notifyPlayer(listing);
             if (submitLog) TransactionLogger.listingCreated(listing);
 
-            HookManager.i().getHook(DiscordHook.class).ifPresent(hook -> {
+            Hooker.getHook(DiscordHook.class).ifPresent(hook -> {
                 if (!(hook.getConf().isOnlySendOnAdvert() && postAdvert)) hook.send(listing);
             });
 
