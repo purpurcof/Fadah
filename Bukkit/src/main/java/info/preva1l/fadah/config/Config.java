@@ -47,6 +47,12 @@ public class Config {
     })
     private boolean minimalMode = false;
 
+    @Comment({
+            "This doesnt disable the update checker in console,",
+            "only for when players with the permission 'fadah.manage.profile' join."
+    })
+    private boolean updateChecker = true;
+
     private TimeLength maxListingLength = new TimeLength(10, ChronoUnit.DAYS);
     private TimeLength defaultListingLength = new TimeLength(2, ChronoUnit.DAYS);
 

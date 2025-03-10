@@ -2,6 +2,7 @@ package info.preva1l.fadah.listeners;
 
 import com.github.puregero.multilib.regionized.RegionizedTask;
 import info.preva1l.fadah.Fadah;
+import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.guis.NewListingMenu;
@@ -44,6 +45,11 @@ public class PlayerListener implements Listener {
         RegionizedTask task = invalidateIfNoJoin.remove(e.getPlayer().getUniqueId());
         if (task != null) {
             task.cancel();
+        }
+        if (e.getPlayer().hasPermission("fadah.manage.profile") && Config.i().isUpdateChecker()) {
+            var checked = Fadah.getINSTANCE().getChecked();
+            e.getPlayer().sendMessage(StringUtils.colorize("&f[Fadah] Fadah is &#D63C3COUTDATED&f! " +
+                    "&7Current: &#D63C3C%s &7Latest: &#18D53A%s".formatted(checked.getCurrentVersion(), checked.getLatestVersion())));
         }
     }
 
