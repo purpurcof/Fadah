@@ -40,8 +40,8 @@ dependencies {
     compileOnly 'com.github.MilkBowl:VaultAPI:1.7' // Economy Hook
 
     // Extra Hooks
-    annotationProcessor "info.preva1l.hooker:Hooker:1.0.0"
-    implementation "info.preva1l.hooker:Hooker:1.0.0"
+    annotationProcessor "info.preva1l.hooker:Hooker:1.0.1"
+    implementation "info.preva1l.hooker:Hooker:1.0.1"
     // Eco Items
     compileOnly 'com.willfp:libreforge:4.58.1'
     compileOnly 'com.willfp:eco:6.56.0'

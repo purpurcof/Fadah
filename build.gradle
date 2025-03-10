@@ -104,8 +104,12 @@ subprojects {
         if (project.name != "API") return
 
         if (!user || !pass) {
-            println "Skipping publishing: Credentials are missing."
-            return
+            user = System.getProperty("fad_username")
+            pass = System.getProperty("fad_password")
+            if (!user || !pass) {
+                println "Skipping publishing: Credentials are missing."
+                return
+            }
         }
 
         repositories {
