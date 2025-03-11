@@ -5,6 +5,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/**
+ * A category in the auction menu.
+ * <br><br>
+ * Created on 13/04/2024
+ *
+ * @author Preva1l
+ * @param id the category id.
+ * @param name the display name of the category.
+ * @param priority the category's priority.
+ * @param modelData the model data of the category icon.
+ * @param icon the item to show in the main menu.
+ * @param description the category description.
+ * @param matchers the matchers to check items with.
+ */
 public record Category(
         @NotNull String id,
         @NotNull String name,

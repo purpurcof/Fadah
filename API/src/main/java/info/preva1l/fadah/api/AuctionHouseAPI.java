@@ -18,9 +18,21 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * The Fadah API allowing access and modification to every aspect of the plugin.
+ * <br><br>
+ * Created on 13/04/2024
+ *
+ * @author Preva1l
+ */
 @SuppressWarnings("unused")
 public abstract class AuctionHouseAPI {
     private static AuctionHouseAPI instance = null;
+
+    /**
+     * Only Fadah should initialize the API.
+     */
+    AuctionHouseAPI() {}
 
     /**
      * Get the custom item filtering namespacedkey
@@ -93,8 +105,8 @@ public abstract class AuctionHouseAPI {
      * Gets a reference to a player's collection box if they are online.
      * If you are trying to get the collection box of on offline user use {@link AuctionHouseAPI#loadCollectionBox(OfflinePlayer)}.
      *
-     * @param player the player
-     * @return the collection box of the user
+     * @param player the player.
+     * @return the collection box of the user.
      * @throws IllegalStateException when the user is not online.
      * @since 2.9
      */
@@ -106,8 +118,8 @@ public abstract class AuctionHouseAPI {
      * Gets a reference to a player's collection box if they are online.
      * If you are trying to get the collection box of on offline user use {@link AuctionHouseAPI#loadCollectionBox(UUID)}.
      *
-     * @param playerUniqueId the players uuid
-     * @return the collection box of the user
+     * @param playerUniqueId the players uuid.
+     * @return the collection box of the user.
      * @throws IllegalStateException when the user is not online.
      * @since 2.9
      */
@@ -117,8 +129,8 @@ public abstract class AuctionHouseAPI {
      * Loads a users collection box from the database,
      * if the user is online it uses {@link AuctionHouseAPI#collectionBox(UUID)}.
      *
-     * @param player the offline player
-     * @return the collection box of the user
+     * @param player the offline player.
+     * @return the collection box of the user.
      * @since 2.9
      */
     public CompletableFuture<CollectionBox> loadCollectionBox(OfflinePlayer player) {
@@ -129,8 +141,8 @@ public abstract class AuctionHouseAPI {
      * Loads a users collection box from the database,
      * if the user is online it uses {@link AuctionHouseAPI#collectionBox(UUID)}.
      *
-     * @param playerUniqueId the players uuid
-     * @return the collection box of the user
+     * @param playerUniqueId the players uuid.
+     * @return the collection box of the user.
      * @since 2.9
      */
     public abstract CompletableFuture<CollectionBox> loadCollectionBox(UUID playerUniqueId);
@@ -165,8 +177,8 @@ public abstract class AuctionHouseAPI {
      * Gets a reference to a player's expired items if they are online.
      * If you are trying to get the expired items of on offline user use {@link AuctionHouseAPI#loadExpiredItems(OfflinePlayer)}.
      *
-     * @param player the player
-     * @return the users expired items
+     * @param player the player.
+     * @return the users expired items.
      * @throws IllegalStateException when the user is not online.
      * @since 2.9
      */
@@ -178,8 +190,8 @@ public abstract class AuctionHouseAPI {
      * Gets a reference to a player's expired items if they are online.
      * If you are trying to get the expired items of on offline user use {@link AuctionHouseAPI#loadExpiredItems(UUID)}.
      *
-     * @param playerUniqueId the players uuid
-     * @return the users expired items
+     * @param playerUniqueId the players uuid.
+     * @return the users expired items.
      * @throws IllegalStateException when the user is not online.
      * @since 2.9
      */
@@ -189,8 +201,8 @@ public abstract class AuctionHouseAPI {
      * Loads a users expired items from the database,
      * if the user is online it uses {@link AuctionHouseAPI#expiredItems(Player)}.
      *
-     * @param player the offline player
-     * @return the users expired items
+     * @param player the offline player.
+     * @return the users expired items.
      * @since 2.9
      */
     public CompletableFuture<ExpiredItems> loadExpiredItems(OfflinePlayer player) {
@@ -201,8 +213,8 @@ public abstract class AuctionHouseAPI {
      * Loads a users expired items from the database,
      * if the user is online it uses {@link AuctionHouseAPI#expiredItems(UUID)}.
      *
-     * @param playerUniqueId the players uuid
-     * @return the users expired items
+     * @param playerUniqueId the players uuid.
+     * @return the users expired items.
      * @since 2.9
      */
     public abstract CompletableFuture<ExpiredItems> loadExpiredItems(UUID playerUniqueId);
@@ -237,8 +249,8 @@ public abstract class AuctionHouseAPI {
      * Gets a reference to a player's history if they are online.
      * If you are trying to get the history of on offline user use {@link AuctionHouseAPI#loadHistory(OfflinePlayer)}.
      *
-     * @param player the player
-     * @return the users history
+     * @param player the player.
+     * @return the users history.
      * @throws IllegalStateException when the user is not online.
      * @since 2.9
      */
@@ -250,8 +262,8 @@ public abstract class AuctionHouseAPI {
      * Gets a reference to a player's history if they are online.
      * If you are trying to get the history of on offline user use {@link AuctionHouseAPI#loadHistory(UUID)}.
      *
-     * @param playerUniqueId the players uuid
-     * @return the users history
+     * @param playerUniqueId the players uuid.
+     * @return the users history.
      * @throws IllegalStateException when the user is not online.
      * @since 2.9
      */
@@ -261,8 +273,8 @@ public abstract class AuctionHouseAPI {
      * Loads a users history from the database,
      * if the user is online it uses {@link AuctionHouseAPI#history(Player)}.
      *
-     * @param player the offline player
-     * @return the users history
+     * @param player the offline player.
+     * @return the users history.
      * @since 2.9
      */
     public CompletableFuture<History> loadHistory(OfflinePlayer player) {
@@ -273,8 +285,8 @@ public abstract class AuctionHouseAPI {
      * Loads a users history from the database,
      * if the user is online it uses {@link AuctionHouseAPI#history(UUID)}.
      *
-     * @param playerUniqueId the players uuid
-     * @return the users history
+     * @param playerUniqueId the players uuid.
+     * @return the user's history.
      * @since 2.9
      */
     public abstract CompletableFuture<History> loadHistory(UUID playerUniqueId);
@@ -316,7 +328,7 @@ public abstract class AuctionHouseAPI {
      * Get the instance of the Fadah API.
      *
      * @return the Fadah API implementation.
-     * @throws IllegalStateException if you accessed the API incorrectly
+     * @throws IllegalStateException if the API is accessed incorrectly.
      */
     public static AuctionHouseAPI getInstance() {
         if (instance == null) {
@@ -339,7 +351,8 @@ public abstract class AuctionHouseAPI {
     /**
      * Set the instance of the Fadah API.
      *
-     * @throws IllegalStateException if the instance is already assigned
+     * @param newInstance the instance to set the api to.
+     * @throws IllegalStateException if the instance is already assigned.
      */
     @ApiStatus.Internal
     public static void setInstance(AuctionHouseAPI newInstance) {

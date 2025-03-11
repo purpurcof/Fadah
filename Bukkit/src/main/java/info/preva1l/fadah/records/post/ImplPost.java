@@ -92,7 +92,7 @@ public final class ImplPost extends Post {
     private void notifyPlayer(Listing listing) {
         if (player == null) return;
 
-        double taxAmount = PermissionsData.getHighestDouble(PermissionsData.PermissionType.LISTING_TAX, player);
+        double taxAmount = listing.getTax();
         String itemName = StringUtils.extractItemName(listing.getItemStack());
         String message = String.join("\n", ListHelper.replace(
                 Lang.i().getNotifications().getNewListing(),

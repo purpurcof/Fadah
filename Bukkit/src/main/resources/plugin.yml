@@ -2,7 +2,7 @@ name: Fadah
 description: Fadah (Finally a Decent Auction House) is the fast, modern and advanced auction house plugin that you have been looking for!
 authors: [Preva1l]
 website: https://discord.gg/4KcF7S94HF
-version: '${version}'
+version: ${version}
 
 softdepend: [PlaceholderAPI, EcoItems, zAuctionHouseV3, AuctionHouse, RedisEconomy, CoinsEngine, Vault]
 
@@ -13,19 +13,19 @@ folia-supported: true
 main: info.preva1l.fadah.Fadah
 api-version: '1.16'
 libraries:
-  - org.redisson:redisson:${redisson_version}
-  - org.apache.commons:commons-pool2:${acp2_version}
-  - org.mongodb:mongodb-driver-sync:${mongo_version}
-  - org.xerial:sqlite-jdbc:${sqlite_version}
-  - com.mysql:mysql-connector-j:${mysql_version}
-  - org.mariadb.jdbc:mariadb-java-client:${mariadb_version}
-  - net.kyori:adventure-text-minimessage:${minimessage_version}
-  - net.kyori:adventure-api:${minimessage_version}
-  - net.kyori:adventure-platform-bukkit:${mm_platform_version}
-  - com.influxdb:influxdb-client-java:${influxdb_version}
-  - com.zaxxer:HikariCP:${hikari_version}
-  - org.mozilla:rhino:${rhino_version}
-  - de.exlll:configlib-yaml:${configlib_version}
+  - org.redisson:redisson:${redissonVersion}
+  - org.apache.commons:commons-pool2:${acp2Version}
+  - org.mongodb:mongodb-driver-sync:${mongoVersion}
+  - org.xerial:sqlite-jdbc:${sqliteVersion}
+  - com.mysql:mysql-connector-j:${mysqlVersion}
+  - org.mariadb.jdbc:mariadb-java-client:${mariadbVersion}
+  - net.kyori:adventure-text-minimessage:${minimessageVersion}
+  - net.kyori:adventure-api:${minimessageVersion}
+  - net.kyori:adventure-platform-bukkit:${mmPlatformVersion}
+  - com.influxdb:influxdb-client-java:${influxdbVersion}
+  - com.zaxxer:HikariCP:${hikariVersion}
+  - org.mozilla:rhino:${rhinoVersion}
+  - de.exlll:configlib-yaml:${configlibVersion}
 
 permissions:
   fadah.max-listings.<amount>:

@@ -193,7 +193,6 @@ public class Config {
         @Configuration
         @NoArgsConstructor(access = AccessLevel.PRIVATE)
         public static class CoinsEngine {
-            private String name = "Coins Engine";
             @Comment("Which currencies to use from coins engine.")
             private List<SubEconomy> currencies = List.of(
                     new SubEconomy("mob_coins", "Mob Coins"),
@@ -206,7 +205,6 @@ public class Config {
         @Configuration
         @NoArgsConstructor(access = AccessLevel.PRIVATE)
         public static class RedisEconomy {
-            private String name = "Redis Economy";
             @Comment("Which currencies to use from redis economy, if your using the default currency use the vault currency instead.")
             private List<SubEconomy> currencies = List.of(
                     new SubEconomy("dollar", "Dollar"),

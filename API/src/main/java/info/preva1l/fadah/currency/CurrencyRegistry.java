@@ -2,101 +2,134 @@ package info.preva1l.fadah.currency;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+/**
+ * A registry of {@link Currency}.
+ * <br><br>
+ * Created on 22/10/2024
+ *
+ * @author Preva1l
+ */
 public final class CurrencyRegistry {
-    private static Map<Integer, String> enumerator = new ConcurrentHashMap<>();
-    private static Map<String, Currency> values = new ConcurrentHashMap<>();
+    private static final Map<Integer, String> enumerator = new ConcurrentHashMap<>();
+    private static final Map<String, Currency> values = new ConcurrentHashMap<>();
 
+    /**
+     * Registries can not be initialized.
+     */
+    private CurrencyRegistry() {
+        throw new UnsupportedOperationException("Registries can not be initialized.");
+    }
+
+    /**
+     * Register a multi-currency hook.
+     * <p>
+     * This registers all the {@link MultiCurrency} sub-currencies as their own {@link Currency} entry.
+     *
+     * @deprecated use {@link CurrencyRegistry#register(CurrencyBase)} instead.
+     * @param currency the currency to register.
+     * @throws IllegalArgumentException when a currency is already registered with one of the provided sub currency ids.
+     * @see CurrencyRegistry#register(CurrencyBase)
+     */
+    @Deprecated(since = "2.9.0")
     public static void registerMulti(MultiCurrency currency) {
-        if (!currency.getRequiredPlugin().isEmpty()) {
-            Plugin requiredPlugin = Bukkit.getPluginManager().getPlugin(currency.getRequiredPlugin());
+        register(currency);
+    }
+
+    /**
+     * Register a currency hook.
+     * <p>
+     * If a {@link MultiCurrency} is loaded it will load all of its sub-currencies as their own {@link Currency} entry.
+     *
+     * @param currencyBase the currency to register.
+     * @throws IllegalArgumentException when a currency is already registered with one of the provided ids.
+     * @since 2.9.0
+     * @see CurrencyRegistry#registerMulti(MultiCurrency)
+     */
+    public static void register(CurrencyBase currencyBase) {
+        if (values.containsKey(currencyBase.getId())) {
+            throw new IllegalArgumentException("Currency with the id " + currencyBase.getId() + " is already registered!");
+        }
+
+        if (!currencyBase.getRequiredPlugin().isEmpty()) {
+            Plugin requiredPlugin = Bukkit.getPluginManager().getPlugin(currencyBase.getRequiredPlugin());
             if (requiredPlugin == null || !requiredPlugin.isEnabled()) return;
         }
 
-        if (!currency.preloadChecks()) {
+        if (!currencyBase.preloadChecks()) {
             Logger.getLogger("Fadah")
                     .severe("Tried enabling currency %s but the preload checks failed!"
-                            .formatted(currency.getId().toLowerCase()));
+                            .formatted(currencyBase.getId().toLowerCase()));
             return;
         }
 
-        for (Currency curr : currency.getCurrencies()) {
-            register(curr);
-        }
-    }
-
-    public static void register(Currency currency) {
-        if (values == null) {
-            values = new ConcurrentHashMap<>();
-        }
-        if (enumerator == null) {
-            enumerator = new ConcurrentHashMap<>();
-        }
-        Logger.getLogger("Fadah").info("Currency Loaded: " + currency.getId());
-
-        if (!currency.getRequiredPlugin().isEmpty()) {
-            Plugin requiredPlugin = Bukkit.getPluginManager().getPlugin(currency.getRequiredPlugin());
-            if (requiredPlugin == null || !requiredPlugin.isEnabled()) {
-                Logger.getLogger("Fadah")
-                        .warning("Tried enabling currency %s but the required plugin %s is not found/enabled!"
-                                .formatted(currency.getId().toLowerCase(), currency.getRequiredPlugin()));
-                return;
+        if (currencyBase instanceof MultiCurrency multiCurrency) {
+            for (Currency currency : multiCurrency.getCurrencies()) {
+                register(currency);
             }
-        }
-
-        if (!currency.preloadChecks()) {
-            Logger.getLogger("Fadah")
-                    .severe("Tried enabling currency %s but the preload checks failed!"
-                            .formatted(currency.getId().toLowerCase()));
             return;
         }
+
+        // Sanity check in-case someone implements CurrencyBase for some unknown reason
+        if (!(currencyBase instanceof Currency currency)) return;
 
         values.put(currency.getId().toLowerCase(), currency);
         enumerator.put(enumerator.size(), currency.getId().toLowerCase());
+
+        Logger.getLogger("Fadah").info("Currency Loaded: " + currency.getId());
     }
 
-    public static Currency get(String currencyCode) {
-        if (values == null) {
-            values = new ConcurrentHashMap<>();
-        }
-        return values.get(currencyCode.toLowerCase());
+    /**
+     * Get a currency by its id.
+     * <p>
+     * The currency id must be lowercase, but this is automatically fixed in this method.
+     *
+     * @param currencyId the currency to get.
+     * @return the currency with the specified id, or null if it isn't loaded.
+     */
+    public static Currency get(String currencyId) {
+        return values.get(currencyId.toLowerCase());
     }
 
-    @Blocking
+    /**
+     * Unregister a currency.
+     *
+     * @param currency the currency to unregister.
+     * @implNote This method is pretty slow but should be fast enough to run on the main thread.
+     */
     public static void unregister(@NotNull Currency currency) {
-        values.remove(currency.getId().toLowerCase());
+        String currencyId = currency.getId().toLowerCase();
 
-        int removedKey = -1;
-        for (Map.Entry<Integer, String> entry : enumerator.entrySet()) {
-            if (entry.getValue().equals(currency.getId().toLowerCase())) {
-                removedKey = entry.getKey();
-                break;
-            }
-        }
+        values.remove(currencyId);
+
+        int removedKey = enumerator.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(currencyId))
+                .findFirst()
+                .map(Map.Entry::getKey).orElse(-1);
 
         if (removedKey != -1) {
             enumerator.remove(removedKey);
-            Map<Integer, String> updatedEnumerator = new LinkedHashMap<>();
+            enumerator.entrySet().removeIf(entry -> entry.getKey() > removedKey);
 
+            int newKey = removedKey;
             for (Map.Entry<Integer, String> entry : enumerator.entrySet()) {
-                int currentKey = entry.getKey();
-                int newKey = currentKey > removedKey ? currentKey - 1 : currentKey;
-                updatedEnumerator.put(newKey, entry.getValue());
+                enumerator.put(newKey++, entry.getValue());
             }
-
-            enumerator.clear();
-            enumerator.putAll(updatedEnumerator);
         }
     }
 
+    /**
+     * Get the currency after the provided currency based of the enumerator order.
+     *
+     * @param current the seed.
+     * @return the next currency.
+     */
     public static Currency getNext(@NotNull Currency current) {
         Integer currentIndex = null;
         for (Map.Entry<Integer, String> entry : enumerator.entrySet()) {
@@ -113,6 +146,12 @@ public final class CurrencyRegistry {
         return values.get(nextCurrencyId);
     }
 
+    /**
+     * Get the currency before the provided currency based of the enumerator order.
+     *
+     * @param current the seed.
+     * @return the previous currency.
+     */
     public static Currency getPrevious(@NotNull Currency current) {
         Integer currentIndex = null;
         for (Map.Entry<Integer, String> entry : enumerator.entrySet()) {
@@ -129,6 +168,11 @@ public final class CurrencyRegistry {
         return values.get(previousCurrencyId);
     }
 
+    /**
+     * Get all the currently loaded currencies.
+     *
+     * @return an immutable list.
+     */
     public static List<Currency> getAll() {
         return List.copyOf(values.values());
     }

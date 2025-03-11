@@ -58,7 +58,7 @@ public class CollectionBoxMenu extends PaginatedFastInv {
 
                     // In game logs
                     boolean isAdmin = viewer.getUniqueId() != owner.getUniqueId();
-                    HistoricItem historicItem = new HistoricItem(owner.getUniqueId(), Instant.now().toEpochMilli(),
+                    HistoricItem historicItem = new HistoricItem(Instant.now().toEpochMilli(),
                             isAdmin ? HistoricItem.LoggedAction.COLLECTION_BOX_ADMIN_CLAIM
                                     : HistoricItem.LoggedAction.COLLECTION_BOX_CLAIM,
                             collectableItem.itemStack(), null, null);

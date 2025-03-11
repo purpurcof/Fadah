@@ -21,7 +21,6 @@ public class TransactionLogger {
     public void listingCreated(Listing listing) {
         // In game logs
         HistoricItem historicItem = new HistoricItem(
-                listing.getOwner(),
                 System.currentTimeMillis(),
                 HistoricItem.LoggedAction.LISTING_START,
                 listing.getItemStack(),
@@ -44,7 +43,6 @@ public class TransactionLogger {
     public void listingSold(Listing listing, Player buyer) {
         // In Game logs
         HistoricItem historicItemSeller = new HistoricItem(
-                listing.getOwner(),
                 System.currentTimeMillis(),
                 HistoricItem.LoggedAction.LISTING_SOLD,
                 listing.getItemStack(),
@@ -59,7 +57,6 @@ public class TransactionLogger {
                 );
 
         HistoricItem historicItemBuyer = new HistoricItem(
-                buyer.getUniqueId(),
                 System.currentTimeMillis(),
                 HistoricItem.LoggedAction.LISTING_PURCHASED,
                 listing.getItemStack(),
@@ -81,7 +78,6 @@ public class TransactionLogger {
     public void listingRemoval(Listing listing, boolean isAdmin) {
         // In game logs
         HistoricItem historicItem = new HistoricItem(
-                listing.getOwner(),
                 System.currentTimeMillis(),
                 isAdmin ? HistoricItem.LoggedAction.LISTING_ADMIN_CANCEL : HistoricItem.LoggedAction.LISTING_CANCEL,
                 listing.getItemStack(),
@@ -108,7 +104,6 @@ public class TransactionLogger {
     public void listingExpired(Listing listing) {
         // In game logs
         HistoricItem historicItem = new HistoricItem(
-                listing.getOwner(),
                 System.currentTimeMillis(),
                 HistoricItem.LoggedAction.LISTING_EXPIRE,
                 listing.getItemStack(),

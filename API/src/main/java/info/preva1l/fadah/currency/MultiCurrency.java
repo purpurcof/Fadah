@@ -2,19 +2,18 @@ package info.preva1l.fadah.currency;
 
 import java.util.List;
 
-public interface MultiCurrency {
-    String getId();
-
-    String getName();
-
-    String getRequiredPlugin();
-
-    List<Currency> getCurrencies();
-
+/**
+ * A currency hook that has the ability to load multiple currencies from one hook.
+ * <br><br>
+ * Created on 24/10/2024
+ *
+ * @author Preva1l
+ */
+public interface MultiCurrency extends CurrencyBase {
     /**
-     * Pre startup checks for the currency hook.
+     * Get all the sub-currencies.
      *
-     * @return true if the checks succeed false if they fail.
+     * @return an immutable list of the sub-currencies.
      */
-     boolean preloadChecks();
+    List<Currency> getCurrencies();
 }

@@ -58,7 +58,7 @@ public class ExpiredListingsMenu extends PaginatedFastInv {
 
                     // In game logs
                     boolean isAdmin = viewer.getUniqueId() != owner.getUniqueId();
-                    HistoricItem historicItem = new HistoricItem(owner.getUniqueId(), Instant.now().toEpochMilli(),
+                    HistoricItem historicItem = new HistoricItem(Instant.now().toEpochMilli(),
                             isAdmin ? HistoricItem.LoggedAction.EXPIRED_ITEM_ADMIN_CLAIM : HistoricItem.LoggedAction.EXPIRED_ITEM_CLAIM,
                             expiredItem.itemStack(), null, null);
                     CacheAccess.getNotNull(History.class, owner.getUniqueId()).add(historicItem);

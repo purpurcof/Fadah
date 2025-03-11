@@ -9,9 +9,10 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Access to the category registry via the API.
- * </br>
+ * <br><br>
  * Created on 7/03/2025
  *
+ * @since 2.9.0
  * @author Preva1l
  */
 @SuppressWarnings("unused")
@@ -19,39 +20,44 @@ public interface CategoryManager {
     /**
      * Get a category by id.
      *
+     * @param id the category id
      * @return the category matching that ID, or null if no category with that id exists.
-     * @since 2.9
+     * @since 2.9.0
      */
     @Nullable
     Category get(@NotNull String id);
 
     /**
      * Get a category for an item.
-     * </br>
+     * <p>
      * This is generally a slow operation as it has to process a-lot of information so it is a completable future.
      * It runs the item through all the categories (in order of priority) and runs all the matchers
      * to find the first category that accepts the item, if there is not one that matches it returns
      * the placeholder value for no category "{@code _none_}".
      *
+     * @param item the item to find the category for
      * @return the category id or "{@code _none_}"
-     * @since 2.9
+     * @since 2.9.0
      */
     CompletableFuture<String> forItem(@NotNull ItemStack item);
 
     /**
      * Register a custom category via the api.
+     * <p>
      * This is usually done via config, but I thought maybe some plugins may like to add a category for their items automatically.
      *
+     * @param category the category to register
      * @return true if successful, false if a category with that id already exists
-     * @since 2.9
+     * @since 2.9.0
      */
     boolean register(@NotNull Category category);
 
     /**
      * Unregister a category by its id.
      *
+     * @param id the category id to unregister
      * @return true if successful, false if the category never existed
-     * @since 2.9
+     * @since 2.9.0
      */
     boolean unregister(@NotNull String id);
 }

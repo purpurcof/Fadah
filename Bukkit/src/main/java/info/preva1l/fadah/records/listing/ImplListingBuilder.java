@@ -59,19 +59,20 @@ public final class ImplListingBuilder extends ListingBuilder {
         return CategoryRegistry.getCategoryForItem(itemStack)
                 .thenApplyAsync(category -> {
                     if (biddable) {
-                        return new BidListing(
-                                UUID.randomUUID(),
-                                ownerUuid,
-                                ownerName,
-                                itemStack,
-                                category,
-                                currency.getId(),
-                                price,
-                                tax,
-                                System.currentTimeMillis(),
-                                Instant.now().plus(length, ChronoUnit.MILLIS).toEpochMilli(),
-                                new TreeSet<>()
-                        );
+                        throw new IllegalStateException("Bidding is not implemented yet!");
+//                        return new BidListing(
+//                                UUID.randomUUID(),
+//                                ownerUuid,
+//                                ownerName,
+//                                itemStack,
+//                                category,
+//                                currency.getId(),
+//                                price,
+//                                tax,
+//                                System.currentTimeMillis(),
+//                                Instant.now().plus(length, ChronoUnit.MILLIS).toEpochMilli(),
+//                                new TreeSet<>()
+//                        );
                     } else {
                         return new BinListing(
                                 UUID.randomUUID(),
