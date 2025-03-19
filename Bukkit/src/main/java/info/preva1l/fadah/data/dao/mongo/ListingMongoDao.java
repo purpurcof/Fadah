@@ -32,50 +32,8 @@ public class ListingMongoDao implements Dao<Listing> {
             MongoCollection<Document> collection = collectionHelper.getCollection("listings");
             final Document doc = collection.find().filter(Filters.eq("uuid", id)).first();
             if (doc == null) return Optional.empty();
-            final UUID owner = doc.get("ownerUUID", UUID.class);
-            final String ownerName = doc.getString("ownerName");
-            String temp = doc.getString("category");
-            String currency;
-            String category;
-            if (temp.contains("~")) {
-                String[] t2 = temp.split("~");
-                currency = t2[1];
-                category = t2[0];
-            } else {
-                currency = "vault";
-                category = temp;
-            }
-            final long creationDate = doc.getLong("creationDate");
-            final long deletionDate = doc.getLong("deletionDate");
-            final double price = doc.getDouble("price");
-            final double tax = doc.getDouble("tax");
-            final ItemStack itemStack = ItemSerializer.deserialize(doc.getString("itemStack"))[0];
-            final boolean biddable = doc.getBoolean("biddable");
-            final SortedSet<Bid> bids = new TreeSet<>();
 
-            final Listing listing;
-            if (biddable) {
-                listing = new BidListing(
-                        id,
-                        owner, ownerName,
-                        itemStack,
-                        category,
-                        currency, price, tax,
-                        creationDate, deletionDate,
-                        new TreeSet<>()
-                );
-            } else {
-                listing = new BinListing(
-                        id,
-                        owner, ownerName,
-                        itemStack,
-                        category,
-                        currency, price, tax,
-                        creationDate, deletionDate,
-                        new TreeSet<>()
-                );
-            }
-            return Optional.of(listing);
+            return Optional.of(createListing(id, doc));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,51 +52,8 @@ public class ListingMongoDao implements Dao<Listing> {
             MongoCollection<Document> collection = collectionHelper.getCollection("listings");
             for (Document doc : collection.find()) {
                 final UUID id = doc.get("uuid", UUID.class);
-                final UUID owner = doc.get("ownerUUID", UUID.class);
-                final String ownerName = doc.getString("ownerName");
-                String temp = doc.getString("category");
-                String currency;
-                String category;
-                if (temp.contains("~")) {
-                    String[] t2 = temp.split("~");
-                    currency = t2[1];
-                    category = t2[0];
-                } else {
-                    currency = "vault";
-                    category = temp;
-                }
-                final long creationDate = doc.getLong("creationDate");
-                final long deletionDate = doc.getLong("deletionDate");
-                final double price = doc.getDouble("price");
-                final double tax = doc.getDouble("tax");
-                final ItemStack itemStack = ItemSerializer.deserialize(doc.getString("itemStack"))[0];
-                final boolean biddable = doc.getBoolean("biddable");
-                final SortedSet<Bid> bids = new TreeSet<>();
 
-                final Listing listing;
-                if (biddable) {
-                    listing = new BidListing(
-                            id,
-                            owner, ownerName,
-                            itemStack,
-                            category,
-                            currency, price, tax,
-                            creationDate, deletionDate,
-                            bids
-                    );
-                } else {
-                    listing = new BinListing(
-                            id,
-                            owner, ownerName,
-                            itemStack,
-                            category,
-                            currency, price, tax,
-                            creationDate, deletionDate,
-                            bids
-                    );
-                }
-
-                list.add(listing);
+                list.add(createListing(id, doc));
             }
             return list;
         } catch (Exception e) {
@@ -198,5 +113,52 @@ public class ListingMongoDao implements Dao<Listing> {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private Listing createListing(UUID id, Document doc) {
+        final UUID owner = doc.get("ownerUUID", UUID.class);
+        final String ownerName = doc.getString("ownerName");
+        String temp = doc.getString("category");
+        String currency;
+        String category;
+        if (temp.contains("~")) {
+            String[] t2 = temp.split("~");
+            currency = t2[1];
+            category = t2[0];
+        } else {
+            currency = "vault";
+            category = temp;
+        }
+        final long creationDate = doc.getLong("creationDate");
+        final long deletionDate = doc.getLong("deletionDate");
+        final double price = doc.getDouble("price");
+        final double tax = doc.getDouble("tax");
+        final ItemStack itemStack = ItemSerializer.deserialize(doc.getString("itemStack"))[0];
+        final boolean biddable = doc.getBoolean("biddable");
+        final SortedSet<Bid> bids = new TreeSet<>();
+
+        final Listing listing;
+        if (biddable) {
+            listing = new BidListing(
+                    id,
+                    owner, ownerName,
+                    itemStack,
+                    category,
+                    currency, price, tax,
+                    creationDate, deletionDate,
+                    new TreeSet<>()
+            );
+        } else {
+            listing = new BinListing(
+                    id,
+                    owner, ownerName,
+                    itemStack,
+                    category,
+                    currency, price, tax,
+                    creationDate, deletionDate,
+                    new TreeSet<>()
+            );
+        }
+        return listing;
     }
 }
