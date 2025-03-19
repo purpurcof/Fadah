@@ -3,10 +3,11 @@ package info.preva1l.fadah.commands.subcommands;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
-import info.preva1l.fadah.guis.ExpiredListingsMenu;
+import info.preva1l.fadah.guis.CollectionMenu;
 import info.preva1l.fadah.utils.commands.SubCommand;
 import info.preva1l.fadah.utils.commands.SubCommandArgs;
 import info.preva1l.fadah.utils.commands.SubCommandArguments;
+import info.preva1l.fadah.utils.guis.LayoutManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +36,6 @@ public class ExpiredItemsSubCommand extends SubCommand {
             Fadah.getINSTANCE().loadPlayerData(owner.getUniqueId()).join();
         }
 
-        new ExpiredListingsMenu(command.getPlayer(), owner).open(command.getPlayer());
+        new CollectionMenu(command.getPlayer(), owner, LayoutManager.MenuType.EXPIRED_LISTINGS).open(command.getPlayer());
     }
 }

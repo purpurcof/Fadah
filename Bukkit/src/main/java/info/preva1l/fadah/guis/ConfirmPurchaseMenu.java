@@ -1,26 +1,16 @@
 package info.preva1l.fadah.guis;
 
-import info.preva1l.fadah.filters.SortingDirection;
-import info.preva1l.fadah.filters.SortingMethod;
-import info.preva1l.fadah.records.Category;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.guis.FastInv;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
 import info.preva1l.fadah.utils.guis.LayoutManager;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 
 public class ConfirmPurchaseMenu extends FastInv {
     public ConfirmPurchaseMenu(Listing listing,
                                Player player,
-                               @Nullable Category category,
-                               @Nullable String search,
-                               @Nullable SortingMethod sortingMethod,
-                               @Nullable SortingDirection sortingDirection,
-                               boolean isViewListings,
-                               @Nullable OfflinePlayer listingsPlayer) {
+                               Runnable returnFunction) {
         super(LayoutManager.MenuType.CONFIRM_PURCHASE.getLayout().guiSize(),
                 LayoutManager.MenuType.CONFIRM_PURCHASE.getLayout().guiTitle(),
                 LayoutManager.MenuType.CONFIRM_PURCHASE);
@@ -40,12 +30,7 @@ public class ConfirmPurchaseMenu extends FastInv {
                         .name(getLang().getStringFormatted("cancel.name", "&c&lCANCEL"))
                         .modelData(getLang().getInt("cancel.model-data"))
                         .lore(getLang().getLore("cancel.lore")).build(), e -> {
-            if (isViewListings) {
-                assert listingsPlayer != null;
-                new ViewListingsMenu(player, listingsPlayer).open(player);
-                return;
-            }
-            new MainMenu(category, player, search, sortingMethod, sortingDirection).open(player);
+            returnFunction.run();
         });
 
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.ITEM_TO_PURCHASE, -1),

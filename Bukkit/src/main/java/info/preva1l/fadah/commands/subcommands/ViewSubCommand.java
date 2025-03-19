@@ -34,6 +34,6 @@ public class ViewSubCommand extends SubCommand {
                     .replace("%player%", command.args()[0]));
             return;
         }
-        new ViewListingsMenu(command.getPlayer(), owner).open(command.getPlayer());
+        new ViewListingsMenu(command.getPlayer(), owner, null, null, null).open(command.getPlayer());
     }
 }

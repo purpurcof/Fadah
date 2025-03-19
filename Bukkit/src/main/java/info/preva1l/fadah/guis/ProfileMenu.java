@@ -56,7 +56,7 @@ public class ProfileMenu extends FastInv {
                                 ? Lang.i().getWords().getYour() : owner.getName() + "'s")).build(), e -> {
                     if ((viewer.getUniqueId() != owner.getUniqueId() && viewer.hasPermission("fadah.manage.active-listings"))
                             || viewer.getUniqueId() == owner.getUniqueId()) {
-                        new ActiveListingsMenu(viewer, owner).open(viewer);
+                        new ViewListingsMenu(viewer, owner, null, null, null).open(viewer);
                     }
                 });
     }
@@ -75,7 +75,7 @@ public class ProfileMenu extends FastInv {
                                 ? Lang.i().getWords().getYour() : owner.getName() + "'s")).build(), e -> {
                     if ((viewer.getUniqueId() != owner.getUniqueId() && viewer.hasPermission("fadah.manage.collection-box"))
                             || viewer.getUniqueId() == owner.getUniqueId()) {
-                        new CollectionBoxMenu(viewer, owner).open(viewer);
+                        new CollectionMenu(viewer, owner, LayoutManager.MenuType.COLLECTION_BOX).open(viewer);
                     }
                 });
     }
@@ -94,7 +94,7 @@ public class ProfileMenu extends FastInv {
                                 ? Lang.i().getWords().getYour() : owner.getName() + "'s")).build(), e -> {
                     if ((viewer.getUniqueId() != owner.getUniqueId() && viewer.hasPermission("fadah.manage.expired-listings"))
                             || viewer.getUniqueId() == owner.getUniqueId()) {
-                        new ExpiredListingsMenu(viewer, owner).open(viewer);
+                        new CollectionMenu(viewer, owner, LayoutManager.MenuType.EXPIRED_LISTINGS).open(viewer);
                     }
                 });
     }
