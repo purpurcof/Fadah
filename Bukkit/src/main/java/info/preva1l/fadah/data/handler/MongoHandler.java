@@ -17,7 +17,8 @@ import info.preva1l.fadah.watcher.Watching;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MongoHandler implements DatabaseHandler {
     private final Map<Class<?>, Dao<?>> daos = new HashMap<>();
@@ -65,38 +66,7 @@ public class MongoHandler implements DatabaseHandler {
     }
 
     @Override
-    public <T> List<T> getAll(Class<T> clazz) {
-        return (List<T>) getDao(clazz).getAll();
-    }
-
-    @Override
-    public <T> Optional<T> get(Class<T> clazz, UUID id) {
-        return (Optional<T>) getDao(clazz).get(id);
-    }
-
-    @Override
-    public <T> void save(Class<T> clazz, T t) {
-        getDao(clazz).save(t);
-    }
-
-    @Override
-    public <T> void update(Class<T> clazz, T t, String[] params) {
-        getDao(clazz).update(t, params);
-    }
-
-    @Override
-    public <T> void delete(Class<T> clazz, T t) {
-        getDao(clazz).delete(t);
-    }
-
-    /**
-     * Gets the DAO for a specific class.
-     *
-     * @param clazz The class to get the DAO for.
-     * @param <T>   The type of the class.
-     * @return The DAO for the specified class.
-     */
-    private <T> Dao<T> getDao(Class<?> clazz) {
+    public <T> Dao<T> getDao(Class<?> clazz) {
         if (!daos.containsKey(clazz))
             throw new IllegalArgumentException("No DAO registered for class " + clazz.getName());
         return (Dao<T>) daos.get(clazz);
