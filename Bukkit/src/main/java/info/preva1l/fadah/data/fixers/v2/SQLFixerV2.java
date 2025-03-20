@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 @RequiredArgsConstructor
-public class SQLiteFixerV2 implements V2Fixer {
+public class SQLFixerV2 implements V2Fixer {
     private final HikariDataSource dataSource;
 
     @Override

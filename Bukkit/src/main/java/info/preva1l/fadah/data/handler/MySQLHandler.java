@@ -6,7 +6,7 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.data.DatabaseType;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.dao.sql.*;
-import info.preva1l.fadah.data.fixers.v2.MySQLFixerV2;
+import info.preva1l.fadah.data.fixers.v2.SQLFixerV2;
 import info.preva1l.fadah.data.fixers.v2.V2Fixer;
 import info.preva1l.fadah.data.fixers.v3.MySQLFixerV3;
 import info.preva1l.fadah.data.fixers.v3.V3Fixer;
@@ -109,7 +109,7 @@ public class MySQLHandler implements DatabaseHandler {
                     "Please check the supplied database credentials in the config file", e);
         }
         registerDaos();
-        v2Fixer = new MySQLFixerV2(dataSource);
+        v2Fixer = new SQLFixerV2(dataSource);
         v3Fixer = new MySQLFixerV3(dataSource);
     }
 

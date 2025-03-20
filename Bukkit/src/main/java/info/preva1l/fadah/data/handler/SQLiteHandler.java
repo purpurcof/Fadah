@@ -6,7 +6,7 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.dao.sqlite.*;
-import info.preva1l.fadah.data.fixers.v2.SQLiteFixerV2;
+import info.preva1l.fadah.data.fixers.v2.SQLFixerV2;
 import info.preva1l.fadah.data.fixers.v2.V2Fixer;
 import info.preva1l.fadah.data.fixers.v3.V3Fixer;
 import info.preva1l.fadah.records.collection.CollectionBox;
@@ -78,7 +78,7 @@ public class SQLiteHandler implements DatabaseHandler {
             destroy();
         }
         registerDaos();
-        v2Fixer = new SQLiteFixerV2(dataSource);
+        v2Fixer = new SQLFixerV2(dataSource);
         v3Fixer = V3Fixer.empty();
         connected = true;
     }
