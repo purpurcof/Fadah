@@ -23,13 +23,13 @@ public class AuctionHouseCommand extends Command {
         super(plugin, Lang.i().getCommands().getMain().getAliases());
         subCommands.add(new ReloadSubCommand(plugin));
         subCommands.add(new SellSubCommand(plugin));
-        subCommands.add(new ProfileSubCommand(plugin));
-        subCommands.add(new CollectionBoxSubCommand(plugin));
+        subCommands.add(new ProfileSubCommand());
+        subCommands.add(new CollectionBoxSubCommand());
         subCommands.add(new ToggleSubCommand(plugin));
-        subCommands.add(new ExpiredItemsSubCommand(plugin));
+        subCommands.add(new ExpiredItemsSubCommand());
         subCommands.add(new HelpSubCommand(plugin));
         subCommands.add(new ActiveListingsSubCommand(plugin));
-        subCommands.add(new HistorySubCommand(plugin));
+        subCommands.add(new HistorySubCommand());
         subCommands.add(new ViewListingCommand(plugin));
         subCommands.add(new AboutSubCommand(plugin));
         subCommands.add(new ViewSubCommand(plugin));

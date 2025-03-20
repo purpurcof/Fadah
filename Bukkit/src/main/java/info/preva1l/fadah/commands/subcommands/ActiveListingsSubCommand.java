@@ -24,16 +24,16 @@ public class ActiveListingsSubCommand extends SubCommand {
             command.reply(Lang.i().getPrefix() + Lang.i().getErrors().getDisabled());
             return;
         }
+
         OfflinePlayer owner = command.getPlayer();
 
-        if (command.args().length >= 1 && command.sender().hasPermission("fadah.manage.profiles")) {
+        if (command.args().length >= 1 && command.sender().hasPermission("fadah.manage.active-listings")) {
             owner = Bukkit.getOfflinePlayerIfCached(command.args()[0]);
             if (owner == null) {
                 command.reply(Lang.i().getPrefix() + Lang.i().getErrors().getPlayerNotFound()
                         .replace("%player%", command.args()[0]));
                 return;
             }
-            Fadah.getINSTANCE().loadPlayerData(owner.getUniqueId()).join();
         }
 
         new ViewListingsMenu(
