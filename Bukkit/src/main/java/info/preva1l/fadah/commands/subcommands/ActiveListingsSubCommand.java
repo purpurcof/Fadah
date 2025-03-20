@@ -3,9 +3,11 @@ package info.preva1l.fadah.commands.subcommands;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
+import info.preva1l.fadah.guis.ViewListingsMenu;
+import info.preva1l.fadah.utils.commands.CommandArguments;
 import info.preva1l.fadah.utils.commands.SubCommand;
 import info.preva1l.fadah.utils.commands.SubCommandArgs;
-import info.preva1l.fadah.utils.commands.SubCommandArguments;
+import info.preva1l.fadah.utils.guis.LayoutManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +18,7 @@ public class ActiveListingsSubCommand extends SubCommand {
     }
 
     @SubCommandArgs(name = "active-listings", permission = "fadah.active-listings")
-    public void execute(@NotNull SubCommandArguments command) {
+    public void execute(@NotNull CommandArguments command) {
         assert command.getPlayer() != null;
         if (!Config.i().isEnabled()) {
             command.reply(Lang.i().getPrefix() + Lang.i().getErrors().getDisabled());
@@ -34,6 +36,13 @@ public class ActiveListingsSubCommand extends SubCommand {
             Fadah.getINSTANCE().loadPlayerData(owner.getUniqueId()).join();
         }
 
-        new ActiveListingsMenu(command.getPlayer(), owner).open(command.getPlayer());
+        new ViewListingsMenu(
+                command.getPlayer(),
+                owner,
+                LayoutManager.MenuType.ACTIVE_LISTINGS,
+                null,
+                null,
+                null
+        ).open(command.getPlayer());
     }
 }

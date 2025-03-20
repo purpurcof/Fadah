@@ -22,13 +22,14 @@ public class ViewListingsMenu extends PurchaseMenu {
     public ViewListingsMenu(
             @NotNull Player player,
             OfflinePlayer owner,
+            LayoutManager.MenuType type,
             @Nullable String search,
             @Nullable SortingMethod sortingMethod,
             @Nullable SortingDirection sortingDirection) {
         super(
                 player,
-                LayoutManager.MenuType.MAIN.getLayout().guiTitle(),
-                LayoutManager.MenuType.MAIN,
+                type.getLayout().guiTitle(),
+                type,
                 () -> {
                     List<Listing> listings = CacheAccess.getAll(Listing.class);
                     listings.removeIf(listing -> !listing.isOwner(owner.getUniqueId()));
@@ -53,7 +54,7 @@ public class ViewListingsMenu extends PurchaseMenu {
                         .modelData(getLang().getInt("filter.search.model-data"))
                         .lore(getLang().getLore("filter.search.lore")).build(), e ->
                         new SearchMenu(player, getLang().getString("filter.search.placeholder", "Search Query..."), search ->
-                                new ViewListingsMenu(player, owner, search, sortingMethod, sortingDirection).open(player)));
+                                new ViewListingsMenu(player, owner, getMenuType(), search, sortingMethod, sortingDirection).open(player)));
     }
 
     protected void addNavigationButtons() {

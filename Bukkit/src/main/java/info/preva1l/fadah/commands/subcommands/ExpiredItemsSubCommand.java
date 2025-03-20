@@ -4,9 +4,9 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.guis.CollectionMenu;
+import info.preva1l.fadah.utils.commands.CommandArguments;
 import info.preva1l.fadah.utils.commands.SubCommand;
 import info.preva1l.fadah.utils.commands.SubCommandArgs;
-import info.preva1l.fadah.utils.commands.SubCommandArguments;
 import info.preva1l.fadah.utils.guis.LayoutManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -18,7 +18,7 @@ public class ExpiredItemsSubCommand extends SubCommand {
     }
 
     @SubCommandArgs(name = "expired-items", permission = "fadah.expired-items")
-    public void execute(@NotNull SubCommandArguments command) {
+    public void execute(@NotNull CommandArguments command) {
         assert command.getPlayer() != null;
         if (!Config.i().isEnabled()) {
             command.reply(Lang.i().getPrefix() + Lang.i().getErrors().getDisabled());

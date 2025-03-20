@@ -4,9 +4,10 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.guis.ViewListingsMenu;
+import info.preva1l.fadah.utils.commands.CommandArguments;
 import info.preva1l.fadah.utils.commands.SubCommand;
 import info.preva1l.fadah.utils.commands.SubCommandArgs;
-import info.preva1l.fadah.utils.commands.SubCommandArguments;
+import info.preva1l.fadah.utils.guis.LayoutManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +18,7 @@ public class ViewSubCommand extends SubCommand {
     }
 
     @SubCommandArgs(name = "view", permission = "fadah.view")
-    public void execute(@NotNull SubCommandArguments command) {
+    public void execute(@NotNull CommandArguments command) {
         assert command.getPlayer() != null;
         if (!Config.i().isEnabled()) {
             command.reply(Lang.i().getPrefix() + Lang.i().getErrors().getDisabled());
@@ -34,6 +35,13 @@ public class ViewSubCommand extends SubCommand {
                     .replace("%player%", command.args()[0]));
             return;
         }
-        new ViewListingsMenu(command.getPlayer(), owner, null, null, null).open(command.getPlayer());
+        new ViewListingsMenu(
+                command.getPlayer(),
+                owner,
+                LayoutManager.MenuType.VIEW_LISTINGS,
+                null,
+                null,
+                null
+        ).open(command.getPlayer());
     }
 }

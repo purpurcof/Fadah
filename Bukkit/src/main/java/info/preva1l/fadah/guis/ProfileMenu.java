@@ -56,7 +56,14 @@ public class ProfileMenu extends FastInv {
                                 ? Lang.i().getWords().getYour() : owner.getName() + "'s")).build(), e -> {
                     if ((viewer.getUniqueId() != owner.getUniqueId() && viewer.hasPermission("fadah.manage.active-listings"))
                             || viewer.getUniqueId() == owner.getUniqueId()) {
-                        new ViewListingsMenu(viewer, owner, null, null, null).open(viewer);
+                        new ViewListingsMenu(
+                                viewer,
+                                owner,
+                                LayoutManager.MenuType.ACTIVE_LISTINGS,
+                                null,
+                                null,
+                                null
+                        ).open(viewer);
                     }
                 });
     }

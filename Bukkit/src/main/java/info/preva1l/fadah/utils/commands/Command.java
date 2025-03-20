@@ -5,11 +5,9 @@ import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.utils.CommandMapUtil;
 import info.preva1l.fadah.utils.TaskManager;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.defaults.BukkitCommand;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Getter
-public abstract class Command {
+public abstract class Command implements CommandBase {
     public Fadah plugin;
     private CommandExecutor executor;
     private CommandArgs assigned;
@@ -39,34 +37,6 @@ public abstract class Command {
             CommandMapUtil.getCommandMap(plugin.getServer());
             CommandMapUtil.getCommandMap(plugin.getServer()).register(plugin.getDescription().getName().toLowerCase(), executor);
         }
-    }
-
-    public abstract void execute(@NotNull CommandArguments command);
-
-    public List<String> onTabComplete(CommandArguments command) {
-        return new ArrayList<>();
-    }
-
-    //This is default tab complete which should return a list of online players
-    public List<String> getDefaultTabComplete(CommandArguments command) {
-        List<String> completors = new ArrayList<>();
-
-        List<String> values = Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).toList();
-
-        String[] args = command.args();
-
-        if (args.length == 0) return new ArrayList<>();
-
-        if (!args[args.length - 1].equalsIgnoreCase("")) {
-            values.forEach(value -> {
-                if (value.toLowerCase().startsWith(args[args.length - 1].toLowerCase())) {
-                    completors.add(value);
-                }
-            });
-        } else {
-            completors.addAll(values);
-        }
-        return completors;
     }
 
     public List<String> subCommandsTabCompleter(CommandArguments command, List<SubCommand> subCommands) {

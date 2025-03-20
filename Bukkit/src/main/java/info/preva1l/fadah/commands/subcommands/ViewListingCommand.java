@@ -5,9 +5,9 @@ import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.guis.ConfirmPurchaseMenu;
 import info.preva1l.fadah.records.listing.Listing;
+import info.preva1l.fadah.utils.commands.CommandArguments;
 import info.preva1l.fadah.utils.commands.SubCommand;
 import info.preva1l.fadah.utils.commands.SubCommandArgs;
-import info.preva1l.fadah.utils.commands.SubCommandArguments;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -19,7 +19,7 @@ public class ViewListingCommand extends SubCommand {
     }
 
     @SubCommandArgs(name = "view-listing", permission = "fadah.use")
-    public void execute(@NotNull SubCommandArguments command) {
+    public void execute(@NotNull CommandArguments command) {
         assert command.getPlayer() != null;
         if (command.args().length == 0) {
             command.reply(Lang.i().getPrefix() + Lang.i().getErrors().getInvalidUsage()
@@ -46,7 +46,6 @@ public class ViewListingCommand extends SubCommand {
             return;
         }
 
-        new ConfirmPurchaseMenu(listing.get(), command.getPlayer(), null, null, null,
-                null, false, null).open(command.getPlayer());
+        new ConfirmPurchaseMenu(listing.get(), command.getPlayer(), () -> command.getPlayer().closeInventory()).open(command.getPlayer());
     }
 }

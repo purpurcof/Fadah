@@ -11,9 +11,9 @@ import info.preva1l.fadah.records.listing.ImplListingBuilder;
 import info.preva1l.fadah.records.post.PostResult;
 import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.commands.CommandArguments;
 import info.preva1l.fadah.utils.commands.SubCommand;
 import info.preva1l.fadah.utils.commands.SubCommandArgs;
-import info.preva1l.fadah.utils.commands.SubCommandArguments;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -32,7 +32,7 @@ public class SellSubCommand extends SubCommand {
     }
 
     @SubCommandArgs(name = "sell", permission = "fadah.use")
-    public void execute(@NotNull SubCommandArguments command) {
+    public void execute(@NotNull CommandArguments command) {
         if (!Config.i().isEnabled()) {
             command.reply(Lang.i().getPrefix() + Lang.i().getErrors().getDisabled());
             return;
@@ -82,7 +82,7 @@ public class SellSubCommand extends SubCommand {
         }
     }
 
-    private void handleSell(SubCommandArguments command, double price) {
+    private void handleSell(CommandArguments command, double price) {
         assert command.getPlayer() != null;
         Player player = command.getPlayer();
         ItemStack item = player.getInventory().getItemInMainHand();

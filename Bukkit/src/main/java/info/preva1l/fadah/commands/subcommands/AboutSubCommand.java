@@ -2,9 +2,9 @@ package info.preva1l.fadah.commands.subcommands;
 
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Lang;
+import info.preva1l.fadah.utils.commands.CommandArguments;
 import info.preva1l.fadah.utils.commands.SubCommand;
 import info.preva1l.fadah.utils.commands.SubCommandArgs;
-import info.preva1l.fadah.utils.commands.SubCommandArguments;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -19,7 +19,7 @@ public class AboutSubCommand extends SubCommand {
     }
 
     @SubCommandArgs(name = "about", inGameOnly = false)
-    public void execute(@NotNull SubCommandArguments command) {
+    public void execute(@NotNull CommandArguments command) {
         final AboutMenu aboutMenu = AboutMenu.builder()
                 .title(Component.text("Finally a Decent Auction House"))
                 .description(Component.text("Fadah is the fast, modern and advanced auction house plugin that you have been looking for!"))

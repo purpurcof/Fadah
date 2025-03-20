@@ -3,9 +3,9 @@ package info.preva1l.fadah.commands.subcommands;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.commands.AuctionHouseCommand;
 import info.preva1l.fadah.config.Lang;
+import info.preva1l.fadah.utils.commands.CommandArguments;
 import info.preva1l.fadah.utils.commands.SubCommand;
 import info.preva1l.fadah.utils.commands.SubCommandArgs;
-import info.preva1l.fadah.utils.commands.SubCommandArguments;
 import org.jetbrains.annotations.NotNull;
 
 public class HelpSubCommand extends SubCommand {
@@ -14,7 +14,7 @@ public class HelpSubCommand extends SubCommand {
     }
 
     @SubCommandArgs(name = "help", permission = "fadah.help", inGameOnly = false)
-    public void execute(@NotNull SubCommandArguments command) {
+    public void execute(@NotNull CommandArguments command) {
         StringBuilder message = new StringBuilder(Lang.i().getCommands().getHelp().getHeader());
         for (SubCommand subCommand : AuctionHouseCommand.getSubCommands()) {
             if (!command.sender().hasPermission(subCommand.getAssigned().permission())) continue;
