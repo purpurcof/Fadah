@@ -73,20 +73,29 @@ public final class ImplPost extends Post {
             CacheAccess.add(Listing.class, listing);
             DatabaseManager.getInstance().save(Listing.class, listing);
 
-            if (notifyPlayer) notifyPlayer(listing);
-            if (submitLog) TransactionLogger.listingCreated(listing);
-
-            Hooker.getHook(DiscordHook.class).ifPresent(hook -> {
-                if (!(hook.getConf().isOnlySendOnAdvert() && postAdvert)) hook.send(listing);
-            });
-
-            if (postAdvert && !postAdvert(listing, bypassAdvertCost)) {
+            if (!processMessages(listing)) {
                 return CompletableFuture.completedFuture(PostResult.SUCCESS_ADVERT_FAIL);
             }
 
-            if (alertWatchers) AuctionWatcher.alertWatchers(listing);
             return CompletableFuture.completedFuture(PostResult.SUCCESS);
         }, executor);
+    }
+
+    private boolean processMessages(Listing listing) {
+        if (notifyPlayer) notifyPlayer(listing);
+        if (submitLog) TransactionLogger.listingCreated(listing);
+
+        Hooker.getHook(DiscordHook.class).ifPresent(hook -> {
+            if (!(hook.getConf().isOnlySendOnAdvert() && postAdvert)) hook.send(listing);
+        });
+
+        if (postAdvert && !postAdvert(listing, bypassAdvertCost)) {
+            return false;
+        }
+
+        if (alertWatchers) AuctionWatcher.alertWatchers(listing);
+
+        return true;
     }
 
     private void notifyPlayer(Listing listing) {
