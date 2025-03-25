@@ -5,13 +5,11 @@ import info.preva1l.fadah.processor.ProcessorArgType;
 import info.preva1l.fadah.processor.ProcessorArgsRegistry;
 import info.preva1l.hooker.annotation.Hook;
 import info.preva1l.hooker.annotation.OnStart;
-import info.preva1l.hooker.annotation.Reloadable;
 import info.preva1l.hooker.annotation.Require;
 
 @Hook(id = "eco-items")
 @Require("EcoItems")
 @Require(type = "config", value = "eco-items")
-@Reloadable
 public class EcoItemsHook {
     @OnStart
     public void onStart() {

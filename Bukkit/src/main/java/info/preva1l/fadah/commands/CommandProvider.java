@@ -3,10 +3,12 @@ package info.preva1l.fadah.commands;
 import info.preva1l.fadah.Fadah;
 
 public interface CommandProvider {
-    default void loadCommands(Fadah plugin) {
+    Fadah getPlugin();
+
+    default void loadCommands() {
         Fadah.getConsole().info("Loading commands...");
-        new AuctionHouseCommand(plugin);
-        new MigrateCommand(plugin);
+        new AuctionHouseCommand(getPlugin());
+        new MigrateCommand(getPlugin());
         Fadah.getConsole().info("Commands Loaded!");
     }
 }

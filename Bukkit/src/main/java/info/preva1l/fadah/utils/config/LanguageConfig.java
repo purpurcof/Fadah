@@ -1,7 +1,9 @@
 package info.preva1l.fadah.utils.config;
 
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.utils.StringUtils;
+import info.preva1l.fadah.config.misc.Tuple;
+import info.preva1l.fadah.utils.Text;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -66,75 +68,79 @@ public class LanguageConfig {
         return material;
     }
 
-    public @NotNull String getStringFormatted(String path)  {
+    public @NotNull Component getStringFormatted(String path)  {
         String f = superSection.getString(path);
         if (f == null || f.equals(path)) {
             throw new RuntimeException("No value at path %s".formatted(path));
         }
-        return StringUtils.colorize(f);
+        return Text.modernMessage(f);
     }
 
     public @NotNull String getString(String path, String def) {
         return superSection.getString(path, def);
     }
 
-    public @NotNull String getStringFormatted(String path, String def) {
-        return StringUtils.colorize(superSection.getString(path, def));
+    public @NotNull Component getStringFormatted(String path, String def) {
+        return Text.modernMessage(superSection.getString(path, def));
     }
 
-    public @NotNull String getStringFormatted(String path, String def, Object... replacements) {
+    @SafeVarargs
+    public final @NotNull Component getStringFormatted(String path, String def, Tuple<String, Object>... replacements) {
         String f = superSection.getString(path);
         if (f == null || f.equals(path)) {
-            return def;
+            return Component.empty();
         }
-        return StringUtils.colorize(StringUtils.formatPlaceholders(f, replacements));
+        return Text.modernMessage(Text.replace(f, replacements));
     }
 
-    public @NotNull List<String> getLore(String path) {
+    public @NotNull List<Component> getLore(String path) {
         List<String> str = superSection.getStringList(path);
-        if (str.isEmpty() || str.get(0).equals(path) || str.get(0).equals("null")) {
+        if (str.isEmpty() || str.getFirst().equals(path) || str.getFirst().equals("null")) {
             return Collections.emptyList();
         }
-        return StringUtils.colorizeList(str);
+        return Text.modernList(str);
     }
 
-    public @NotNull List<String> getLore(String path, List<String> def) {
+    public @NotNull List<Component> getLore(String path, List<String> def) {
         List<String> str = superSection.getStringList(path);
-        if (str.isEmpty() || str.get(0).equals(path) || str.get(0).equals("null")) {
-            return StringUtils.colorizeList(def);
+        if (str.isEmpty() || str.getFirst().equals(path) || str.getFirst().equals("null")) {
+            return Text.modernList(def);
         }
-        return StringUtils.colorizeList(str);
+        return Text.modernList(str);
     }
 
-    public @NotNull List<String> getLore(String path, Object... replacements) {
+    @SafeVarargs
+    public final @NotNull List<Component> getLore(String path, Tuple<String, Object>... replacements) {
         return getLore(null, path, replacements);
     }
 
-    public @NotNull List<String> getLore(Player player, String path, Object... replacements) {
+    @SafeVarargs
+    public final @NotNull List<Component> getLore(Player player, String path, Tuple<String, Object>... replacements) {
         List<String> str = superSection.getStringList(path);
-        if (str.isEmpty() || str.get(0).equals(path) || str.get(0).equals("null")) {
+        if (str.isEmpty() || str.getFirst().equals(path) || str.getFirst().equals("null")) {
             return Collections.emptyList();
         }
         List<String> ret = new ArrayList<>();
         for (String line : str) {
-            ret.add(StringUtils.formatPlaceholders(line, replacements));
+            ret.add(Text.replace(line, replacements));
         }
-        return StringUtils.colorizeList(player, ret);
+        return Text.modernList(player, ret);
     }
 
-    public @NotNull List<String> getLore(String path, List<String> def, Object... replacements) {
+    @SafeVarargs
+    public final @NotNull List<Component> getLore(String path, List<String> def, Tuple<String, Object>... replacements) {
         List<String> str = superSection.getStringList(path);
-        if (str.isEmpty() || str.get(0).equals(path) || str.get(0).equals("null")) {
+        if (str.isEmpty() || str.getFirst().equals(path) || str.getFirst().equals("null")) {
             List<String> ret = new ArrayList<>();
             for (String line : def) {
-                ret.add(StringUtils.formatPlaceholders(line, replacements));
+                ret.add(Text.replace(line, replacements));
             }
-            return StringUtils.colorizeList(ret);
+            return Text.modernList(ret);
         }
         List<String> ret = new ArrayList<>();
         for (String line : str) {
-            ret.add(StringUtils.formatPlaceholders(line, replacements));
+            ret.add(Text.replace(line, replacements));
         }
-        return StringUtils.colorizeList(ret);
+        return Text.modernList(ret);
     }
 }

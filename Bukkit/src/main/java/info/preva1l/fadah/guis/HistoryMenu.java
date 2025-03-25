@@ -3,18 +3,22 @@ package info.preva1l.fadah.guis;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
+import info.preva1l.fadah.config.Menus;
+import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
-import info.preva1l.fadah.utils.StringUtils;
+import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.TimeUtil;
-import info.preva1l.fadah.utils.guis.*;
+import info.preva1l.fadah.utils.guis.ItemBuilder;
+import info.preva1l.fadah.utils.guis.LayoutManager;
+import info.preva1l.fadah.utils.guis.PaginatedFastInv;
+import info.preva1l.fadah.utils.guis.PaginatedItem;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.text.DecimalFormat;
 import java.util.List;
 
 public class HistoryMenu extends PaginatedFastInv {
@@ -24,9 +28,10 @@ public class HistoryMenu extends PaginatedFastInv {
 
     public HistoryMenu(Player viewer, OfflinePlayer owner, @Nullable String dateSearch) {
         super(LayoutManager.MenuType.HISTORY.getLayout().guiSize(), LayoutManager.MenuType.HISTORY.getLayout().formattedTitle(
-                        viewer.getUniqueId() == owner.getUniqueId()
-                                ? StringUtils.capitalize(Lang.i().getWords().getYour())
-                                : owner.getName() + "'s", owner.getName() + "'s"),
+                Tuple.of("%dynamic%", viewer.getUniqueId() == owner.getUniqueId()
+                        ? Text.capitalizeFirst(Lang.i().getWords().getYour())
+                        : owner.getName()),
+                Tuple.of("%username%", owner.getName())),
                 viewer, LayoutManager.MenuType.HISTORY,
                 List.of(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34));
         this.viewer = viewer;
@@ -50,31 +55,31 @@ public class HistoryMenu extends PaginatedFastInv {
     protected synchronized void fillPaginationItems() {
         for (HistoricItem historicItem : historicItems) {
             ItemBuilder itemStack = new ItemBuilder(historicItem.itemStack().clone());
-            if (historicItem.purchaserUUID() != null) {
+            if (historicItem.playerUUID() != null) {
                 itemStack.addLore(historicItem.action() == HistoricItem.LoggedAction.LISTING_SOLD
                         ? getLang().getLore(player,"lore-with-buyer",
-                        historicItem.action().getLocaleActionName(),
-                        Bukkit.getOfflinePlayer(historicItem.purchaserUUID()).getName(),
-                        new DecimalFormat(Config.i().getFormatting().getNumbers()).format(historicItem.price()),
-                        TimeUtil.formatTimeToVisualDate(historicItem.loggedDate()))
+                        Tuple.of("%action%", historicItem.action().getLocaleActionName()),
+                        Tuple.of("%buyer%", Bukkit.getOfflinePlayer(historicItem.playerUUID()).getName()),
+                        Tuple.of("%price%", Config.i().getFormatting().numbers().format(historicItem.price())),
+                        Tuple.of("%date%", TimeUtil.formatTimeToVisualDate(historicItem.loggedDate())))
 
                         : getLang().getLore(player, "lore-with-seller",
-                        historicItem.action().getLocaleActionName(),
-                        Bukkit.getOfflinePlayer(historicItem.purchaserUUID()).getName(),
-                        new DecimalFormat(Config.i().getFormatting().getNumbers()).format(historicItem.price()),
-                        TimeUtil.formatTimeToVisualDate(historicItem.loggedDate()))
+                        Tuple.of("%action%", historicItem.action().getLocaleActionName()),
+                        Tuple.of("%seller%", Bukkit.getOfflinePlayer(historicItem.playerUUID()).getName()),
+                        Tuple.of("%price%", Config.i().getFormatting().numbers().format(historicItem.price())),
+                        Tuple.of("%date%", TimeUtil.formatTimeToVisualDate(historicItem.loggedDate())))
                 );
             } else if (historicItem.price() != null && historicItem.price() != 0d) {
                 itemStack.addLore(getLang().getLore(player, "lore-with-price",
-                        historicItem.action().getLocaleActionName(),
-                        new DecimalFormat(Config.i().getFormatting().getNumbers()).format(historicItem.price()),
-                        TimeUtil.formatTimeToVisualDate(historicItem.loggedDate())
-                ));
+                        Tuple.of("%action%", historicItem.action().getLocaleActionName()),
+                        Tuple.of("%price%", Config.i().getFormatting().numbers().format(historicItem.price())),
+                        Tuple.of("%date%", TimeUtil.formatTimeToVisualDate(historicItem.loggedDate())))
+                );
             } else {
                 itemStack.addLore(getLang().getLore(player, "lore",
-                        historicItem.action().getLocaleActionName(),
-                        TimeUtil.formatTimeToVisualDate(historicItem.loggedDate())
-                ));
+                        Tuple.of("%action%", historicItem.action().getLocaleActionName()),
+                        Tuple.of("%date%", TimeUtil.formatTimeToVisualDate(historicItem.loggedDate())))
+                );
             }
             addPaginationItem(new PaginatedItem(itemStack.build(), (e) -> {}));
         }
@@ -82,7 +87,7 @@ public class HistoryMenu extends PaginatedFastInv {
 
     private void addNavigationButtons() {
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.BACK, -1),
-                GuiHelper.constructButton(GuiButtonType.BACK), e -> new ProfileMenu(viewer, owner).open(viewer));
+                Menus.i().getBackButton().itemStack(), e -> new ProfileMenu(viewer, owner).open(viewer));
 
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.SEARCH, -1),
                 new ItemBuilder(getLang().getAsMaterial("search.icon", Material.OAK_SIGN))

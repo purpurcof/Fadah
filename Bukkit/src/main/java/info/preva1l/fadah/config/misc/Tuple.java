@@ -1,4 +1,4 @@
-package info.preva1l.fadah.config;
+package info.preva1l.fadah.config.misc;
 
 public class Tuple<F,S> {
     public F first;

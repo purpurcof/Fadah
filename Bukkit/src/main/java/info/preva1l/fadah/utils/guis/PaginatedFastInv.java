@@ -1,9 +1,10 @@
 package info.preva1l.fadah.utils.guis;
 
-import com.github.puregero.multilib.MultiLib;
 import com.github.puregero.multilib.regionized.RegionizedTask;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Menus;
+import info.preva1l.fadah.utils.TaskManager;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,6 +19,7 @@ public abstract class PaginatedFastInv extends FastInv {
     private List<Integer> paginationMappings;
     private final List<PaginatedItem> paginatedItems = new ArrayList<>();
     protected boolean needsClearing = false;
+    private final RegionizedTask updateTask;
 
     protected PaginatedFastInv(int size, @NotNull String title, @NotNull Player player, LayoutManager.MenuType menuType) {
         super(size, title, menuType);
@@ -28,17 +30,30 @@ public abstract class PaginatedFastInv extends FastInv {
                 31, 32, 33, 34, 38, 39, 40,
                 41, 42, 43);
 
-        RegionizedTask task = MultiLib.getAsyncScheduler().runAtFixedRate(Fadah.getINSTANCE(), t -> updatePagination(), 20L, 20L);
-        InventoryEventHandler.tasksToQuit.put(getInventory(), task);
+        updateTask = TaskManager.Async.runTask(Fadah.getInstance(), this::updatePagination, 20L);
+        addCloseHandler(event -> updateTask.cancel());
     }
 
-    protected PaginatedFastInv(int size, @NotNull String title, @NotNull Player player, LayoutManager.MenuType menuType, @NotNull List<Integer> paginationMappings) {
+    protected PaginatedFastInv(int size, @NotNull Component title, @NotNull Player player, LayoutManager.MenuType menuType) {
+        super(size, title, menuType);
+        this.player = player;
+        this.paginationMappings = List.of(
+                11, 12, 13, 14, 15, 16, 20,
+                21, 22, 23, 24, 25, 29, 30,
+                31, 32, 33, 34, 38, 39, 40,
+                41, 42, 43);
+
+        updateTask = TaskManager.Async.runTask(Fadah.getInstance(), this::updatePagination, 20L);
+        addCloseHandler(event -> updateTask.cancel());
+    }
+
+    protected PaginatedFastInv(int size, @NotNull Component title, @NotNull Player player, LayoutManager.MenuType menuType, @NotNull List<Integer> paginationMappings) {
         super(size, title, menuType);
         this.player = player;
         this.paginationMappings = paginationMappings;
 
-        RegionizedTask task = MultiLib.getAsyncScheduler().runAtFixedRate(Fadah.getINSTANCE(), t -> updatePagination(), 20L, 20L);
-        InventoryEventHandler.tasksToQuit.put(getInventory(), task);
+        updateTask = TaskManager.Async.runTask(Fadah.getInstance(), this::updatePagination, 20L);
+        addCloseHandler(event -> updateTask.cancel());
     }
 
     protected void setPaginationMappings(List<Integer> list) {
@@ -96,11 +111,7 @@ public abstract class PaginatedFastInv extends FastInv {
     protected void paginationEmpty() {
         List<Integer> noItems = getLayout().noItems();
         if (!noItems.isEmpty()) {
-            setItems(noItems.stream().mapToInt(Integer::intValue).toArray(),
-                    new ItemBuilder(Menus.NO_ITEM_FOUND_ICON.toMaterial())
-                            .name(Menus.NO_ITEM_FOUND_NAME.toFormattedString())
-                            .modelData(Menus.NO_ITEM_FOUND_MODEL_DATA.toInteger())
-                            .lore(Menus.NO_ITEM_FOUND_LORE.toLore()).build());
+            setItems(noItems.stream().mapToInt(Integer::intValue).toArray(), Menus.i().getNoItemFound().itemStack());
         }
     }
 
@@ -108,17 +119,17 @@ public abstract class PaginatedFastInv extends FastInv {
 
     protected void addPaginationControls() {
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_ONE, -1),
-                GuiHelper.constructButton(GuiButtonType.BORDER));
+                Menus.i().getBorder().itemStack());
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_TWO,-1),
-                GuiHelper.constructButton(GuiButtonType.BORDER));
+                Menus.i().getBorder().itemStack());
         if (page > 0) {
             setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_ONE, -1),
-                    GuiHelper.constructButton(GuiButtonType.PREVIOUS_PAGE), e -> previousPage());
+                    Menus.i().getPreviousButton().itemStack(), e -> previousPage());
         }
 
         if (paginatedItems != null && paginatedItems.size() >= index + 1) {
             setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_TWO,-1),
-                    GuiHelper.constructButton(GuiButtonType.NEXT_PAGE), e -> nextPage());
+                    Menus.i().getNextButton().itemStack(), e -> nextPage());
         }
     }
 

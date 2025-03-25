@@ -1,8 +1,9 @@
 package info.preva1l.fadah.filters;
 
 import info.preva1l.fadah.config.Lang;
-import info.preva1l.fadah.utils.StringUtils;
+import info.preva1l.fadah.utils.Text;
 import lombok.AllArgsConstructor;
+import net.kyori.adventure.text.Component;
 
 @AllArgsConstructor
 public enum SortingDirection {
@@ -13,15 +14,15 @@ public enum SortingDirection {
     private final String ageName;
     private final String priceName;
 
-    public String getAlphaName() {
-        return StringUtils.colorize(alphaName);
+    public Component getAlphaName() {
+        return Text.modernMessage(alphaName);
     }
 
-    public String getAgeName() {
-        return StringUtils.colorize(ageName);
+    public Component getAgeName() {
+        return Text.modernMessage(ageName);
     }
 
-    public String getPriceName() {
-        return StringUtils.colorize(priceName);
+    public Component getPriceName() {
+        return Text.modernMessage(priceName);
     }
 }

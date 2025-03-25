@@ -8,7 +8,7 @@ lang:
     name: '&3Search'
     lore:
       - '&fClick to add a search!'
-      - '&7Current: &e{0}'
+      - '&7Current: &e%current%'
   min-price:
     icon: IRON_NUGGET
     model-data: 0
@@ -16,7 +16,7 @@ lang:
     name: '&3Minimum Price'
     lore:
       - '&fClick to add a minimum price'
-      - '&7Current: &e${0}'
+      - '&7Current: &e$%current%'
   max-price:
     icon: GOLD_NUGGET
     model-data: 0
@@ -24,7 +24,7 @@ lang:
     name: '&3Maximum Price'
     lore:
       - '&fClick to add a maximum price'
-      - '&7Current: &e${0}'
+      - '&7Current: &e$%current%'
   start:
     icon: EMERALD
     model-data: 0

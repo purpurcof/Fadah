@@ -3,6 +3,8 @@ package info.preva1l.fadah.guis;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Menus;
 import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Text;
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -12,8 +14,8 @@ import java.util.function.Consumer;
 
 public class SearchMenu implements Listener {
     public SearchMenu(Player player, String placeholder, Consumer<String> callback) {
-        AnvilGUI.Builder guiBuilder = new AnvilGUI.Builder().plugin(Fadah.getINSTANCE())
-                .title(Menus.SEARCH_TITLE.toFormattedString());
+        AnvilGUI.Builder guiBuilder = new AnvilGUI.Builder().plugin(Fadah.getInstance())
+                .jsonTitle(JSONComponentSerializer.json().serialize(Text.modernMessage(Menus.i().getSearchTitle())));
         guiBuilder.text(placeholder);
 
         guiBuilder.onClick((slot, state) -> {
@@ -24,13 +26,13 @@ public class SearchMenu implements Listener {
             String search = state.getText();
 
             return Collections.singletonList(AnvilGUI.ResponseAction.run(() ->
-                    callback.accept((search != null && search.contains(placeholder)) ? null : search)));
+                    callback.accept((search != null && search.equals(placeholder)) ? null : search)));
         });
 
         guiBuilder.onClose((state)-> {
             String search = state.getText();
-            TaskManager.Sync.runLater(Fadah.getINSTANCE(), () ->
-                    callback.accept((search != null && search.contains(placeholder)) ? null : search),1L);
+            TaskManager.Sync.runLater(Fadah.getInstance(), () ->
+                    callback.accept((search != null && search.equals(placeholder)) ? null : search),1L);
         });
 
         guiBuilder.open(player);

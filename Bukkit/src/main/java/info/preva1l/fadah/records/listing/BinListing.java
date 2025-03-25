@@ -4,22 +4,20 @@ import info.preva1l.fadah.api.ListingPurchaseEvent;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
-import info.preva1l.fadah.config.ListHelper;
-import info.preva1l.fadah.config.Tuple;
+import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
-import info.preva1l.fadah.utils.StringUtils;
+import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.SortedSet;
 import java.util.UUID;
@@ -59,9 +57,9 @@ public final class BinListing extends ActiveListing {
         // Notify Both Players
         Lang.sendMessage(buyer, String.join("\n", Lang.i().getNotifications().getNewItem()));
 
-        String itemName = StringUtils.extractItemName(itemStack);
-        String formattedPrice = new DecimalFormat(Config.i().getFormatting().getNumbers()).format(this.getPrice() - taxed);
-        String message = String.join("\n", ListHelper.replace(Lang.i().getNotifications().getSale(),
+        String itemName = Text.extractItemName(itemStack);
+        String formattedPrice = Config.i().getFormatting().numbers().format(this.getPrice() - taxed);
+        String message = String.join("\n", Text.replace(Lang.i().getNotifications().getSale(),
                 Tuple.of("%item%", itemName),
                 Tuple.of("%price%", formattedPrice),
                 Tuple.of("%buyer%", buyer.getName())));

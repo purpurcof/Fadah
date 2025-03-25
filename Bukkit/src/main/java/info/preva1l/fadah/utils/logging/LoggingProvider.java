@@ -6,19 +6,18 @@ import info.preva1l.fadah.config.Config;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.FileHandler;
-import java.util.logging.Logger;
 
 public interface LoggingProvider {
-    Logger getTransactionLogger();
+    Fadah getPlugin();
 
-    default void initLogger(Fadah plugin) {
+    default void initLogger() {
         Fadah.getConsole().info("Initialising transaction logger...");
 
         if (!Config.i().isLogToFile()) {
             return;
         }
         try {
-            File logsFolder = new File(plugin.getDataFolder(), "logs");
+            File logsFolder = new File(getPlugin().getDataFolder(), "logs");
             if (!logsFolder.exists()) {
                 if (!logsFolder.mkdirs()) {
                     Fadah.getConsole().warning("Failed to create logs folder!");
@@ -38,8 +37,8 @@ public interface LoggingProvider {
 
             FileHandler fileHandler = new FileHandler(logFile.getAbsolutePath());
             fileHandler.setFormatter(new TransactionLogFormatter());
-            getTransactionLogger().setUseParentHandlers(false);
-            getTransactionLogger().addHandler(fileHandler);
+            getPlugin().getTransactionLogger().setUseParentHandlers(false);
+            getPlugin().getTransactionLogger().addHandler(fileHandler);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -2,6 +2,8 @@ package info.preva1l.fadah.config;
 
 import de.exlll.configlib.*;
 import info.preva1l.fadah.Fadah;
+import info.preva1l.fadah.config.misc.SubEconomy;
+import info.preva1l.fadah.config.misc.TimeLength;
 import info.preva1l.fadah.data.DatabaseType;
 import info.preva1l.fadah.hooks.impl.DiscordHook;
 import lombok.AccessLevel;
@@ -10,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -86,6 +89,10 @@ public class Config {
             private String days = "%dd, %dh, %dm, %ds";
             private String months = "%dm, %dd, %dh, %dm, %ds";
             private String years = "%dy, %dm, %dd, %dh, %dm, %ds";
+        }
+
+        public DecimalFormat numbers() {
+            return new DecimalFormat(numbers);
         }
     }
 
@@ -257,11 +264,11 @@ public class Config {
     }
 
     public void save() {
-        YamlConfigurations.save(new File(Fadah.getINSTANCE().getDataFolder(), "config.yml").toPath(), Config.class, this);
+        YamlConfigurations.save(new File(Fadah.getInstance().getDataFolder(), "config.yml").toPath(), Config.class, this);
     }
 
     public static void reload() {
-        instance = YamlConfigurations.load(new File(Fadah.getINSTANCE().getDataFolder(), "config.yml").toPath(), Config.class, PROPERTIES);
+        instance = YamlConfigurations.load(new File(Fadah.getInstance().getDataFolder(), "config.yml").toPath(), Config.class, PROPERTIES);
     }
 
     public static Config i() {
@@ -269,6 +276,6 @@ public class Config {
             return instance;
         }
 
-        return instance = YamlConfigurations.update(new File(Fadah.getINSTANCE().getDataFolder(), "config.yml").toPath(), Config.class, PROPERTIES);
+        return instance = YamlConfigurations.update(new File(Fadah.getInstance().getDataFolder(), "config.yml").toPath(), Config.class, PROPERTIES);
     }
 }

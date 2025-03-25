@@ -1,5 +1,7 @@
 package info.preva1l.fadah.guis;
 
+import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.guis.FastInv;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
@@ -20,7 +22,9 @@ public class ConfirmPurchaseMenu extends FastInv {
                 new ItemBuilder(getLang().getAsMaterial("confirm.icon", Material.LIME_CONCRETE))
                         .name(getLang().getStringFormatted("confirm.name", "&a&lCONFIRM"))
                         .modelData(getLang().getInt("confirm.model-data"))
-                        .lore(getLang().getLore("confirm.lore")).build(), e -> {
+                        .lore(getLang().getLore("confirm.lore",
+                                Tuple.of("%price%", Config.i().getFormatting().numbers().format(listing.getPrice()))))
+                        .build(), e -> {
             player.closeInventory();
             listing.purchase(((Player) e.getWhoClicked()));
         });

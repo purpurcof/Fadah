@@ -1,24 +1,26 @@
 package info.preva1l.fadah.data.dao.mongo;
 
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.records.listing.Bid;
 import info.preva1l.fadah.records.listing.BidListing;
 import info.preva1l.fadah.records.listing.BinListing;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.ItemSerializer;
-import info.preva1l.fadah.utils.mongo.CollectionHelper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.NotImplementedException;
 import org.bson.Document;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.util.logging.Level;
 
 @RequiredArgsConstructor
 public class ListingMongoDao implements Dao<Listing> {
-    private final CollectionHelper collectionHelper;
+    private final MongoDatabase database;
 
     /**
      * Get an object from the database by its id.
@@ -29,13 +31,13 @@ public class ListingMongoDao implements Dao<Listing> {
     @Override
     public Optional<Listing> get(UUID id) {
         try {
-            MongoCollection<Document> collection = collectionHelper.getCollection("listings");
+            MongoCollection<Document> collection = database.getCollection("listings");
             final Document doc = collection.find().filter(Filters.eq("uuid", id)).first();
             if (doc == null) return Optional.empty();
 
             return Optional.of(createListing(id, doc));
         } catch (Exception e) {
-            e.printStackTrace();
+            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
         }
         return Optional.empty();
     }
@@ -49,7 +51,7 @@ public class ListingMongoDao implements Dao<Listing> {
     public List<Listing> getAll() {
         try {
             List<Listing> list = new ArrayList<>();
-            MongoCollection<Document> collection = collectionHelper.getCollection("listings");
+            MongoCollection<Document> collection = database.getCollection("listings");
             for (Document doc : collection.find()) {
                 final UUID id = doc.get("uuid", UUID.class);
 
@@ -57,7 +59,7 @@ public class ListingMongoDao implements Dao<Listing> {
             }
             return list;
         } catch (Exception e) {
-            e.printStackTrace();
+            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
         }
         return List.of();
     }
@@ -81,9 +83,9 @@ public class ListingMongoDao implements Dao<Listing> {
                     .append("itemStack", ItemSerializer.serialize(listing.getItemStack()))
                     .append("biddable", false)
                     .append("bids", "");
-            collectionHelper.insertDocument("listings", document);
+            database.getCollection("listings").insertOne(document);
         } catch (Exception e) {
-            e.printStackTrace();
+            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
         }
     }
 
@@ -106,12 +108,9 @@ public class ListingMongoDao implements Dao<Listing> {
     @Override
     public void delete(Listing listing) {
         try {
-            MongoCollection<Document> collection = collectionHelper.getCollection("listings");
-            final Document listingDocument = collection.find().filter(Filters.eq("uuid", listing.getId())).first();
-            if (listingDocument == null) return;
-            collectionHelper.deleteDocument("listings", listingDocument);
+            database.getCollection("listings").findOneAndDelete(Filters.eq("uuid", listing.getId()));
         } catch (Exception e) {
-            e.printStackTrace();
+            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
         }
     }
 

@@ -1,6 +1,7 @@
 package info.preva1l.fadah.utils.guis;
 
 import info.preva1l.fadah.cache.CategoryRegistry;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,6 +15,14 @@ public abstract class ScrollBarFastInv extends PaginatedFastInv {
     private final List<PaginatedItem> scrollbarItems = new ArrayList<>();
 
     protected ScrollBarFastInv(int size, @NotNull String title, @NotNull Player player, LayoutManager.MenuType menuType) {
+        super(size, title, player, menuType);
+        scrollbarSlots.put(0, 9);
+        scrollbarSlots.put(1, 18);
+        scrollbarSlots.put(2, 27);
+        scrollbarSlots.put(3, 36);
+    }
+
+    protected ScrollBarFastInv(int size, @NotNull Component title, @NotNull Player player, LayoutManager.MenuType menuType) {
         super(size, title, player, menuType);
         scrollbarSlots.put(0, 9);
         scrollbarSlots.put(1, 18);

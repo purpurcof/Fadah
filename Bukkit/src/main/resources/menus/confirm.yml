@@ -6,7 +6,7 @@ lang:
     model-data: 0
     name: '&a&lCONFIRM'
     lore:
-      - '&7Click to confirm'
+      - '&7Click to confirm for &a$%price%'
   cancel:
     icon: RED_CONCRETE
     model-data: 0

@@ -4,12 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
-import info.preva1l.fadah.utils.mongo.CollectionHelper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.NotImplementedException;
 import org.bson.Document;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 
 @RequiredArgsConstructor
 public class HistoryMongoDao implements Dao<History> {
@@ -27,7 +29,7 @@ public class HistoryMongoDao implements Dao<History> {
             .registerTypeHierarchyAdapter(ConfigurationSerializable.class, new BukkitSerializableAdapter())
             .serializeNulls().disableHtmlEscaping().create();
     private static final Type HISTORY_LIST_TYPE = new TypeToken<ArrayList<HistoricItem>>() {}.getType();
-    private final CollectionHelper collectionHelper;
+    private final MongoDatabase database;
 
     /**
      * Get an object from the database by its id.
@@ -38,7 +40,7 @@ public class HistoryMongoDao implements Dao<History> {
     @Override
     public Optional<History> get(UUID id) {
         try {
-            MongoCollection<Document> collection = collectionHelper.getCollection("history");
+            MongoCollection<Document> collection = database.getCollection("history");
             final Document document = collection.find().filter(Filters.eq("playerUUID", id)).first();
             if (document == null) return Optional.empty();
 
@@ -48,7 +50,7 @@ public class HistoryMongoDao implements Dao<History> {
 
             return Optional.of(new History(id, items));
         } catch (Exception e) {
-            e.printStackTrace();
+            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
         }
         return Optional.empty();
     }
@@ -73,9 +75,9 @@ public class HistoryMongoDao implements Dao<History> {
         try {
             Document document = new Document("playerUUID", expiredItems.owner())
                     .append("items", GSON.toJson(expiredItems.historicItems(), HISTORY_LIST_TYPE));
-            collectionHelper.insertDocument("history", document);
+            database.getCollection("history").replaceOne(Filters.eq("playerUUID", expiredItems.owner()), document);
         } catch (Exception e) {
-            e.printStackTrace();
+            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
         }
     }
 

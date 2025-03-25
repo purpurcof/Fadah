@@ -2,15 +2,13 @@ package info.preva1l.fadah.watcher;
 
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
-import info.preva1l.fadah.config.ListHelper;
-import info.preva1l.fadah.config.Tuple;
+import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.StringUtils;
+import info.preva1l.fadah.utils.Text;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -19,7 +17,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,7 +39,7 @@ public class AuctionWatcher {
         for (Map.Entry<UUID, Watching> entry : watchingListings.entrySet()) {
             Watching watching = entry.getValue();
             if (watching.getSearch() != null) {
-                if (StringUtils.doesItemHaveString(watching.getSearch().toUpperCase(), listing.getItemStack())
+                if (Text.doesItemHaveString(watching.getSearch().toUpperCase(), listing.getItemStack())
                         || checkForEnchantmentOnBook(watching.getSearch().toUpperCase(), listing.getItemStack())) {
                     if (priceCheck(listing, watching)) {
                         sendAlert(entry.getKey(), listing);
@@ -69,13 +66,13 @@ public class AuctionWatcher {
         Player player = Bukkit.getPlayer(uuid);
         if (player == null) return;
 
-        String alertMessage = String.join("&r\n", ListHelper.replace(Lang.i().getNotifications().getWatched(),
+        String alertMessage = String.join("&r\n", Text.replace(Lang.i().getNotifications().getWatched(),
                 Tuple.of("%player%", player.getName()),
-                Tuple.of("%item%", StringUtils.extractItemName(listing.getItemStack())),
-                Tuple.of("%price%", new DecimalFormat(Config.i().getFormatting().getNumbers()).format(listing.getPrice()))
+                Tuple.of("%item%", Text.extractItemName(listing.getItemStack())),
+                Tuple.of("%price%", Config.i().getFormatting().numbers().format(listing.getPrice()))
         ));
 
-        Component textComponent = MiniMessage.miniMessage().deserialize(StringUtils.legacyToMiniMessage(alertMessage));
+        Component textComponent = Text.modernMessage(alertMessage);
         textComponent = textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/ah view-listing " + listing.getId()));
 
         player.sendMessage(textComponent);

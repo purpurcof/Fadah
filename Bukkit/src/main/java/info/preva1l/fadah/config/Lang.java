@@ -5,7 +5,7 @@ import de.exlll.configlib.NameFormatters;
 import de.exlll.configlib.YamlConfigurationProperties;
 import de.exlll.configlib.YamlConfigurations;
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.utils.StringUtils;
+import info.preva1l.fadah.utils.Text;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -385,15 +385,15 @@ public class Lang {
     }
 
     public static void sendMessage(CommandSender sender, String message) {
-        sender.sendMessage(StringUtils.colorize(sender instanceof Player player ? player : null, message));
+        sender.sendMessage(Text.modernMessage(sender instanceof Player player ? player : null, message));
     }
 
     public void save() {
-        YamlConfigurations.save(new File(Fadah.getINSTANCE().getDataFolder(), "lang.yml").toPath(), Lang.class, this);
+        YamlConfigurations.save(new File(Fadah.getInstance().getDataFolder(), "lang.yml").toPath(), Lang.class, this);
     }
 
     public static void reload() {
-        instance = YamlConfigurations.load(new File(Fadah.getINSTANCE().getDataFolder(), "lang.yml").toPath(), Lang.class, PROPERTIES);
+        instance = YamlConfigurations.load(new File(Fadah.getInstance().getDataFolder(), "lang.yml").toPath(), Lang.class, PROPERTIES);
     }
 
     public static Lang i() {
@@ -401,6 +401,6 @@ public class Lang {
             return instance;
         }
 
-        return instance = YamlConfigurations.update(new File(Fadah.getINSTANCE().getDataFolder(), "lang.yml").toPath(), Lang.class, PROPERTIES);
+        return instance = YamlConfigurations.update(new File(Fadah.getInstance().getDataFolder(), "lang.yml").toPath(), Lang.class, PROPERTIES);
     }
 }

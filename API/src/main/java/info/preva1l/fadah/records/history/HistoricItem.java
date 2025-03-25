@@ -14,19 +14,19 @@ import java.util.UUID;
  * <br><br>
  * Created on 13/04/2024
  *
+ * @param loggedDate when the action happened, in epoch millis.
+ * @param action     the action that got logged.
+ * @param itemStack  the item that had an action performed on it.
+ * @param price      nullable, only used for {@link LoggedAction#LISTING_START}, {@link LoggedAction#LISTING_PURCHASED}, {@link LoggedAction#LISTING_SOLD}
+ * @param playerUUID nullable, only used for {@link LoggedAction#LISTING_SOLD} and {@link LoggedAction#LISTING_PURCHASED}
  * @author Preva1l
- * @param loggedDate    when the action happened, in epoch millis.
- * @param action        the action that got logged.
- * @param itemStack     the item that had an action performed on it.
- * @param price         nullable, only used for {@link LoggedAction#LISTING_START}, {@link LoggedAction#LISTING_PURCHASED}, {@link LoggedAction#LISTING_SOLD}
- * @param purchaserUUID nullable, only used for {@link LoggedAction#LISTING_SOLD}
  */
 public record HistoricItem(
         @Expose @NotNull Long loggedDate,
         @Expose @NotNull LoggedAction action,
         @Expose @NotNull ItemStack itemStack,
         @Expose @Nullable Double price,
-        @Expose @Nullable UUID purchaserUUID
+        @Expose @Nullable UUID playerUUID
 ) {
 
     @Override
@@ -37,7 +37,7 @@ public record HistoricItem(
         ))) return false;
         return Objects.equals(price, price1)
                 && Objects.equals(loggedDate, date)
-                && Objects.equals(purchaserUUID, buyerUid)
+                && Objects.equals(playerUUID, buyerUid)
                 && action == action1
                 && Objects.equals(itemStack, stack);
     }

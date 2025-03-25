@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @UtilityClass
 public final class CategoryRegistry {
     private final SortedSet<Category> categories = new TreeSet<>();
-    private final BasicConfig categoriesFile = Fadah.getINSTANCE().getCategoriesFile();
+    private final BasicConfig categoriesFile = Fadah.getInstance().getCategoriesFile();
 
     public Category getCategory(String id) {
         return categories.stream().filter(category -> category.id().equals(id)).findFirst().orElse(null);
@@ -38,7 +38,7 @@ public final class CategoryRegistry {
         return Collections.unmodifiableSortedSet(categories);
     }
 
-    public CompletableFuture<@NotNull String> getCategoryForItem(ItemStack item) {
+    public CompletableFuture<String> getCategoryForItem(ItemStack item) {
         if (categories.isEmpty()) {
             return CompletableFuture.completedFuture("_none_");
         }
@@ -56,7 +56,7 @@ public final class CategoryRegistry {
     }
 
     public void loadCategories() {
-        Fadah.getINSTANCE().getCategoriesFile().load();
+        Fadah.getInstance().getCategoriesFile().load();
         SortedSet<Category> set = new TreeSet<>();
         for (String key : categoriesFile.getConfiguration().getKeys(false)) {
             String name = categoriesFile.getString(key + ".name");

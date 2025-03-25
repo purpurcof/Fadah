@@ -4,24 +4,27 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CategoryRegistry;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
+import info.preva1l.fadah.config.Menus;
+import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.filters.SortingDirection;
 import info.preva1l.fadah.filters.SortingMethod;
 import info.preva1l.fadah.records.listing.BidListing;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.CooldownManager;
-import info.preva1l.fadah.utils.StringUtils;
+import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.TimeUtil;
-import info.preva1l.fadah.utils.guis.*;
+import info.preva1l.fadah.utils.guis.ItemBuilder;
+import info.preva1l.fadah.utils.guis.LayoutManager;
+import info.preva1l.fadah.utils.guis.PaginatedItem;
+import info.preva1l.fadah.utils.guis.ScrollBarFastInv;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.text.DecimalFormat;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 /**
@@ -32,7 +35,6 @@ import java.util.function.Supplier;
 public abstract class PurchaseMenu extends ScrollBarFastInv {
     protected final Supplier<List<Listing>> listingSupplier;
     protected final List<Listing> listings;
-    protected final Lock lock = new ReentrantLock();
 
     // Filters
     protected final String search;
@@ -41,7 +43,7 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
 
     protected PurchaseMenu(
             Player player,
-            String title,
+            Component title,
             LayoutManager.MenuType menuType,
             Supplier<List<Listing>> listings,
             @Nullable String search,
@@ -57,17 +59,14 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
         this.sortingMethod = (sortingMethod == null ? SortingMethod.AGE : sortingMethod);
         this.sortingDirection = (sortingDirection == null ? SortingDirection.ASCENDING : sortingDirection);
 
-        lock.lock();
         this.listings.sort(this.sortingMethod.getSorter(this.sortingDirection));
 
         if (search != null) {
             this.listings.removeIf(
-                    listing -> !(StringUtils.doesItemHaveString(search, listing.getItemStack())
+                    listing -> !(Text.doesItemHaveString(search, listing.getItemStack())
                             || doesBookHaveEnchant(search, listing.getItemStack()))
             );
         }
-
-        lock.unlock();
 
         fillers();
         setScrollbarSlots(getLayout().scrollbarSlots());
@@ -87,46 +86,45 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
     }
 
     @Override
-    protected synchronized void fillPaginationItems() {
-        lock.lock();
+    protected void fillPaginationItems() {
         for (Listing listing : listings) {
             if (listing.getCurrency() == null) {
                 Fadah.getConsole().severe("Cannot load listing %s because currency %s is not on this server!".formatted(listing.getId(), listing.getCurrencyId()));
                 continue;
             }
-            String buyMode = listing instanceof BidListing
-                    ? getLang().getStringFormatted("listing.lore-buy.bidding")
-                    : getLang().getStringFormatted("listing.lore-buy.buy-it-now");
+            Component buyMode = listing instanceof BidListing
+                    ? getLang().getStringFormatted("listing.mode.bidding")
+                    : getLang().getStringFormatted("listing.mode.buy-it-now");
 
             ItemBuilder itemStack = new ItemBuilder(listing.getItemStack().clone())
                     .addLore(getLang().getLore(player, "listing.lore-body",
-                            listing.getOwnerName(),
-                            StringUtils.removeColorCodes(CategoryRegistry.getCatName(listing.getCategoryID())), buyMode,
-                            new DecimalFormat(Config.i().getFormatting().getNumbers())
-                                    .format(listing.getPrice()), TimeUtil.formatTimeUntil(listing.getDeletionDate()),
-                            listing.getCurrency().getName()));
+                            Tuple.of("%seller%", listing.getOwnerName()),
+                            Tuple.of("%category%", Text.removeColorCodes(CategoryRegistry.getCatName(listing.getCategoryID()))),
+                            Tuple.of("%mode%", buyMode),
+                            Tuple.of("%price%", Config.i().getFormatting().numbers().format(listing.getPrice())),
+                            Tuple.of("%expiry%", TimeUtil.formatTimeUntil(listing.getDeletionDate())),
+                            Tuple.of("%currency%", listing.getCurrency().getName())));
 
             if (player.getUniqueId().equals(listing.getOwner())) {
-                itemStack.addLore(getLang().getStringFormatted("listing.lore-footer.own-listing"));
+                itemStack.addLore(getLang().getStringFormatted("listing.footer.own-listing"));
             } else if (listing.getCurrency().canAfford(player, listing.getPrice())) {
-                itemStack.addLore(getLang().getStringFormatted("listing.lore-footer.buy"));
+                itemStack.addLore(getLang().getStringFormatted("listing.footer.buy"));
             } else {
-                itemStack.addLore(getLang().getStringFormatted("listing.lore-footer.too-expensive"));
+                itemStack.addLore(getLang().getStringFormatted("listing.footer.too-expensive"));
             }
             if (listing.getItemStack().getType().name().toUpperCase().endsWith("SHULKER_BOX")) {
-                itemStack.addLore(getLang().getStringFormatted("listing.lore-footer.is-shulker"));
+                itemStack.addLore(getLang().getStringFormatted("listing.footer.shulker"));
             }
 
             addPaginationItem(new PaginatedItem(itemStack.build(), e -> {
-                if (e.isShiftClick() && (e.getWhoClicked().hasPermission("fadah.manage.active-listings") || listing.isOwner(((Player) e.getWhoClicked())))) {
-                    if (listing.cancel(((Player) e.getWhoClicked()))) {
-                        updatePagination();
-                    }
+                if (e.isShiftClick() && (e.getWhoClicked().hasPermission("fadah.manage.active-listings")
+                        || listing.isOwner(((Player) e.getWhoClicked())))) {
+                    if (listing.cancel(((Player) e.getWhoClicked()))) updatePagination();
                     return;
                 }
 
                 if (e.isRightClick() && listing.getItemStack().getType().name().toUpperCase().endsWith("SHULKER_BOX")) {
-                    new ShulkerBoxPreviewMenu(listing, player, () -> open(player)).open(player);
+                    new ShulkerBoxPreviewMenu(listing, () -> open(player)).open(player);
                     return;
                 }
 
@@ -135,14 +133,13 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
                 new ConfirmPurchaseMenu(listing, player, () -> open(player)).open(player);
             }));
         }
-        lock.unlock();
     }
 
     protected void addNavigationButtons() {
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.SCROLLBAR_CONTROL_ONE,-1),
-                GuiHelper.constructButton(GuiButtonType.SCROLL_PREVIOUS), e -> scrollUp());
+                Menus.i().getScrollPreviousButton().itemStack(), e -> scrollUp());
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.SCROLLBAR_CONTROL_TWO,-1),
-                GuiHelper.constructButton(GuiButtonType.SCROLL_NEXT), e -> scrollDown());
+                Menus.i().getScrollNextButton().itemStack(),e -> scrollDown());
     }
 
     protected void addFilterButtons() {
@@ -154,8 +151,10 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
                 new ItemBuilder(getLang().getAsMaterial("filter.change-type.icon", Material.PUFFERFISH))
                         .name(getLang().getStringFormatted("filter.change-type.name", "&eListing Filter"))
                         .modelData(getLang().getInt("filter.change-type.model-data"))
-                        .addLore(getLang().getLore("filter.change-type.lore", (prev == null ? Lang.i().getWords().getNone() : prev.getFriendlyName()),
-                                sortingMethod.getFriendlyName(), (next == null ? Lang.i().getWords().getNone() : next.getFriendlyName())))
+                        .addLore(getLang().getLore("filter.change-type.lore",
+                                Tuple.of("%previous%", (prev == null ? Lang.i().getWords().getNone() : prev.getFriendlyName())),
+                                Tuple.of("%current%", sortingMethod.getFriendlyName()),
+                                Tuple.of("%next%", (next == null ? Lang.i().getWords().getNone() : next.getFriendlyName()))))
                         .build(), e -> {
                     if (CooldownManager.hasCooldown(CooldownManager.Cooldown.SORT, player)) {
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getCooldown()
@@ -178,21 +177,24 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
                 });
 
         // Filter Direction Toggle
-        String asc = StringUtils.formatPlaceholders(sortingDirection == SortingDirection.ASCENDING
-                        ? getLang().getStringFormatted("filter.change-direction.options.selected", "&8> &e{0}")
-                        : getLang().getStringFormatted("filter.change-direction.options.not-selected", "&f{0}"),
-                sortingMethod.getLang(SortingDirection.ASCENDING));
-        String desc = StringUtils.formatPlaceholders(sortingDirection == SortingDirection.DESCENDING
-                        ? getLang().getStringFormatted("filter.change-direction.options.selected", "&8> &e{0}")
-                        : getLang().getStringFormatted("filter.change-direction.options.not-selected", "&f{0}"),
-                sortingMethod.getLang(SortingDirection.DESCENDING));
+        Component asc = Text.replace(sortingDirection == SortingDirection.ASCENDING
+                        ? getLang().getStringFormatted("filter.change-direction.options.selected", "&8> &e%option%")
+                        : getLang().getStringFormatted("filter.change-direction.options.not-selected", "&f%option%"),
+                Tuple.of("%option%", sortingMethod.getLang(SortingDirection.ASCENDING)));
+        Component desc = Text.replace(sortingDirection == SortingDirection.DESCENDING
+                        ? getLang().getStringFormatted("filter.change-direction.options.selected", "&8> &e%option%")
+                        : getLang().getStringFormatted("filter.change-direction.options.not-selected", "&f%option%"),
+                Tuple.of("%option%", sortingMethod.getLang(SortingDirection.DESCENDING)));
 
         removeItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.FILTER_DIRECTION,-1));
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.FILTER_DIRECTION,-1),
                 new ItemBuilder(getLang().getAsMaterial("filter.change-direction.icon", Material.CLOCK))
                         .name(getLang().getStringFormatted("filter.change-direction.name", "&eFilter Direction"))
                         .modelData(getLang().getInt("filter.change-direction.model-data"))
-                        .lore(getLang().getLore("filter.change-direction.lore", asc, desc)).build(), e -> {
+                        .lore(getLang().getLore("filter.change-direction.lore",
+                                Tuple.of("%first%", asc),
+                                Tuple.of("%second%", desc))
+                        ).build(), e -> {
                     if (CooldownManager.hasCooldown(CooldownManager.Cooldown.SORT, player)) {
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getCooldown()
                                 .replace("%time%", CooldownManager.getCooldownString(CooldownManager.Cooldown.SORT, player)));
@@ -227,7 +229,7 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
         this.listings.addAll(listingSupplier.get());
 
         if (search != null) {
-            listings.removeIf(listing -> !(StringUtils.doesItemHaveString(search, listing.getItemStack())
+            listings.removeIf(listing -> !(Text.doesItemHaveString(search, listing.getItemStack())
                     || doesBookHaveEnchant(search, listing.getItemStack())));
         }
 

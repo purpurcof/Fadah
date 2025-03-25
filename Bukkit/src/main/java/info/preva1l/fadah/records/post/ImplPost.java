@@ -5,8 +5,7 @@ import info.preva1l.fadah.api.ListingCreateEvent;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
-import info.preva1l.fadah.config.ListHelper;
-import info.preva1l.fadah.config.Tuple;
+import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.data.PermissionsData;
 import info.preva1l.fadah.filters.Restrictions;
@@ -16,15 +15,14 @@ import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.records.listing.ListingBuilder;
-import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.TimeUtil;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
 import info.preva1l.fadah.watcher.AuctionWatcher;
 import info.preva1l.hooker.Hooker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +38,7 @@ import java.util.concurrent.ExecutorService;
  */
 public final class ImplPost extends Post {
     private final @Nullable Player player;
-    private final DecimalFormat df = new DecimalFormat(Config.i().getFormatting().getNumbers());
+    private final DecimalFormat df = Config.i().getFormatting().numbers();
 
     public ImplPost(ListingBuilder listing, @Nullable Player player) {
         super(listing);
@@ -66,7 +64,7 @@ public final class ImplPost extends Post {
 
             if (callEvent) {
                 ListingCreateEvent event = new ListingCreateEvent(player, listing);
-                TaskManager.Sync.run(Fadah.getINSTANCE(), () -> Bukkit.getServer().getPluginManager().callEvent(event));
+                TaskManager.Sync.run(Fadah.getInstance(), () -> Bukkit.getServer().getPluginManager().callEvent(event));
                 if (event.isCancelled()) return CompletableFuture.completedFuture(PostResult.custom(event.getCancelReason()));
             }
 
@@ -102,8 +100,8 @@ public final class ImplPost extends Post {
         if (player == null) return;
 
         double taxAmount = listing.getTax();
-        String itemName = StringUtils.extractItemName(listing.getItemStack());
-        String message = String.join("\n", ListHelper.replace(
+        String itemName = Text.extractItemName(listing.getItemStack());
+        String message = String.join("\n", Text.replace(
                 Lang.i().getNotifications().getNewListing(),
                 Tuple.of("%item%", itemName),
                 Tuple.of("%price%", df.format(listing.getPrice())),
@@ -127,20 +125,19 @@ public final class ImplPost extends Post {
 
         listing.getCurrency().withdraw(player, advertPrice);
 
-        String advertMessage = String.join("&r\n", ListHelper.replace(
+        String advertMessage = String.join("&r\n", Text.replace(
                 Lang.i().getNotifications().getAdvert(),
                 Tuple.of("%player%", player.getName()),
-                Tuple.of("%item%", StringUtils.extractItemName(listing.getItemStack())),
+                Tuple.of("%item%", Text.extractItemName(listing.getItemStack())),
                 Tuple.of("%price%", df.format(listing.getPrice()))
         ));
 
-        Component textComponent = MiniMessage.miniMessage().deserialize(
-                StringUtils.legacyToMiniMessage(advertMessage));
+        Component textComponent = Text.modernMessage(advertMessage);
         textComponent = textComponent.clickEvent(
                 ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/ah view-listing " + listing.getId()));
 
         for (Player announce : Bukkit.getOnlinePlayers()) {
-            Fadah.getINSTANCE().getAdventureAudience().player(announce).sendMessage(textComponent);
+            announce.sendMessage(textComponent);
         }
 
         if (Broker.getInstance().isConnected()) {

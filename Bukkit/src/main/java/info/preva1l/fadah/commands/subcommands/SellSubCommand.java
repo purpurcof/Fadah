@@ -9,8 +9,8 @@ import info.preva1l.fadah.data.PermissionsData;
 import info.preva1l.fadah.guis.NewListingMenu;
 import info.preva1l.fadah.records.listing.ImplListingBuilder;
 import info.preva1l.fadah.records.post.PostResult;
-import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.commands.CommandArguments;
 import info.preva1l.fadah.utils.commands.SubCommand;
 import info.preva1l.fadah.utils.commands.SubCommandArgs;
@@ -55,7 +55,7 @@ public class SellSubCommand extends SubCommand {
 
         double price;
         try {
-            price = StringUtils.getAmountFromString(priceString);
+            price = Text.getAmountFromString(priceString);
         } catch (NumberFormatException e) {
             command.reply(Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMustBeNumber());
             running.remove(command.getPlayer().getUniqueId());

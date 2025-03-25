@@ -2,18 +2,15 @@ package info.preva1l.fadah.listeners;
 
 import com.github.puregero.multilib.regionized.RegionizedTask;
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.guis.NewListingMenu;
-import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
-import info.preva1l.fadah.utils.guis.InventoryEventHandler;
+import info.preva1l.fadah.utils.Text;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -29,15 +26,15 @@ public class PlayerListener implements Listener {
     public void joinListener(AsyncPlayerPreLoginEvent e) {
         if (!DatabaseManager.getInstance().isConnected()) {
             e.setLoginResult(AsyncPlayerPreLoginEvent.Result.KICK_OTHER);
-            e.setKickMessage(StringUtils.colorize(Lang.i().getPrefix() + Lang.i().getErrors().getDatabaseLoading()));
+            e.kickMessage(Text.modernMessage(Lang.i().getPrefix() + Lang.i().getErrors().getDatabaseLoading()));
             return;
         }
 
-        invalidateIfNoJoin.put(e.getUniqueId(), TaskManager.Sync.runLater(Fadah.getINSTANCE(),
-                () -> Fadah.getINSTANCE()
+        invalidateIfNoJoin.put(e.getUniqueId(), TaskManager.Sync.runLater(Fadah.getInstance(),
+                () -> Fadah.getInstance()
                         .invalidateAndSavePlayerData(e.getUniqueId())
                         .thenRun(() -> invalidateIfNoJoin.remove(e.getUniqueId())), 1200L));
-        Fadah.getINSTANCE().loadPlayerData(e.getUniqueId()).join();
+        Fadah.getInstance().loadPlayerData(e.getUniqueId()).join();
     }
 
     @EventHandler
@@ -46,32 +43,19 @@ public class PlayerListener implements Listener {
         if (task != null) {
             task.cancel();
         }
-        if (e.getPlayer().hasPermission("fadah.manage.profile") && Config.i().isUpdateChecker()) {
-            var checked = Fadah.getINSTANCE().getChecked();
-            if (checked == null) return;
-            e.getPlayer().sendMessage(StringUtils.colorize("&f[Fadah] Fadah is &#D63C3COUTDATED&f! " +
-                    "&7Current: &#D63C3C%s &7Latest: &#18D53A%s".formatted(checked.getCurrentVersion(), checked.getLatestVersion())));
-        }
+        Fadah.getInstance().notifyUpdate(e.getPlayer());
     }
 
     @EventHandler
     public void leaveListener(PlayerQuitEvent e) {
-        Fadah.getINSTANCE().invalidateAndSavePlayerData(e.getPlayer().getUniqueId());
+        Fadah.getInstance().invalidateAndSavePlayerData(e.getPlayer().getUniqueId());
     }
 
     @EventHandler
     public void pickupItem(EntityPickupItemEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
-        if (player.getOpenInventory().getTopInventory().getHolder() instanceof NewListingMenu) {
+        if (player.getOpenInventory().getTopInventory().getHolder(false) instanceof NewListingMenu) {
             event.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onClose(InventoryCloseEvent event) {
-        RegionizedTask task = InventoryEventHandler.tasksToQuit.get(event.getInventory());
-        if (task != null) {
-            task.cancel();
         }
     }
 }

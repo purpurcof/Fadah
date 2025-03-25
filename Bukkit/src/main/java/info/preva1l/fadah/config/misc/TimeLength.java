@@ -1,4 +1,4 @@
-package info.preva1l.fadah.config;
+package info.preva1l.fadah.config.misc;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;

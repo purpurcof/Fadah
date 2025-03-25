@@ -1,9 +1,10 @@
 package info.preva1l.fadah.utils.guis;
 
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.utils.StringUtils;
+import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.config.BasicConfig;
 import info.preva1l.fadah.utils.config.LanguageConfig;
+import net.kyori.adventure.text.Component;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +18,7 @@ public class LayoutManager {
     public void loadLayout(BasicConfig config) {
         final MenuType menuType = getMenuType(config.getFileName());
 
-        final String guiTitle = StringUtils.colorize(config.getString("title"));
+        final Component guiTitle = Text.modernMessage(config.getString("title"));
 
         final List<Integer> fillerSlots = new ArrayList<>();
         final List<Integer> paginationSlots = new ArrayList<>();
@@ -108,7 +109,7 @@ public class LayoutManager {
     public void reloadLayout(MenuType menuType) {
         final String temp = menuType.getLayout().extraConfig().getFileName();
         guiLayouts.removeIf(mT -> mT.menuType().equals(menuType));
-        loadLayout(new BasicConfig(Fadah.getINSTANCE(), temp));
+        loadLayout(new BasicConfig(Fadah.getInstance(), temp));
     }
 
     public @NotNull GuiLayout getLayout(MenuType menuType) {
@@ -143,7 +144,7 @@ public class LayoutManager {
         ;
 
         public GuiLayout getLayout() {
-            return Fadah.getINSTANCE().getLayoutManager().getLayout(this);
+            return Fadah.getInstance().getLayoutManager().getLayout(this);
         }
     }
 

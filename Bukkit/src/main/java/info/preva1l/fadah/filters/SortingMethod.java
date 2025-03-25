@@ -2,9 +2,11 @@ package info.preva1l.fadah.filters;
 
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.StringUtils;
+import info.preva1l.fadah.utils.Text;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
@@ -32,8 +34,8 @@ public enum SortingMethod {
     private final Comparator<Listing> normalSorter;
     private final Comparator<Listing> reversedSorter;
 
-    public String getFriendlyName() {
-        return StringUtils.colorize(friendlyName);
+    public Component getFriendlyName() {
+        return Text.modernMessage(friendlyName);
     }
 
     public Comparator<Listing> getSorter(@NotNull SortingDirection direction) {
@@ -43,7 +45,7 @@ public enum SortingMethod {
         };
     }
 
-    public String getLang(@NotNull SortingDirection direction) {
+    public Component getLang(@NotNull SortingDirection direction) {
         return switch (this) {
             case AGE -> direction.getAgeName();
             case ALPHABETICAL -> direction.getAlphaName();
@@ -66,10 +68,14 @@ public enum SortingMethod {
     private static class AlphabeticalComparator implements Comparator<Listing> {
         @Override
         public int compare(Listing o1, Listing o2) {
-            String check1 = o1.getItemStack().hasItemMeta() ? (o1.getItemStack().getItemMeta().hasDisplayName() ?
-                    StringUtils.removeColorCodes(o1.getItemStack().getItemMeta().getDisplayName()) : o1.getItemStack().getType().name()) : o1.getItemStack().getType().name();
-            String check2 = o2.getItemStack().hasItemMeta() ? (o2.getItemStack().getItemMeta().hasDisplayName() ?
-                    StringUtils.removeColorCodes(o2.getItemStack().getItemMeta().getDisplayName()) : o2.getItemStack().getType().name()) : o2.getItemStack().getType().name();
+            Component display1 = o1.getItemStack().getItemMeta().displayName();
+            String check1 = o1.getItemStack().hasItemMeta()
+                    ? (display1 != null ? ((TextComponent) display1).content() : o1.getItemStack().getType().name())
+                    : o1.getItemStack().getType().name();
+            Component display2 = o2.getItemStack().getItemMeta().displayName();
+            String check2 = o2.getItemStack().hasItemMeta()
+                    ? (display2 != null ? ((TextComponent) display2).content() : o2.getItemStack().getType().name())
+                    : o2.getItemStack().getType().name();
             return check1.compareToIgnoreCase(check2);
         }
     }

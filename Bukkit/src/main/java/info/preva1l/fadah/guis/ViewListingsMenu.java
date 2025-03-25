@@ -1,11 +1,10 @@
 package info.preva1l.fadah.guis;
 
 import info.preva1l.fadah.cache.CacheAccess;
+import info.preva1l.fadah.config.Menus;
 import info.preva1l.fadah.filters.SortingDirection;
 import info.preva1l.fadah.filters.SortingMethod;
 import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.guis.GuiButtonType;
-import info.preva1l.fadah.utils.guis.GuiHelper;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
 import info.preva1l.fadah.utils.guis.LayoutManager;
 import org.bukkit.Material;
@@ -61,7 +60,7 @@ public class ViewListingsMenu extends PurchaseMenu {
         super.addNavigationButtons();
 
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.CLOSE, -1),
-                GuiHelper.constructButton(GuiButtonType.CLOSE), e -> e.getWhoClicked().closeInventory());
+                Menus.i().getCloseButton().itemStack(), e -> e.getWhoClicked().closeInventory());
     }
 
     @Override

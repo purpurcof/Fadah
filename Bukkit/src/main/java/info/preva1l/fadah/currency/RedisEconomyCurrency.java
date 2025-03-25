@@ -3,7 +3,7 @@ package info.preva1l.fadah.currency;
 import dev.unnm3d.rediseconomy.api.RedisEconomyAPI;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
-import info.preva1l.fadah.config.SubEconomy;
+import info.preva1l.fadah.config.misc.SubEconomy;
 import lombok.Getter;
 
 import java.util.ArrayList;

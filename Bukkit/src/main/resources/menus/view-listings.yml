@@ -1,24 +1,59 @@
-title: '&9&lAuction House &8> &1{0} Listings' # {0} = "Your" or the players name if in management mode, {1} = the players username
+title: '&9&lAuction House &8> &1%dynamic% Listings' # %dynamic% = "Your" or the players name if in management mode, %username% = the players username
 
 lang:
   listing:
     lore-body:
       - '&8&n---------------------------'
-      - '&fSeller: &e{0}'
-      - '&fCategory: &e{1}'
+      - '&fSeller: &e%seller%'
+      - '&fCategory: &e%category%'
       - '&r '
-      - '&f{2}: &6${3}'
+      - '&f%mode%: &6$%amount%'
+      - '&fCurrency: &9%currency%'
       - '&r '
-      - '&fExpires In: &e{4}'
+      - '&fExpires In: &e%expiry%'
       - '&8&n---------------------------'
-    lore-buy:
+    mode:
       buy-it-now: "Buy Now"
       bidding: "Current Bid"
-    lore-footer:
+    footer:
       buy: '&aClick to buy now!'
       too-expensive: '&cYou cannot afford this item!'
       own-listing: '&cYou cannot buy your own listing! &8(Shift Click to Cancel)'
-      is-shulker: '&fRight Click to Preview!'
+      shulker: '&fRight Click to Preview!'
+
+  filter:
+    search:
+      icon: OAK_SIGN
+      model-data: 0
+      placeholder: 'Search Query...'
+      name: '&3&lSearch'
+      lore:
+        - '&fClick to search for an item name/type!'
+    change-type:
+      icon: PUFFERFISH
+      model-data: 0
+      name: '&eListing Filter'
+      lore:
+        - '&7Left Click to cycle up'
+        - '&7Right Click to cycle down'
+        - '&8-------------------------'
+        - '&f%previous%'
+        - '&8> &e%current%'
+        - '&f%next%'
+        - '&8-------------------------'
+    change-direction:
+      icon: CLOCK
+      model-data: 0
+      name: '&eFilter Direction'
+      lore:
+        - '&7Click To Toggle'
+        - '&8-------------------------'
+        - '%first%'
+        - '%second%'
+        - '&8-------------------------'
+      options:
+        selected: '&8> &e%option%'
+        not-selected: '&f%option%'
 
 size: 5
 
@@ -60,11 +95,11 @@ layout:
   '34': "PAGINATION_ITEM"
   '35': "FILLER"
   '36': "FILLER"
-  '37': "FILLER"
-  '38': "FILLER"
+  '37': "FILTER"
+  '38': "FILTER_DIRECTION"
   '39': "PAGINATION_CONTROL_ONE"
   '40': "CLOSE"
   '41': "PAGINATION_CONTROL_TWO"
-  '42': "FILLER"
+  '42': "SEARCH"
   '43': "FILLER"
   '44': "FILLER"

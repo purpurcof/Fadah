@@ -4,22 +4,22 @@ lang:
   listing:
     lore-body:
       - '&8&n---------------------------'
-      - '&fSeller: &e{0}'
-      - '&fCategory: &e{1}'
+      - '&fSeller: &e%seller%'
+      - '&fCategory: &e%category%'
       - '&r '
-      - '&f{2}: &6${3}'
-      - '&fCurrency: &9{5}'
+      - '&f%mode%: &6$%amount%'
+      - '&fCurrency: &9%currency%'
       - '&r '
-      - '&fExpires In: &e{4}'
+      - '&fExpires In: &e%expiry%'
       - '&8&n---------------------------'
-    lore-buy:
+    mode:
       buy-it-now: "Buy Now"
       bidding: "Current Bid"
-    lore-footer:
+    footer:
       buy: '&aClick to buy now!'
       too-expensive: '&cYou cannot afford this item!'
       own-listing: '&cYou cannot buy your own listing! &8(Shift Click to Cancel)'
-      is-shulker: '&fRight Click to Preview!'
+      shulker: '&fRight Click to Preview!'
 
   profile-button:
     icon: PLAYER_HEAD
@@ -44,9 +44,9 @@ lang:
         - '&7Left Click to cycle up'
         - '&7Right Click to cycle down'
         - '&8-------------------------'
-        - '&f{0}'
-        - '&8> &e{1}'
-        - '&f{2}'
+        - '&f%previous%'
+        - '&8> &e%current%'
+        - '&f%next%'
         - '&8-------------------------'
     change-direction:
       icon: CLOCK
@@ -55,12 +55,12 @@ lang:
       lore:
         - '&7Click To Toggle'
         - '&8-------------------------'
-        - '{0}'
-        - '{1}'
+        - '%first%'
+        - '%second%'
         - '&8-------------------------'
       options:
-        selected: '&8> &e{0}'
-        not-selected: '&f{0}'
+        selected: '&8> &e%option%'
+        not-selected: '&f%option%'
 
 size: 6
 

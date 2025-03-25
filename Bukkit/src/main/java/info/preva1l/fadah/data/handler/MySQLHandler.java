@@ -47,7 +47,7 @@ public class MySQLHandler implements DatabaseHandler {
     @SuppressWarnings("SameParameterValue")
     @NotNull
     private String[] getSchemaStatements(@NotNull String schemaFileName) throws IOException {
-        return new String(Objects.requireNonNull(Fadah.getINSTANCE().getResource(schemaFileName))
+        return new String(Objects.requireNonNull(Fadah.getInstance().getResource(schemaFileName))
                 .readAllBytes(), StandardCharsets.UTF_8).split(";");
     }
 

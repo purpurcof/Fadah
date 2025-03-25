@@ -43,7 +43,7 @@ public class SQLiteHandler implements DatabaseHandler {
     @Blocking
     public void connect() {
         try {
-            File databaseFile = new File(Fadah.getINSTANCE().getDataFolder(), DATABASE_FILE_NAME);
+            File databaseFile = new File(Fadah.getInstance().getDataFolder(), DATABASE_FILE_NAME);
             if (databaseFile.createNewFile()) {
                 Fadah.getConsole().info("Created the SQLite database file");
             }
@@ -86,7 +86,7 @@ public class SQLiteHandler implements DatabaseHandler {
     @SuppressWarnings("SameParameterValue")
     @NotNull
     private String[] getSchemaStatements(@NotNull String schemaFileName) throws IOException {
-        return new String(Objects.requireNonNull(Fadah.getINSTANCE().getResource(schemaFileName))
+        return new String(Objects.requireNonNull(Fadah.getInstance().getResource(schemaFileName))
                 .readAllBytes(), StandardCharsets.UTF_8).split(";");
     }
 

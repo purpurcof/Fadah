@@ -18,7 +18,7 @@ import java.util.List;
  */
 public abstract class BaseProfileSubCommand extends SubCommand {
     protected BaseProfileSubCommand(List<String> aliases, String description) {
-        super(Fadah.getINSTANCE(), aliases, description);
+        super(Fadah.getInstance(), aliases, description);
     }
 
     protected @Nullable OfflinePlayer checkEnabledPermissionAndLoaded(CommandArguments command, String permission) {
@@ -37,7 +37,7 @@ public abstract class BaseProfileSubCommand extends SubCommand {
                         .replace("%player%", command.args()[0]));
                 return null;
             }
-            Fadah.getINSTANCE().loadPlayerData(owner.getUniqueId()).join();
+            Fadah.getInstance().loadPlayerData(owner.getUniqueId()).join();
         }
 
         return owner;

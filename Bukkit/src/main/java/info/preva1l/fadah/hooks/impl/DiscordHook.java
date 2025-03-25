@@ -5,8 +5,8 @@ import com.google.gson.JsonObject;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Text;
 import info.preva1l.hooker.annotation.Hook;
 import info.preva1l.hooker.annotation.OnStart;
 import info.preva1l.hooker.annotation.Reloadable;
@@ -33,16 +33,16 @@ import java.util.List;
 @Getter
 public class DiscordHook {
     private Config.Hooks.Discord conf = Config.i().getHooks().getDiscord();
-    private DecimalFormat df = new DecimalFormat(Config.i().getFormatting().getNumbers());
+    private DecimalFormat df = Config.i().getFormatting().numbers();
 
     @OnStart
     public void onStart() {
         conf = Config.i().getHooks().getDiscord();
-        df = new DecimalFormat(Config.i().getFormatting().getNumbers());
+        df = Config.i().getFormatting().numbers();
     }
 
     public void send(Listing listing) {
-        TaskManager.Async.run(Fadah.getINSTANCE(), () -> {
+        TaskManager.Async.run(Fadah.getInstance(), () -> {
             switch (conf.getMessageMode()) {
                 case EMBED -> sendEmbed(listing);
                 case PLAIN_TEXT -> sendPlain(listing);
@@ -85,10 +85,10 @@ public class DiscordHook {
     }
 
     private String formatString(String str, Listing listing) {
-        return StringUtils.colorize(str
+        return str
                 .replace("%player%", listing.getOwnerName())
-                .replace("%item%", StringUtils.removeColorCodes(StringUtils.extractItemName(listing.getItemStack())))
-                .replace("%price%", df.format(listing.getPrice())));
+                .replace("%item%", Text.extractItemName(listing.getItemStack()))
+                .replace("%price%", df.format(listing.getPrice()));
     }
 
     private String getImageUrlForItem(Material material) {

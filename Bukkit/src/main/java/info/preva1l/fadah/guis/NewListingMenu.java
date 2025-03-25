@@ -4,28 +4,32 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.commands.subcommands.SellSubCommand;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
+import info.preva1l.fadah.config.Menus;
+import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.currency.Currency;
 import info.preva1l.fadah.currency.CurrencyRegistry;
 import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.data.PermissionsData;
 import info.preva1l.fadah.records.listing.ImplListingBuilder;
 import info.preva1l.fadah.records.post.PostResult;
-import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.TimeUtil;
-import info.preva1l.fadah.utils.guis.*;
+import info.preva1l.fadah.utils.guis.FastInv;
+import info.preva1l.fadah.utils.guis.ItemBuilder;
+import info.preva1l.fadah.utils.guis.LayoutManager;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
-import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.logging.Level;
 
 public class NewListingMenu extends FastInv {
-    private final Fadah plugin = Fadah.getINSTANCE();
+    private final Fadah plugin = Fadah.getInstance();
     private final Player player;
     private final ItemStack itemToSell;
     private long timeOffsetMillis;
@@ -52,9 +56,7 @@ public class NewListingMenu extends FastInv {
                 new ItemBuilder(getLang().getAsMaterial("create.icon", Material.EMERALD))
                         .name(getLang().getStringFormatted("create.name", "&aClick to create listing!"))
                         .modelData(getLang().getInt("create.model-data"))
-                        .addLore(getLang().getLore(player, "create.lore",
-                                new DecimalFormat(Config.i().getFormatting().getNumbers())
-                                        .format(price)))
+                        .addLore(getLang().getLore(player, "create.lore", Tuple.of("%price%", Config.i().getFormatting().numbers().format(price))))
                         .setAttributes(null)
                         .flags(ItemFlag.HIDE_ATTRIBUTES)
                         .build(), e -> {
@@ -132,7 +134,9 @@ public class NewListingMenu extends FastInv {
                         .setAttributes(null)
                         .flags(ItemFlag.HIDE_ATTRIBUTES)
                         .modelData(getLang().getInt("time.model-data"))
-                        .addLore(getLang().getLore("time.lore", TimeUtil.formatTimeUntil(Instant.now().plusSeconds(1).plusMillis(timeOffsetMillis).toEpochMilli()))).build(), e -> {
+                        .addLore(getLang().getLore("time.lore",
+                                Tuple.of("%time%", TimeUtil.formatTimeUntil(Instant.now().plusSeconds(1).plusMillis(timeOffsetMillis).toEpochMilli())))
+                        ).build(), e -> {
                     if (e.isRightClick()) {
                         if (e.isShiftClick()) {
                             if (timeOffsetMillis - 30 * 60 * 1000 < 0)
@@ -164,14 +168,14 @@ public class NewListingMenu extends FastInv {
     }
 
     private void setAdvertButton() {
-        String postAdvert = StringUtils.formatPlaceholders(advertise
-                        ? getLang().getStringFormatted("advert.options.selected", "&8> &e{0}")
-                        : getLang().getStringFormatted("advert.options.not-selected", "&f{0}"),
-                Lang.i().getAdvertActions().getPost());
-        String dontPost = StringUtils.formatPlaceholders(!advertise
-                        ? getLang().getStringFormatted("advert.options.selected", "&8> &e{0}")
-                        : getLang().getStringFormatted("advert.options.not-selected", "&f{0}"),
-                Lang.i().getAdvertActions().getSilent());
+        Component postAdvert = Text.replace(advertise
+                        ? getLang().getStringFormatted("advert.options.selected", "&8> &e%option%")
+                        : getLang().getStringFormatted("advert.options.not-selected", "&f%option%"),
+                Tuple.of("%option%", Lang.i().getAdvertActions().getPost()));
+        Component dontPost = Text.replace(!advertise
+                        ? getLang().getStringFormatted("advert.options.selected", "&8> &e%option%")
+                        : getLang().getStringFormatted("advert.options.not-selected", "&f%option%"),
+                Tuple.of("%option%", Lang.i().getAdvertActions().getSilent()));
 
         removeItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_ADVERT, -1));
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_ADVERT, -1),
@@ -181,9 +185,10 @@ public class NewListingMenu extends FastInv {
                         .setAttributes(null)
                         .flags(ItemFlag.HIDE_ATTRIBUTES)
                         .lore(getLang().getLore(player, "advert.lore",
-                                new DecimalFormat(Config.i().getFormatting().getNumbers())
-                                        .format(PermissionsData.getHighestDouble(PermissionsData.PermissionType.ADVERT_PRICE, player)),
-                                postAdvert, dontPost)).build(), e -> {
+                                Tuple.of("%cost%", Config.i().getFormatting().numbers()
+                                        .format(PermissionsData.getHighestDouble(PermissionsData.PermissionType.ADVERT_PRICE, player))),
+                                Tuple.of("%first%", postAdvert),
+                                Tuple.of("%second%", dontPost))).build(), e -> {
                     this.advertise = !advertise;
                     setAdvertButton();
                 }
@@ -207,9 +212,9 @@ public class NewListingMenu extends FastInv {
                         .setAttributes(null)
                         .flags(ItemFlag.HIDE_ATTRIBUTES)
                         .lore(getLang().getLore("currency.lore",
-                                StringUtils.colorize(previous),
-                                StringUtils.colorize(current),
-                                StringUtils.colorize(next))).build(), e -> {
+                                Tuple.of("%previous%", previous),
+                                Tuple.of("%current%", current),
+                                Tuple.of("%next%", next))).build(), e -> {
                     if (e.getClick().isLeftClick() && previousCurrency != null) {
                         currency = previousCurrency;
                     }
@@ -224,14 +229,14 @@ public class NewListingMenu extends FastInv {
 
     // Not Used (For future bidding update)
     private void setModeButton() {
-        String bidding = StringUtils.formatPlaceholders(isBidding
-                        ? getLang().getStringFormatted("mode.options.selected", "&8> &e{0}")
-                        : getLang().getStringFormatted("mode.options.not-selected", "&f{0}"),
-                Lang.i().getWords().getModes().getBidding());
-        String bin = StringUtils.formatPlaceholders(!isBidding
-                        ? getLang().getStringFormatted("mode.options.selected", "&8> &e{0}")
-                        : getLang().getStringFormatted("mode.options.not-selected", "&f{0}"),
-                Lang.i().getWords().getModes().getBuyItNow());
+        Component bidding = Text.replace(isBidding
+                        ? getLang().getStringFormatted("mode.options.selected", "&8> &e%option%")
+                        : getLang().getStringFormatted("mode.options.not-selected", "&f%option%"),
+                Tuple.of("%option%", Lang.i().getWords().getModes().getBidding()));
+        Component bin = Text.replace(!isBidding
+                        ? getLang().getStringFormatted("mode.options.selected", "&8> &e%option%")
+                        : getLang().getStringFormatted("mode.options.not-selected", "&f%option%"),
+                Tuple.of("%option%", Lang.i().getWords().getModes().getBuyItNow()));
 
         removeItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_MODE, -1));
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_MODE, -1),
@@ -240,7 +245,9 @@ public class NewListingMenu extends FastInv {
                         .modelData(getLang().getInt("mode.model-data"))
                         .setAttributes(null)
                         .flags(ItemFlag.HIDE_ATTRIBUTES)
-                        .lore(getLang().getLore("mode.lore", bidding, bin)).build(), e -> {
+                        .lore(getLang().getLore("mode.lore",
+                                Tuple.of("%first%", bidding),
+                                Tuple.of("%second%", bin))).build(), e -> {
                     this.isBidding = !isBidding;
                     setModeButton();
                 }
@@ -249,6 +256,6 @@ public class NewListingMenu extends FastInv {
 
     private void addNavigationButtons() {
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.CLOSE, 49),
-                GuiHelper.constructButton(GuiButtonType.CLOSE), e -> e.getWhoClicked().closeInventory());
+                Menus.i().getCloseButton().itemStack(), e -> e.getWhoClicked().closeInventory());
     }
 }

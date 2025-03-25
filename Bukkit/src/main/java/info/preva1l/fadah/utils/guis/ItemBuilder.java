@@ -1,6 +1,7 @@
 package info.preva1l.fadah.utils.guis;
 
 import com.google.common.collect.Multimap;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -13,10 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -103,6 +101,10 @@ public class ItemBuilder {
         return meta(meta -> meta.setDisplayName(name));
     }
 
+    public ItemBuilder name(Component component) {
+        return meta(meta -> meta.displayName(component));
+    }
+
     public ItemBuilder lore(String lore) {
         return lore(Collections.singletonList(lore));
     }
@@ -113,6 +115,10 @@ public class ItemBuilder {
 
     public ItemBuilder lore(List<String> lore) {
         return meta(meta -> meta.setLore(lore));
+    }
+
+    public ItemBuilder lore(Collection<Component> lore) {
+        return meta(meta -> meta.lore(new ArrayList<>(lore)));
     }
 
     public void addLore(String line) {
@@ -126,6 +132,20 @@ public class ItemBuilder {
 
             lore.add(line);
             meta.setLore(lore);
+        });
+    }
+
+    public void addLore(Component line) {
+        meta(meta -> {
+            List<Component> lore = meta.lore();
+
+            if (lore == null) {
+                meta.lore(Collections.singletonList(line));
+                return;
+            }
+
+            lore.add(line);
+            meta.lore(lore);
         });
     }
 
@@ -146,6 +166,21 @@ public class ItemBuilder {
             meta.setLore(lore);
         });
     }
+
+    public ItemBuilder addLore(Collection<Component> lines) {
+        return meta(meta -> {
+            List<Component> lore = meta.lore();
+
+            if (lore == null) {
+                meta.lore(new ArrayList<>(lines));
+                return;
+            }
+
+            lore.addAll(lines);
+            meta.lore(lore);
+        });
+    }
+
 
     public ItemBuilder flags(ItemFlag... flags) {
         return meta(meta -> meta.addItemFlags(flags));

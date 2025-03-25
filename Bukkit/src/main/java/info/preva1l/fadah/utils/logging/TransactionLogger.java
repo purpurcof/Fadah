@@ -7,7 +7,6 @@ import info.preva1l.fadah.hooks.impl.InfluxDBHook;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
 import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.hooker.Hooker;
 import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
@@ -31,11 +30,13 @@ public class TransactionLogger {
         CacheAccess.getNotNull(History.class, listing.getOwner()).add(historicItem);
 
         // Log file logs
-        String logMessage = StringUtils.formatPlaceholders("[NEW LISTING] Seller: {0} ({1}), Price: {2}, ItemStack: {3}",
-                Bukkit.getOfflinePlayer(listing.getOwner()).getName(), Bukkit.getOfflinePlayer(listing.getOwner()).getUniqueId().toString(),
-                listing.getPrice(), listing.getItemStack().toString());
+        String logMessage = "[NEW LISTING] Seller: %s (%s), Price: %.2f, ItemStack: %s".formatted(
+                Bukkit.getOfflinePlayer(listing.getOwner()).getName(),
+                Bukkit.getOfflinePlayer(listing.getOwner()).getUniqueId().toString(),
+                listing.getPrice(),
+                listing.getItemStack().toString());
 
-        Fadah.getINSTANCE().getTransactionLogger().info(logMessage);
+        Fadah.getInstance().getTransactionLogger().info(logMessage);
 
         Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }
@@ -67,10 +68,16 @@ public class TransactionLogger {
         CacheAccess.getNotNull(History.class, buyer.getUniqueId()).add(historicItemBuyer);
 
         // Log file logs
-        String logMessage = StringUtils.formatPlaceholders("[LISTING SOLD] Seller: {0} ({1}), Buyer: {2} ({3}), Price: {4}, ItemStack: {5}",
-                listing.getOwnerName(), listing.getOwner(), buyer.getName(), buyer.getUniqueId(), listing.getPrice(), listing.getItemStack());
+        String logMessage = "[LISTING SOLD] Seller: %s (%s), Buyer: %s (%s), Price: %.2f, ItemStack: %s".formatted(
+                listing.getOwnerName(),
+                listing.getOwner(),
+                buyer.getName(),
+                buyer.getUniqueId(),
+                listing.getPrice(),
+                listing.getItemStack()
+        );
 
-        Fadah.getINSTANCE().getTransactionLogger().info(logMessage);
+        Fadah.getInstance().getTransactionLogger().info(logMessage);
 
         Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }
@@ -92,11 +99,14 @@ public class TransactionLogger {
                 );
 
         // Log file logs
-        String logMessage = StringUtils.formatPlaceholders("[LISTING REMOVED] Seller: {0} ({1}), Price: {2}, ItemStack: {3}",
-                Bukkit.getOfflinePlayer(listing.getOwner()).getName(), Bukkit.getOfflinePlayer(listing.getOwner()).getUniqueId().toString(),
-                listing.getPrice(), listing.getItemStack().toString());
+        String logMessage = "[LISTING REMOVED] Seller: %s (%s), Price: %.2f, ItemStack: %s".formatted(
+                Bukkit.getOfflinePlayer(listing.getOwner()).getName(),
+                Bukkit.getOfflinePlayer(listing.getOwner()).getUniqueId().toString(),
+                listing.getPrice(),
+                listing.getItemStack().toString()
+        );
 
-        Fadah.getINSTANCE().getTransactionLogger().info(logMessage);
+        Fadah.getInstance().getTransactionLogger().info(logMessage);
 
         Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }
@@ -117,11 +127,14 @@ public class TransactionLogger {
                 );
 
         // Log file logs
-        String logMessage = StringUtils.formatPlaceholders("[LISTING EXPIRED] Seller: {0} ({1}), Price: {2}, ItemStack: {3}",
-                Bukkit.getOfflinePlayer(listing.getOwner()).getName(), Bukkit.getOfflinePlayer(listing.getOwner()).getUniqueId().toString(),
-                listing.getPrice(), listing.getItemStack().toString());
+        String logMessage = "[LISTING EXPIRED] Seller: %s (%s), Price: %.2f, ItemStack: %s".formatted(
+                Bukkit.getOfflinePlayer(listing.getOwner()).getName(),
+                Bukkit.getOfflinePlayer(listing.getOwner()).getUniqueId().toString(),
+                listing.getPrice(),
+                listing.getItemStack().toString()
+        );
 
-        Fadah.getINSTANCE().getTransactionLogger().info(logMessage);
+        Fadah.getInstance().getTransactionLogger().info(logMessage);
 
         Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }

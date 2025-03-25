@@ -4,12 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.ExpiredItems;
-import info.preva1l.fadah.utils.mongo.CollectionHelper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.NotImplementedException;
 import org.bson.Document;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 
 @RequiredArgsConstructor
 public class ExpiredItemsMongoDao implements Dao<ExpiredItems> {
@@ -27,7 +29,7 @@ public class ExpiredItemsMongoDao implements Dao<ExpiredItems> {
             .registerTypeHierarchyAdapter(ConfigurationSerializable.class, new BukkitSerializableAdapter())
             .serializeNulls().disableHtmlEscaping().create();
     private static final Type EXPIRED_LIST_TYPE = new TypeToken<ArrayList<CollectableItem>>() {}.getType();
-    private final CollectionHelper collectionHelper;
+    private final MongoDatabase database;
 
     /**
      * Get an object from the database by its id.
@@ -38,7 +40,7 @@ public class ExpiredItemsMongoDao implements Dao<ExpiredItems> {
     @Override
     public Optional<ExpiredItems> get(UUID id) {
         try {
-            MongoCollection<Document> collection = collectionHelper.getCollection("expired_items");
+            MongoCollection<Document> collection = database.getCollection("expired_items");
             final Document document = collection.find().filter(Filters.eq("playerUUID", id)).first();
             if (document == null) return Optional.empty();
 
@@ -46,7 +48,7 @@ public class ExpiredItemsMongoDao implements Dao<ExpiredItems> {
             if (items == null) items = new ArrayList<>();
             return Optional.of(new ExpiredItems(id, items));
         } catch (Exception e) {
-            e.printStackTrace();
+            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
         }
         return Optional.empty();
     }
@@ -71,9 +73,9 @@ public class ExpiredItemsMongoDao implements Dao<ExpiredItems> {
         try {
             Document document = new Document("playerUUID", expiredItems.owner())
                     .append("items", GSON.toJson(expiredItems.expiredItems(), EXPIRED_LIST_TYPE));
-            collectionHelper.insertDocument("expired_items", document);
+            database.getCollection("expired_items").insertOne(document);
         } catch (Exception e) {
-            e.printStackTrace();
+            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
         }
     }
 

@@ -5,6 +5,7 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.records.listing.Listing;
 import lombok.AllArgsConstructor;
 import lombok.experimental.UtilityClass;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 
@@ -12,8 +13,8 @@ import java.util.Set;
 
 @UtilityClass
 public class PermissionsData {
-    public int getCurrentListings(Player player) {
-        return CacheAccess.getAll(Listing.class).stream().filter(l -> l.isOwner(player)).toList().size();
+    public int getCurrentListings(OfflinePlayer player) {
+        return CacheAccess.getAll(Listing.class).stream().filter(l -> l.isOwner(player.getUniqueId())).toList().size();
     }
 
     public int getHighestInt(PermissionType type, Player player) {

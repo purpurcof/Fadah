@@ -2,7 +2,7 @@ package info.preva1l.fadah.currency;
 
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
-import info.preva1l.fadah.config.SubEconomy;
+import info.preva1l.fadah.config.misc.SubEconomy;
 import lombok.Getter;
 import su.nightexpress.coinsengine.api.CoinsEngineAPI;
 

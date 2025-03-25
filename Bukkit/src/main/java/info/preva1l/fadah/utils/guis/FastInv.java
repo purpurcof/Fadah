@@ -2,7 +2,9 @@ package info.preva1l.fadah.utils.guis;
 
 import com.github.puregero.multilib.MultiLib;
 import info.preva1l.fadah.Fadah;
+import info.preva1l.fadah.config.Menus;
 import info.preva1l.fadah.utils.config.LanguageConfig;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -57,6 +59,9 @@ public class FastInv implements InventoryHolder {
         this(owner -> Bukkit.createInventory(owner, size, title), menuType);
     }
 
+    public FastInv(int size, Component title, LayoutManager.MenuType menuType) {
+        this(owner -> Bukkit.createInventory(owner, size, title), menuType);
+    }
 
     public FastInv(Function<InventoryHolder, Inventory> inventoryFunction, LayoutManager.MenuType menuType) {
         Objects.requireNonNull(inventoryFunction, "inventoryFunction");
@@ -82,8 +87,7 @@ public class FastInv implements InventoryHolder {
     protected void fillers() {
         List<Integer> fillerSlots = getLayout().fillerSlots();
         if (!fillerSlots.isEmpty()) {
-            setItems(fillerSlots.stream().mapToInt(Integer::intValue).toArray(),
-                    GuiHelper.constructButton(GuiButtonType.BORDER));
+            setItems(fillerSlots.stream().mapToInt(Integer::intValue).toArray(), Menus.i().getBorder().itemStack());
         }
     }
 
@@ -177,7 +181,7 @@ public class FastInv implements InventoryHolder {
      * @param player The player to open the menu.
      */
     public void open(Player player) {
-        MultiLib.getEntityScheduler(player).execute(Fadah.getINSTANCE(),
+        MultiLib.getEntityScheduler(player).execute(Fadah.getInstance(),
                 () -> player.openInventory(this.inventory),
                 null,
                 0L);
@@ -230,12 +234,16 @@ public class FastInv implements InventoryHolder {
         }
     }
 
+    public void addCloseHandler(Consumer<InventoryCloseEvent> handler) {
+        this.closeHandlers.add(handler);
+    }
+
     public @NotNull LayoutManager.MenuType getMenuType() {
         return menuType;
     }
 
     public @NotNull GuiLayout getLayout() {
-        return Fadah.getINSTANCE().getLayoutManager().getLayout(this);
+        return Fadah.getInstance().getLayoutManager().getLayout(this);
     }
 
     public @NotNull LanguageConfig getLang() {

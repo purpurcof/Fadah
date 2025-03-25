@@ -7,7 +7,7 @@ import info.preva1l.fadah.filters.SortingDirection;
 import info.preva1l.fadah.filters.SortingMethod;
 import info.preva1l.fadah.records.Category;
 import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.StringUtils;
+import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
 import info.preva1l.fadah.utils.guis.LayoutManager;
 import info.preva1l.fadah.utils.guis.PaginatedItem;
@@ -47,8 +47,8 @@ public class MainMenu extends PurchaseMenu {
     public void fillScrollbarItems() {
         for (Category cat : CategoryRegistry.getCategories()) {
             ItemBuilder itemBuilder = new ItemBuilder(cat.icon())
-                    .name(StringUtils.colorize(cat.name()))
-                    .addLore(StringUtils.colorizeList(cat.description()))
+                    .name(Text.modernMessage(cat.name()))
+                    .addLore(Text.modernList(cat.description()))
                     .modelData(cat.modelData())
                     .setAttributes(null)
                     .flags(ItemFlag.HIDE_ENCHANTS,
@@ -59,7 +59,7 @@ public class MainMenu extends PurchaseMenu {
                             ItemFlag.HIDE_DYE,
                             ItemFlag.HIDE_POTION_EFFECTS);
             if (category == cat) {
-                itemBuilder.name(StringUtils.colorize(cat.name() + "&r " + Lang.i().getCategorySelected()))
+                itemBuilder.name(Text.modernMessage(cat.name() + "&r " + Lang.i().getCategorySelected()))
                         .enchant(Enchantment.DURABILITY);
                 itemBuilder.flags(ItemFlag.HIDE_ENCHANTS);
             }
@@ -96,7 +96,7 @@ public class MainMenu extends PurchaseMenu {
 
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PROFILE,-1),
                 new ItemBuilder(getLang().getAsMaterial("profile-button.icon", Material.PLAYER_HEAD)).skullOwner(player)
-                        .name(getLang().getStringFormatted("profile-button.name", "&e&l{0} Profile", StringUtils.capitalize(Lang.i().getWords().getYour())))
+                        .name(getLang().getStringFormatted("profile-button.name", "&e&lYour Profile"))
                         .addLore(getLang().getLore("profile-button.lore"))
                         .modelData(getLang().getInt("profile-button.model-data"))
                         .build(), e -> new ProfileMenu(player, player).open(player));

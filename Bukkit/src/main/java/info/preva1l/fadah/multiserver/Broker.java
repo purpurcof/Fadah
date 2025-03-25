@@ -9,15 +9,14 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.data.DatabaseType;
 import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.StringUtils;
 import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.FastInvManager;
 import info.preva1l.fadah.watcher.AuctionWatcher;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -47,15 +46,15 @@ public abstract class Broker {
                         Player player = Bukkit.getPlayer(notification.getPlayer());
                         if (player == null) return;
 
-                        player.sendMessage(StringUtils.colorize(notification.getMessage()));
-                        }, () -> {
+                        player.sendMessage(Text.modernMessage(notification.getMessage()));
+                    }, () -> {
                         throw new IllegalStateException("Notification message received with no notification info!");
                     });
 
             case BROADCAST -> message.getPayload()
                     .getBroadcast().ifPresentOrElse(broadcast ->
-                            TaskManager.Async.run(Fadah.getINSTANCE(), () -> {
-                                Component textComponent = MiniMessage.miniMessage().deserialize(StringUtils.legacyToMiniMessage(broadcast.getMessage()));
+                            TaskManager.Async.run(Fadah.getInstance(), () -> {
+                                Component textComponent = Text.modernMessage(broadcast.getMessage());
                                 if (broadcast.getClickCommand() != null) {
                                     textComponent = textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, broadcast.getClickCommand()));
                                 }
@@ -74,12 +73,12 @@ public abstract class Broker {
                                             AuctionWatcher.sendAlert(watchNotification.getPlayer(), listing)));
 
             case RELOAD -> {
-                Fadah.getINSTANCE().reload();
+                Fadah.getInstance().reload();
                 Lang.sendMessage(Bukkit.getConsoleSender(), Lang.i().getPrefix() + Lang.i().getCommands().getReload().getRemote());
             }
 
             case TOGGLE -> {
-                FastInvManager.closeAll(Fadah.getINSTANCE());
+                FastInvManager.closeAll(Fadah.getInstance());
                 boolean enabled = Config.i().isEnabled();
                 Config.i().setEnabled(!enabled);
 
@@ -129,7 +128,7 @@ public abstract class Broker {
     public static Broker getInstance() {
         if (instance == null) {
             instance = switch (Config.i().getBroker().getType()) {
-                case REDIS -> new RedisBroker(Fadah.getINSTANCE());
+                case REDIS -> new RedisBroker(Fadah.getInstance());
             };
         }
         return instance;

@@ -1,43 +1,43 @@
-title: '&9&lAuction House &8> &b{0} Profile' # {0} = "Your" or the players name if in management mode, {1} = the players username
+# %dynamic% = "Your" or the players name if in management mode, %username% = the players username
 
+title: '&9&lAuction House &8> &b%dynamic% Profile'
 
-# {0} = "Your" or the players name if in management mode, {1} = the players username
 lang:
   profile-button:
     icon: PLAYER_HEAD
     model-data: 0
-    name: '&e&l{0} Profile'
+    name: '&e&l%dynamic% Profile'
     lore:
-      - '&fThis is {0} profile!'
-      - '&fHere you will find items from the auction house relating to {1}.' # {1} = you or the players username, {2} = the players username
+      - '&fThis is %dynamic% profile!'
+      - '&fHere you will find items from the auction house relating to %username%.'
   your-listings:
     icon: EMERALD
     model-data: 0
-    name: '&1{0} Listings'
+    name: '&1%dynamic% Listings'
     lore:
       - '&fClick to view & manage'
-      - '&f{0} active listings!'
+      - '&f%dynamic% %amount% active listings!'
   collection-box:
     icon: CHEST_MINECART
     model-data: 0
-    name: '&e{0} Collection Box'
+    name: '&e%dynamic% Collection Box'
     lore:
       - '&fClick to view & claim'
-      - '&f{0} purchases!'
+      - '&f%dynamic% %amount% pending purchases!'
   expired-items:
     icon: ENDER_CHEST
     model-data: 0
-    name: '&c{0} Expired Listings'
+    name: '&c%dynamic% Expired Listings'
     lore:
       - '&fClick to view & claim'
-      - '&f{0} expired listings!'
+      - '&f%dynamic% %amount% expired listings!'
   historic-items:
     icon: WRITABLE_BOOK
     model-data: 0
-    name: '&c{0} History'
+    name: '&c%dynamic% History'
     lore:
       - '&fClick to view'
-      - '&f{0} history!'
+      - '&f%dynamic% history!'
 
 size: 6
 

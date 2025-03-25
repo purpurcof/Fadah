@@ -7,13 +7,13 @@ lang:
     name: '&aClick to create listing!'
     lore:
       - '&cClicking this button will immediately post'
-      - '&cyour item on the auction house for &a${0}'
+      - '&cyour item on the auction house for &a$%price%'
   time:
     icon: CLOCK
     model-data: 0
     name: '&aTime for listing to be active'
     lore:
-      - '&fCurrent: &6{0}'
+      - '&fCurrent: &6%time%'
       - '&7Left Click to Add 1 Hour'
       - '&7Right Click to Remove 1 Hour'
       - '&7Shift Left Click to Add 30 Minutes'
@@ -23,15 +23,15 @@ lang:
     model-data: 0
     name: "&eAdvertise Listing"
     lore:
-      - '&fAdvert Price: &a${0}'
+      - '&fAdvert Price: &a$%cost%'
       - '&7Click To Toggle'
       - '&8-------------------------'
-      - '{1}'
-      - '{2}'
+      - '%first%'
+      - '%first%'
       - '&8-------------------------'
     options:
-      selected: '&8> &e{0}'
-      not-selected: '&f{0}'
+      selected: '&8> &e%option%'
+      not-selected: '&f%option%'
   currency:
     icon: GOLD_INGOT
     model-data: 0
@@ -40,9 +40,9 @@ lang:
       - '&7Left Click to cycle up'
       - '&7Right Click to cycle down'
       - '&8-------------------------'
-      - '&f{0}'
-      - '&8> &e{1}'
-      - '&f{2}'
+      - '&f%previous%'
+      - '&8> &e%current%'
+      - '&f%next%'
       - '&8-------------------------'
   mode: # Future Feature
     icon: HOPPER
@@ -51,12 +51,12 @@ lang:
     lore:
       - '&7Click To Toggle'
       - '&8-------------------------'
-      - '{0}'
-      - '{1}'
+      - '%first%'
+      - '%second%'
       - '&8-------------------------'
     options:
-      selected: '&8> &e{0}'
-      not-selected: '&f{0}'
+      selected: '&8> &e%option%'
+      not-selected: '&f%option%'
 
 size: 6
 

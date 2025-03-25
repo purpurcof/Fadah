@@ -5,21 +5,18 @@ import info.preva1l.fadah.api.BukkitAuctionHouseAPI;
 import info.preva1l.fadah.commands.CommandProvider;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
-import info.preva1l.fadah.config.Menus;
 import info.preva1l.fadah.currency.CurrencyProvider;
 import info.preva1l.fadah.data.DataProvider;
 import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.hooks.HookProvider;
 import info.preva1l.fadah.listeners.PlayerListener;
-import info.preva1l.fadah.metrics.Metrics;
 import info.preva1l.fadah.metrics.MetricsProvider;
 import info.preva1l.fadah.migrator.MigrationProvider;
 import info.preva1l.fadah.migrator.MigratorManager;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.processor.DefaultProcessorArgsProvider;
-import info.preva1l.fadah.records.listing.ListingExpiryProvider;
-import info.preva1l.fadah.utils.StringUtils;
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Text;
+import info.preva1l.fadah.utils.UpdatesProvider;
 import info.preva1l.fadah.utils.config.BasicConfig;
 import info.preva1l.fadah.utils.guis.FastInvManager;
 import info.preva1l.fadah.utils.guis.LayoutManager;
@@ -27,45 +24,35 @@ import info.preva1l.fadah.utils.logging.LoggingProvider;
 import info.preva1l.hooker.Hooker;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
-import net.william278.desertwell.util.UpdateChecker;
-import net.william278.desertwell.util.Version;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-public final class Fadah extends JavaPlugin implements MigrationProvider, CurrencyProvider, ListingExpiryProvider,
-        CommandProvider, MetricsProvider, LoggingProvider, HookProvider, DataProvider, DefaultProcessorArgsProvider {
-    private static final int SPIGOT_ID = 116157;
-    @Getter private static Fadah INSTANCE;
+public final class Fadah extends JavaPlugin implements MigrationProvider, CurrencyProvider,
+        CommandProvider, MetricsProvider, LoggingProvider, HookProvider, DataProvider, DefaultProcessorArgsProvider,
+        UpdatesProvider {
+    @Getter private static Fadah instance;
     @Getter private static Logger console;
+
     @Getter private final Logger transactionLogger = Logger.getLogger("AuctionHouse-Transactions");
-    private Version pluginVersion;
     @Getter private BasicConfig categoriesFile;
     @Getter private BasicConfig menusFile;
 
     @Getter private LayoutManager layoutManager;
 
-    @Getter private BukkitAudiences adventureAudience;
     @Getter @Setter private MigratorManager migrationManager;
-
-    @Getter @Setter private Metrics metrics;
-
-    @Getter private UpdateChecker.Completed checked;
 
     @Override
     public void onLoad() {
-        INSTANCE = this;
-        pluginVersion = Version.fromString(getDescription().getVersion());
+        instance = this;
         console = getLogger();
         loadHooks();
     }
 
     @Override
     public void onEnable() {
-        adventureAudience = BukkitAudiences.create(this);
         getConsole().info("Enabling the API...");
         AuctionHouseAPI.setInstance(new BukkitAuctionHouseAPI());
         getConsole().info("API Enabled!");
@@ -75,10 +62,9 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
         loadMenus();
         loadFiles();
         loadDataAndPopulateCaches();
-        loadCommands(this);
+        loadCommands();
 
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
-        TaskManager.Async.runTask(this, listingExpiryTask(), 10L);
         FastInvManager.register(this);
 
         Broker.getInstance().load();
@@ -86,15 +72,16 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
         Hooker.enable();
         loadMigrators();
 
-        initLogger(this);
-        setupMetrics(this);
+        initLogger();
+        setupMetrics();
 
-        Bukkit.getConsoleSender().sendMessage(StringUtils.colorize("&2&l------------------------------"));
-        Bukkit.getConsoleSender().sendMessage(StringUtils.colorize("&a Finally a Decent Auction House"));
-        Bukkit.getConsoleSender().sendMessage(StringUtils.colorize("&a   has successfully started!"));
-        Bukkit.getConsoleSender().sendMessage(StringUtils.colorize("&2&l------------------------------"));
+        Bukkit.getConsoleSender().sendMessage(Text.modernMessage("""
+                        &2&l------------------------------
+                        &a Finally a Decent Auction House
+                        &a   has successfully started!
+                        &2&l------------------------------""".trim()));
 
-        TaskManager.Sync.runLater(this, this::checkForUpdates, 60L);
+        checkForUpdates();
     }
 
     @Override
@@ -119,10 +106,6 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
 
     private void loadMenus() {
         layoutManager = new LayoutManager();
-
-        menusFile = new BasicConfig(this, "menus/misc.yml");
-        Menus.loadDefault();
-
         Stream.of(
                 new BasicConfig(this, "menus/main.yml"),
                 new BasicConfig(this, "menus/new-listing.yml"),
@@ -137,23 +120,8 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
         ).forEach(layoutManager::loadLayout);
     }
 
-    private void checkForUpdates() {
-        final UpdateChecker checker = UpdateChecker.builder()
-                .currentVersion(pluginVersion)
-                .endpoint(UpdateChecker.Endpoint.SPIGOT)
-                .resource(Integer.toString(SPIGOT_ID))
-                .build();
-        checker.check().thenAccept(checked -> {
-            if (checked.isUpToDate()) {
-                return;
-            }
-            this.checked = checked;
-            Bukkit.getConsoleSender().sendMessage(StringUtils.colorize("&f[Fadah] Fadah is &#D63C3COUTDATED&f! " +
-                    "&7Current: &#D63C3C%s &7Latest: &#18D53A%s".formatted(checked.getCurrentVersion(), checked.getLatestVersion())));
-        });
-    }
-
-    public void reload() {
-        reload(this);
+    @Override
+    public Fadah getPlugin() {
+        return this;
     }
 }

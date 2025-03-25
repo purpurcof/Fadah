@@ -7,7 +7,7 @@ import info.preva1l.hooker.Hooker;
 public interface HookProvider {
     default void loadHooks() {
         Hooker.register(
-                Fadah.getINSTANCE(),
+                Fadah.getInstance(),
                 "info.preva1l.fadah.hooks.impl"
         );
 
