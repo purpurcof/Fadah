@@ -30,9 +30,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-public final class Fadah extends JavaPlugin implements MigrationProvider, CurrencyProvider,
-        CommandProvider, MetricsProvider, LoggingProvider, HookProvider, DataProvider, DefaultProcessorArgsProvider,
-        UpdatesProvider {
+public final class Fadah extends JavaPlugin implements MigrationProvider, CurrencyProvider, CommandProvider,
+        MetricsProvider, LoggingProvider, HookProvider, DataProvider, DefaultProcessorArgsProvider, UpdatesProvider {
     @Getter private static Fadah instance;
     @Getter private static Logger console;
 

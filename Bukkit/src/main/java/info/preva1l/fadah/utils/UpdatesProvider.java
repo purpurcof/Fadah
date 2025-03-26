@@ -12,6 +12,10 @@ import org.jetbrains.annotations.NotNull;
 public interface UpdatesProvider {
     Fadah getPlugin();
 
+    default Version getVersion() {
+        return UpdatesHolder.self.pluginVersion;
+    }
+
     default void checkForUpdates() {
         final UpdateChecker checker = UpdateChecker.builder()
                 .currentVersion(UpdatesHolder.self.pluginVersion)

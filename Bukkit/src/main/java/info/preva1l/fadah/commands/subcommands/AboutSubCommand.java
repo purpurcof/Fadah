@@ -5,17 +5,14 @@ import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.utils.commands.CommandArguments;
 import info.preva1l.fadah.utils.commands.SubCommand;
 import info.preva1l.fadah.utils.commands.SubCommandArgs;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.william278.desertwell.about.AboutMenu;
 import org.jetbrains.annotations.NotNull;
 
 public class AboutSubCommand extends SubCommand {
-    private final BukkitAudiences bukkitAudiences;
     public AboutSubCommand(Fadah plugin) {
         super(plugin, Lang.i().getCommands().getAbout().getAliases(), Lang.i().getCommands().getAbout().getDescription());
-        this.bukkitAudiences = BukkitAudiences.builder(plugin).build();
     }
 
     @SubCommandArgs(name = "about", inGameOnly = false)
@@ -31,10 +28,14 @@ public class AboutSubCommand extends SubCommand {
                         AboutMenu.Credit.of("asdevjava"),
                         AboutMenu.Credit.of("InvadedLands")
                         )
-                .buttons(AboutMenu.Link.of("https://discord.gg/4KcF7S94HF").text("Discord Support").icon("⭐"))
+                .buttons(
+                        AboutMenu.Link.of("https://discord.gg/4KcF7S94HF").text("Discord Support").icon("⭐"),
+                        AboutMenu.Link.of("https://docs.preva1l.info/fadlc/").text("Documentation").icon("📖")
+                )
+                .version(plugin.getVersion())
                 .themeColor(TextColor.fromHexString("#9555FF"))
                 .secondaryColor(TextColor.fromHexString("#bba4e0"))
                 .build();
-        bukkitAudiences.sender(command.sender()).sendMessage(aboutMenu.toComponent());
+        command.sender().sendMessage(aboutMenu.toComponent());
     }
 }
