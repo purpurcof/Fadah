@@ -8,9 +8,8 @@ public interface CurrencyProvider {
     default void loadCurrencies() {
         Fadah.getConsole().info("Loading currencies...");
         Stream.of(
-                new VaultCurrency()
-        ).forEach(CurrencyRegistry::register);
-        Stream.of(
+                new VaultCurrency(),
+                new PlayerPointsCurrency(),
                 new RedisEconomyCurrency(),
                 new CoinsEngineCurrency()
         ).forEach(CurrencyRegistry::register);

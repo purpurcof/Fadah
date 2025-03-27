@@ -217,6 +217,15 @@ public class Config {
                     new SubEconomy("dollar", "Dollar"),
                     new SubEconomy("euro", "Euro"));
         }
+
+        private PlayerPoints playerPoints = new PlayerPoints();
+
+        @Getter
+        @Configuration
+        @NoArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class PlayerPoints {
+            private String name = "Points";
+        }
     }
 
     private Database database = new Database();

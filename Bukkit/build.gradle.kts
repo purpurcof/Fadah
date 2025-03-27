@@ -22,6 +22,7 @@ repositories {
     maven(url = "https://repo.william278.net/snapshots")
     maven(url = "https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven(url = "https://mvn-repo.arim.space/lesser-gpl3/")
+    maven(url = "https://repo.rosewooddev.io/repository/public/")
 }
 
 dependencies {
@@ -55,6 +56,7 @@ dependencies {
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
     compileOnly("com.github.Emibergo02:RedisEconomy:4.3.9")
     compileOnly(files("../libs/CoinsEngine-2.3.5.jar"))
+    compileOnly("org.black_ixx:playerpoints:3.3.0")
 
     // Extra Hooks
     annotationProcessor("info.preva1l.hooker:Hooker:1.0.1")
