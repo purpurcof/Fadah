@@ -191,7 +191,7 @@ public class NewListingMenu extends FastInv {
                         .flags(ItemFlag.HIDE_ATTRIBUTES)
                         .lore(getLang().getLore(player, "advert.lore",
                                 Tuple.of("%cost%", Config.i().getFormatting().numbers().format(
-                                        PermissionsHook.getValue(String.class, Permission.ADVERT_PRICE, player))
+                                        PermissionsHook.getValue(Double.class, Permission.ADVERT_PRICE, player))
                                 ),
                                 Tuple.of("%first%", postAdvert),
                                 Tuple.of("%second%", dontPost))).build(), e -> {

@@ -24,9 +24,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
 public class SQLiteHandler implements DatabaseHandler {
@@ -39,10 +39,13 @@ public class SQLiteHandler implements DatabaseHandler {
     @Getter private V2Fixer v2Fixer;
     @Getter private V3Fixer v3Fixer;
 
+    private final Lock databaseFileLock = new ReentrantLock();
+
     @Override
     @Blocking
     public void connect() {
         try {
+            databaseFileLock.lock();
             File databaseFile = new File(Fadah.getInstance().getDataFolder(), DATABASE_FILE_NAME);
             if (databaseFile.createNewFile()) {
                 Fadah.getConsole().info("Created the SQLite database file");
@@ -76,6 +79,8 @@ public class SQLiteHandler implements DatabaseHandler {
         } catch (ClassNotFoundException e) {
             Fadah.getConsole().log(Level.SEVERE, "Failed to load the necessary SQLite driver", e);
             destroy();
+        } finally {
+            databaseFileLock.unlock();
         }
         registerDaos();
         v2Fixer = new SQLFixerV2(dataSource);
@@ -91,9 +96,7 @@ public class SQLiteHandler implements DatabaseHandler {
     }
 
     private void backupFlatFile(@NotNull File file) {
-        if (!file.exists()) {
-            return;
-        }
+        if (!file.exists()) return;
 
         final File backup = new File(file.getParent(), String.format("%s.bak", file.getName()));
         try {
@@ -120,7 +123,44 @@ public class SQLiteHandler implements DatabaseHandler {
     }
 
     @Override
-    public  <T> Dao<T> getDao(Class<?> clazz) {
+    public <T> List<T> getAll(Class<T> clazz) {
+        databaseFileLock.lock();
+        List<T> ret = (List<T>) getDao(clazz).getAll();
+        databaseFileLock.unlock();
+        return ret;
+    }
+
+    @Override
+    public <T> Optional<T> get(Class<T> clazz, UUID id) {
+        databaseFileLock.lock();
+        Optional<T> ret = (Optional<T>) getDao(clazz).get(id);
+        databaseFileLock.unlock();
+        return ret;
+    }
+
+    @Override
+    public <T> void save(Class<T> clazz, T t) {
+        databaseFileLock.lock();
+        getDao(clazz).save(t);
+        databaseFileLock.unlock();
+    }
+
+    @Override
+    public <T> void update(Class<T> clazz, T t, String[] params) {
+        databaseFileLock.lock();
+        getDao(clazz).update(t, params);
+        databaseFileLock.unlock();
+    }
+
+    @Override
+    public <T> void delete(Class<T> clazz, T t) {
+        databaseFileLock.lock();
+        getDao(clazz).delete(t);
+        databaseFileLock.unlock();
+    }
+
+    @Override
+    public <T> Dao<T> getDao(Class<?> clazz) {
         if (!daos.containsKey(clazz))
             throw new IllegalArgumentException("No DAO registered for class " + clazz.getName());
         return (Dao<T>) daos.get(clazz);

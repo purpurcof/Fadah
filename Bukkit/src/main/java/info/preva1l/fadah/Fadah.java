@@ -27,6 +27,7 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -74,11 +75,12 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
         initLogger();
         setupMetrics();
 
-        Bukkit.getConsoleSender().sendMessage(Text.modernMessage("""
-                        &2&l------------------------------
-                        &a Finally a Decent Auction House
-                        &a   has successfully started!
-                        &2&l------------------------------""".trim()));
+        Text.modernList(List.of(
+                        "&2&l-------------------------------",
+                        "&a Finally a Decent Auction House",
+                        "&a   has successfully started!",
+                        "&2&l-------------------------------")
+        ).forEach(Bukkit.getConsoleSender()::sendMessage);
 
         checkForUpdates();
     }

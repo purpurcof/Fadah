@@ -29,10 +29,16 @@ public abstract class PermissionsHook {
      * @implNote  the default implementation gets the highest or lowest value, depending on the permission.
      */
     public static <T> T getValue(Class<T> type, Permission permission, Player player) {
-        if (type.isAssignableFrom(Number.class)) {
-            return type.cast(valueRetriever.apply(permission, player));
-        } else if (type.isAssignableFrom(String.class)) {
-            return type.cast(String.valueOf((int) valueRetriever.apply(permission, player)));
+        Number value = valueRetriever.apply(permission, player);
+
+        if (type == Double.class) {
+            return type.cast(value.doubleValue());
+        } else if (type == Float.class) {
+            return type.cast(value.floatValue());
+        } else if (type == Integer.class) {
+            return type.cast(value);
+        } else if (type == String.class) {
+            return type.cast(String.valueOf(value));
         }
         throw new IllegalArgumentException("Unsupported return type: " + type.getSimpleName());
     }

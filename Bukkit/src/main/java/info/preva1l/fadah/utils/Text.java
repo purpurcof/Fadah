@@ -37,13 +37,13 @@ public class Text {
      * @return colorized component
      */
     public Component modernMessage(@NotNull String message) {
-        return miniMessage.deserialize(miniMessage.serialize(legacySerializer.deserialize("<!i>" + message)));
+        return miniMessage.deserialize("<!italic>" + miniMessage.serialize(legacySerializer.deserialize(message)));
     }
 
     public Component modernMessage(@Nullable Player player, @NotNull String message) {
         Optional<PapiHook> hook = Hooker.getHook(PapiHook.class);
         if (hook.isPresent()) message = hook.get().format(player, message);
-        return miniMessage.deserialize(miniMessage.serialize(legacySerializer.deserialize("<!i>" + message)));
+        return miniMessage.deserialize("<!italic>" + miniMessage.serialize(legacySerializer.deserialize(message)));
     }
 
     public List<Component> modernList(@NotNull List<String> list) {

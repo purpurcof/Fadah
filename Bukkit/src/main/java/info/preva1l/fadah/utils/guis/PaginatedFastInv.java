@@ -43,7 +43,7 @@ public abstract class PaginatedFastInv extends FastInv {
                 31, 32, 33, 34, 38, 39, 40,
                 41, 42, 43);
 
-        updateTask = TaskManager.Async.runTask(Fadah.getInstance(), this::updatePagination, 20L);
+        updateTask = TaskManager.Async.runTask(Fadah.getInstance(), this::updatePagination, 20L, 20L);
         addCloseHandler(event -> updateTask.cancel());
     }
 

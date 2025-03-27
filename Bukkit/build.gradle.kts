@@ -56,7 +56,7 @@ dependencies {
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
     compileOnly("com.github.Emibergo02:RedisEconomy:4.3.9")
     compileOnly(files("../libs/CoinsEngine-2.3.5.jar"))
-    compileOnly("org.black_ixx:playerpoints:3.3.0")
+    compileOnly("org.black_ixx:playerpoints:3.2.0")
 
     // Extra Hooks
     annotationProcessor("info.preva1l.hooker:Hooker:1.0.1")

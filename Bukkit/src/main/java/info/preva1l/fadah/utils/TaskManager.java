@@ -83,6 +83,17 @@ public class TaskManager {
          * @param runnable The runnable, lambda supported yeh
          * @param interval Time between each run
          */
+        public RegionizedTask runTask(Plugin plugin, Runnable runnable, long delay, long interval) {
+            return MultiLib.getAsyncScheduler().runAtFixedRate(plugin, task -> runnable.run(), delay, interval);
+        }
+
+        /**
+         * Run an asynchronous task forever with a delay between runs.
+         *
+         * @param plugin   The current plugin
+         * @param runnable The runnable, lambda supported yeh
+         * @param interval Time between each run
+         */
         public RegionizedTask runTask(Plugin plugin, Runnable runnable, long interval) {
             return MultiLib.getAsyncScheduler().runAtFixedRate(plugin, task -> runnable.run(), 0L, interval);
         }
