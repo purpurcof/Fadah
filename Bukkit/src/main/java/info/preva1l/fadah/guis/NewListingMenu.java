@@ -66,8 +66,7 @@ public class NewListingMenu extends FastInv {
                     if (startButtonClicked) return;
                     startButtonClicked = true;
                     giveItemBack = false;
-
-
+                    publishListing(price);
                 }
         );
         setClock();
