@@ -39,4 +39,14 @@ public final class MemoryCollectionCache implements Cache<CollectionBox> {
     public @NotNull List<CollectionBox> getAll() {
         return new ArrayList<>(collectionBoxes.values());
     }
+
+    @Override
+    public int size() {
+        return collectionBoxes.size();
+    }
+
+    @Override
+    public int amountByPlayer(@NotNull UUID player) {
+        return collectionBoxes.get(player).collectableItems().size();
+    }
 }

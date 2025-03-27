@@ -17,4 +17,8 @@ public interface Cache<T> {
     void invalidate(@NotNull T obj);
 
     @NotNull List<T> getAll();
+
+    int size();
+
+    int amountByPlayer(@NotNull UUID player);
 }

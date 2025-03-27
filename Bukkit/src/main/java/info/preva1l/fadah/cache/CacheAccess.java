@@ -83,6 +83,14 @@ public final class CacheAccess {
         return getCacheForClass(clazz).getAll();
     }
 
+    public static <T> int size(Class<T> clazz) {
+        return getCacheForClass(clazz).size();
+    }
+
+    public static <T> int amountByPlayer(Class<T> clazz, @NotNull UUID player) {
+        return getCacheForClass(clazz).amountByPlayer(player);
+    }
+
     @FunctionalInterface
     private interface CacheFactory<T> {
         Cache<T> create();

@@ -7,7 +7,7 @@ import java.util.Objects;
  * <br><br>
  * Created on 7/03/2025
  *
- * @since 2.9.0
+ * @since 3.0.0
  * @author Preva1l
  */
 public class PostResult {
@@ -36,7 +36,7 @@ public class PostResult {
      *
      * @param ordinal the ordinal value of the post result.
      * @param message the readable description of the result.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     private PostResult(int ordinal, String message) {
         this.ordinal = ordinal;
@@ -50,7 +50,7 @@ public class PostResult {
      *
      * @param message the readable description of the result.
      * @return the post result.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public static PostResult custom(String message) {
         return new PostResult(-999, message);

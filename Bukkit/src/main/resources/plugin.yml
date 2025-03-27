@@ -4,7 +4,18 @@ authors: [Preva1l]
 website: https://discord.gg/4KcF7S94HF
 version: ${version}
 
-softdepend: [PlaceholderAPI, EcoItems, zAuctionHouseV3, AuctionHouse, RedisEconomy, CoinsEngine, Vault]
+softdepend:
+  # Hooks
+  - PlaceholderAPI
+  - EcoItems
+  - LuckPerms
+  # Migrators
+  - zAuctionHouseV3
+  - AuctionHouse
+  # Economy
+  - RedisEconomy
+  - CoinsEngine
+  - Vault
 
 load: POSTWORLD
 

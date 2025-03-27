@@ -13,7 +13,7 @@ public interface CurrencyProvider {
         Stream.of(
                 new RedisEconomyCurrency(),
                 new CoinsEngineCurrency()
-        ).forEach(CurrencyRegistry::registerMulti);
+        ).forEach(CurrencyRegistry::register);
         Fadah.getConsole().info("Currencies Loaded!");
     }
 }

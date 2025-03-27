@@ -13,23 +13,23 @@ public interface UpdatesProvider {
     Fadah getPlugin();
 
     default Version getVersion() {
-        return UpdatesHolder.self.pluginVersion;
+        return UpdatesHolder.pluginVersion;
     }
 
     default void checkForUpdates() {
         final UpdateChecker checker = UpdateChecker.builder()
-                .currentVersion(UpdatesHolder.self.pluginVersion)
+                .currentVersion(UpdatesHolder.pluginVersion)
                 .endpoint(UpdateChecker.Endpoint.SPIGOT)
                 .resource(Integer.toString(UpdatesHolder.SPIGOT_ID))
                 .build();
-        checker.check().thenAccept(checked -> UpdatesHolder.self.completed = checked);
+        checker.check().thenAccept(checked -> UpdatesHolder.completed = checked);
 
         TaskManager.Sync.runLater(getPlugin(), () -> notifyUpdate(Bukkit.getConsoleSender()), 60L);
     }
 
     default void notifyUpdate(@NotNull CommandSender recipient) {
         if (!recipient.hasPermission("fadah.manage.profile")) return;
-        var checked = UpdatesHolder.self.completed;
+        var checked = UpdatesHolder.completed;
         if (checked.isUpToDate()) return;
         boolean critical = isCritical(checked);
         if (recipient instanceof Player && !Config.i().isUpdateChecker() && !critical) return;
@@ -53,10 +53,11 @@ public interface UpdatesProvider {
     }
 
     class UpdatesHolder {
-        private static final UpdatesHolder self = new UpdatesHolder();
         private static final int SPIGOT_ID = 116157;
 
-        private final Version pluginVersion = Version.fromString(Fadah.getInstance().getDescription().getVersion());
-        private UpdateChecker.Completed completed;
+        private static final Version pluginVersion = Version.fromString(Fadah.getInstance().getDescription().getVersion());
+        private static UpdateChecker.Completed completed;
+
+        private UpdatesHolder() {}
     }
 }

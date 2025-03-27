@@ -39,4 +39,14 @@ public final class MemoryListingCache implements Cache<Listing> {
     public @NotNull List<Listing> getAll() {
         return new ArrayList<>(listings.values());
     }
+
+    @Override
+    public int size() {
+        return listings.size();
+    }
+
+    @Override
+    public int amountByPlayer(@NotNull UUID player) {
+        return (int) listings.values().stream().filter(listing -> listing.isOwner(player)).count();
+    }
 }

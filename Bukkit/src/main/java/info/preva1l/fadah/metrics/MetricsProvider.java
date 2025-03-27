@@ -8,15 +8,13 @@ import info.preva1l.fadah.records.listing.Listing;
 public interface MetricsProvider {
     int METRICS_ID = 21651;
 
-    MetricsHolder metricsHolder = new MetricsHolder();
-
     default void setupMetrics() {
         getPlugin().getLogger().info("Starting Metrics...");
 
-        metricsHolder.metrics = new Metrics(getPlugin(), METRICS_ID);
-        metricsHolder.metrics.addCustomChart(new Metrics.SingleLineChart("items_listed", () -> CacheAccess.getAll(Listing.class).size()));
-        metricsHolder.metrics.addCustomChart(new Metrics.SimplePie("database_type", () -> Config.i().getDatabase().getType().getFriendlyName()));
-        metricsHolder.metrics.addCustomChart(new Metrics.SimplePie(
+        MetricsHolder.metrics = new Metrics(getPlugin(), METRICS_ID);
+        MetricsHolder.metrics.addCustomChart(new Metrics.SingleLineChart("items_listed", () -> CacheAccess.size(Listing.class)));
+        MetricsHolder.metrics.addCustomChart(new Metrics.SimplePie("database_type", () -> Config.i().getDatabase().getType().getFriendlyName()));
+        MetricsHolder.metrics.addCustomChart(new Metrics.SimplePie(
                 "multi_server",
                 () -> Config.i().getBroker().isEnabled() ? Config.i().getBroker().getType().getDisplayName() : "None"
         ));
@@ -26,13 +24,15 @@ public interface MetricsProvider {
     }
 
     default void shutdownMetrics() {
-        if (metricsHolder.metrics != null) {
-            metricsHolder.metrics.shutdown();
+        if (MetricsHolder.metrics != null) {
+            MetricsHolder.metrics.shutdown();
         }
     }
 
     class MetricsHolder {
-        private Metrics metrics;
+        private static Metrics metrics;
+
+        private MetricsHolder() {}
     }
 
     Fadah getPlugin();

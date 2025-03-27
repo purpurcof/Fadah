@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
  * <br><br>
  * Created on 7/03/2025
  *
- * @since 2.9.0
+ * @since 3.0.0
  * @author Preva1l
  */
 @SuppressWarnings("unused")
@@ -22,7 +22,7 @@ public interface CategoryManager {
      *
      * @param id the category id
      * @return the category matching that ID, or null if no category with that id exists.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     @Nullable
     Category get(@NotNull String id);
@@ -37,7 +37,7 @@ public interface CategoryManager {
      *
      * @param item the item to find the category for
      * @return the category id or "{@code _none_}"
-     * @since 2.9.0
+     * @since 3.0.0
      */
     CompletableFuture<String> forItem(@NotNull ItemStack item);
 
@@ -48,7 +48,7 @@ public interface CategoryManager {
      *
      * @param category the category to register
      * @return true if successful, false if a category with that id already exists
-     * @since 2.9.0
+     * @since 3.0.0
      */
     boolean register(@NotNull Category category);
 
@@ -57,7 +57,7 @@ public interface CategoryManager {
      *
      * @param id the category id to unregister
      * @return true if successful, false if the category never existed
-     * @since 2.9.0
+     * @since 3.0.0
      */
     boolean unregister(@NotNull String id);
 }

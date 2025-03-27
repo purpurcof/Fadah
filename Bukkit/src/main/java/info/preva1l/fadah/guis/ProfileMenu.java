@@ -4,9 +4,9 @@ import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.Menus;
 import info.preva1l.fadah.config.misc.Tuple;
-import info.preva1l.fadah.data.PermissionsData;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.FastInv;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
@@ -73,7 +73,7 @@ public class ProfileMenu extends FastInv {
                                         ? Text.capitalizeFirst(Lang.i().getWords().getYour())
                                         : owner.getName()),
                                 Tuple.of("%username%", owner.getName()),
-                                Tuple.of("%amount%", PermissionsData.getCurrentListings(owner)))
+                                Tuple.of("%amount%", CacheAccess.amountByPlayer(Listing.class, owner.getUniqueId())))
                         ).build(), e -> {
                     if ((viewer.getUniqueId() != owner.getUniqueId() && viewer.hasPermission("fadah.manage.active-listings"))
                             || viewer.getUniqueId() == owner.getUniqueId()) {

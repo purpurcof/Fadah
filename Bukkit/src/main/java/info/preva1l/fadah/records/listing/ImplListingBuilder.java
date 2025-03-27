@@ -4,7 +4,8 @@ import com.google.common.base.Preconditions;
 import info.preva1l.fadah.cache.CategoryRegistry;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.data.DatabaseManager;
-import info.preva1l.fadah.data.PermissionsData;
+import info.preva1l.fadah.hooks.impl.permissions.Permission;
+import info.preva1l.fadah.hooks.impl.permissions.PermissionsHook;
 import info.preva1l.fadah.records.post.ImplPost;
 import info.preva1l.fadah.records.post.Post;
 import org.bukkit.entity.Player;
@@ -29,7 +30,7 @@ public final class ImplListingBuilder extends ListingBuilder {
         super(owner);
         this.player = owner;
         this.length = Config.i().getDefaultListingLength().toMillis();
-        this.tax = PermissionsData.getHighestDouble(PermissionsData.PermissionType.LISTING_TAX, owner);
+        this.tax = PermissionsHook.getValue(Double.class, Permission.LISTING_TAX, owner);
     }
 
     public ImplListingBuilder(UUID ownerUuid, String ownerName) {

@@ -51,7 +51,10 @@ dependencies {
 
     compileOnly("org.mozilla:rhino:$rhinoVersion")
 
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7") // Economy Hook
+    // Currency
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+    compileOnly("com.github.Emibergo02:RedisEconomy:4.3.9")
+    compileOnly(files("../libs/CoinsEngine-2.3.5.jar"))
 
     // Extra Hooks
     annotationProcessor("info.preva1l.hooker:Hooker:1.0.1")
@@ -61,9 +64,7 @@ dependencies {
     compileOnly("com.willfp:eco:6.56.0")
     compileOnly("com.willfp:EcoItems:5.43.1")
     compileOnly("com.influxdb:influxdb-client-java:$influxdbVersion") // InfluxDB logging
-    // Currency
-    compileOnly("com.github.Emibergo02:RedisEconomy:4.3.9")
-    compileOnly(files("../libs/CoinsEngine-2.3.5.jar"))
+    compileOnly("net.luckperms:api:5.4") // Permissions enhancement
 
     // Migrators
     compileOnly("com.github.Maxlego08:zAuctionHouseV3-API:3.2.1.9") // zAuctionHouse

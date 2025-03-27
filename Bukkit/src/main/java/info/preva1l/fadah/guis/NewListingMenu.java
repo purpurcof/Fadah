@@ -1,6 +1,7 @@
 package info.preva1l.fadah.guis;
 
 import info.preva1l.fadah.Fadah;
+import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.commands.subcommands.SellSubCommand;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
@@ -9,8 +10,10 @@ import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.currency.Currency;
 import info.preva1l.fadah.currency.CurrencyRegistry;
 import info.preva1l.fadah.data.DatabaseManager;
-import info.preva1l.fadah.data.PermissionsData;
+import info.preva1l.fadah.hooks.impl.permissions.Permission;
+import info.preva1l.fadah.hooks.impl.permissions.PermissionsHook;
 import info.preva1l.fadah.records.listing.ImplListingBuilder;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.records.post.PostResult;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.Text;
@@ -63,48 +66,8 @@ public class NewListingMenu extends FastInv {
                     if (startButtonClicked) return;
                     startButtonClicked = true;
                     giveItemBack = false;
-                    new ImplListingBuilder(player)
-                            .currency(currency)
-                            .price(price)
-                            .tax(PermissionsData.getHighestDouble(PermissionsData.PermissionType.LISTING_TAX, player))
-                            .itemStack(itemToSell)
-                            .length(timeOffsetMillis)
-                            .biddable(isBidding)
-                            .toPost()
-                            .postAdvert(advertise)
-                            .buildAndSubmit().thenAcceptAsync(result -> TaskManager.Sync.run(plugin, player, () -> {
-                                if (result == PostResult.RESTRICTED_ITEM) {
-                                    giveItemBack = true;
-                                    Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getRestricted());
-                                    SellSubCommand.running.remove(player.getUniqueId());
-                                    return;
-                                }
 
-                                if (result == PostResult.MAX_LISTINGS) {
-                                    giveItemBack = true;
-                                    Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMaxListings()
-                                            .replace("%max%", String.valueOf(PermissionsData.getHighestInt(
-                                                    PermissionsData.PermissionType.MAX_LISTINGS,
-                                                    player))
-                                            )
-                                            .replace("%current%", String.valueOf(PermissionsData.getCurrentListings(player)))
-                                    );
-                                    SellSubCommand.running.remove(player.getUniqueId());
-                                    return;
-                                }
 
-                                if (!result.successful()) {
-                                    giveItemBack = true;
-                                    Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getOther().replace("%ex%", result.message()));
-                                }
-
-                                player.closeInventory();
-                                SellSubCommand.running.remove(player.getUniqueId());
-                            }), DatabaseManager.getInstance().getThreadPool())
-                            .exceptionally(t -> {
-                                Fadah.getConsole().log(Level.SEVERE, t.getMessage(), t);
-                                return null;
-                            });
                 }
         );
         setClock();
@@ -114,6 +77,48 @@ public class NewListingMenu extends FastInv {
         addNavigationButtons();
 
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_ITEM, -1), itemToSell);
+    }
+
+    private void publishListing(double price) {
+        new ImplListingBuilder(player)
+                .currency(currency)
+                .price(price)
+                .tax(PermissionsHook.getValue(Double.class, Permission.LISTING_TAX, player))
+                .itemStack(itemToSell)
+                .length(timeOffsetMillis)
+                .biddable(isBidding)
+                .toPost()
+                .postAdvert(advertise)
+                .buildAndSubmit().thenAcceptAsync(result -> TaskManager.Sync.run(plugin, player, () -> {
+                    if (result == PostResult.RESTRICTED_ITEM) {
+                        giveItemBack = true;
+                        Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getRestricted());
+                        SellSubCommand.running.remove(player.getUniqueId());
+                        return;
+                    }
+
+                    if (result == PostResult.MAX_LISTINGS) {
+                        giveItemBack = true;
+                        Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMaxListings()
+                                .replace("%max%", PermissionsHook.getValue(String.class, Permission.MAX_LISTINGS, player))
+                                .replace("%current%", String.valueOf(CacheAccess.amountByPlayer(Listing.class, player.getUniqueId())))
+                        );
+                        SellSubCommand.running.remove(player.getUniqueId());
+                        return;
+                    }
+
+                    if (!result.successful()) {
+                        giveItemBack = true;
+                        Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getOther().replace("%ex%", result.message()));
+                    }
+
+                    player.closeInventory();
+                    SellSubCommand.running.remove(player.getUniqueId());
+                }), DatabaseManager.getInstance().getThreadPool())
+                .exceptionally(t -> {
+                    Fadah.getConsole().log(Level.SEVERE, t.getMessage(), t);
+                    return null;
+                });
     }
 
     @Override
@@ -185,8 +190,9 @@ public class NewListingMenu extends FastInv {
                         .setAttributes(null)
                         .flags(ItemFlag.HIDE_ATTRIBUTES)
                         .lore(getLang().getLore(player, "advert.lore",
-                                Tuple.of("%cost%", Config.i().getFormatting().numbers()
-                                        .format(PermissionsData.getHighestDouble(PermissionsData.PermissionType.ADVERT_PRICE, player))),
+                                Tuple.of("%cost%", Config.i().getFormatting().numbers().format(
+                                        PermissionsHook.getValue(String.class, Permission.ADVERT_PRICE, player))
+                                ),
                                 Tuple.of("%first%", postAdvert),
                                 Tuple.of("%second%", dontPost))).build(), e -> {
                     this.advertise = !advertise;

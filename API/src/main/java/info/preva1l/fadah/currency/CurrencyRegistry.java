@@ -37,7 +37,7 @@ public final class CurrencyRegistry {
      * @throws IllegalArgumentException when a currency is already registered with one of the provided sub currency ids.
      * @see CurrencyRegistry#register(CurrencyBase)
      */
-    @Deprecated(since = "2.9.0")
+    @Deprecated(since = "3.0.0")
     public static void registerMulti(MultiCurrency currency) {
         register(currency);
     }
@@ -49,7 +49,7 @@ public final class CurrencyRegistry {
      *
      * @param currencyBase the currency to register.
      * @throws IllegalArgumentException when a currency is already registered with one of the provided ids.
-     * @since 2.9.0
+     * @since 3.0.0
      * @see CurrencyRegistry#registerMulti(MultiCurrency)
      */
     public static void register(CurrencyBase currencyBase) {

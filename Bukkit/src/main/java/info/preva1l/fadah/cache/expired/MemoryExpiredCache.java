@@ -39,4 +39,14 @@ public final class MemoryExpiredCache implements Cache<ExpiredItems> {
     public @NotNull List<ExpiredItems> getAll() {
         return new ArrayList<>(expiredItems.values());
     }
+
+    @Override
+    public int size() {
+        return expiredItems.size();
+    }
+
+    @Override
+    public int amountByPlayer(@NotNull UUID player) {
+        return expiredItems.get(player).expiredItems().size();
+    }
 }

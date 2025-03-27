@@ -1,13 +1,16 @@
 package info.preva1l.fadah.commands.subcommands;
 
 import info.preva1l.fadah.Fadah;
+import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.currency.CurrencyRegistry;
 import info.preva1l.fadah.data.DatabaseManager;
-import info.preva1l.fadah.data.PermissionsData;
 import info.preva1l.fadah.guis.NewListingMenu;
+import info.preva1l.fadah.hooks.impl.permissions.Permission;
+import info.preva1l.fadah.hooks.impl.permissions.PermissionsHook;
 import info.preva1l.fadah.records.listing.ImplListingBuilder;
+import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.records.post.PostResult;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.Text;
@@ -90,7 +93,7 @@ public class SellSubCommand extends SubCommand {
         new ImplListingBuilder(player)
                 .currency(CurrencyRegistry.getAll().getFirst())
                 .price(price)
-                .tax(PermissionsData.getHighestDouble(PermissionsData.PermissionType.LISTING_TAX, player))
+                .tax(PermissionsHook.getValue(Double.class, Permission.LISTING_TAX, player))
                 .itemStack(item)
                 .length(Config.i().getDefaultListingLength().toMillis())
                 .toPost()
@@ -105,11 +108,8 @@ public class SellSubCommand extends SubCommand {
                     if (result == PostResult.MAX_LISTINGS) {
                         player.getInventory().setItemInMainHand(item);
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMaxListings()
-                                .replace("%max%", String.valueOf(PermissionsData.getHighestInt(
-                                        PermissionsData.PermissionType.MAX_LISTINGS,
-                                        player))
-                                )
-                                .replace("%current%", String.valueOf(PermissionsData.getCurrentListings(player)))
+                                .replace("%max%", PermissionsHook.getValue(String.class, Permission.MAX_LISTINGS, player))
+                                .replace("%current%", String.valueOf(CacheAccess.amountByPlayer(Listing.class, player.getUniqueId())))
                         );
                         running.remove(player.getUniqueId());
                         return;

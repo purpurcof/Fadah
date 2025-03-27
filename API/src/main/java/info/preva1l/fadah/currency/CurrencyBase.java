@@ -9,7 +9,7 @@ import org.jetbrains.annotations.ApiStatus;
  * <br><br>
  * Created on 11/03/2025
  *
- * @since 2.9.0
+ * @since 3.0.0
  * @author Preva1l
  */
 @ApiStatus.NonExtendable

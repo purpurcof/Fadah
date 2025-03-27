@@ -7,9 +7,10 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.data.DatabaseManager;
-import info.preva1l.fadah.data.PermissionsData;
 import info.preva1l.fadah.filters.Restrictions;
 import info.preva1l.fadah.hooks.impl.DiscordHook;
+import info.preva1l.fadah.hooks.impl.permissions.Permission;
+import info.preva1l.fadah.hooks.impl.permissions.PermissionsHook;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
@@ -57,9 +58,11 @@ public final class ImplPost extends Post {
         ).thenComposeAsync(listing -> {
             if (listing == null) return CompletableFuture.completedFuture(PostResult.RESTRICTED_ITEM);
 
-            if (!bypassMaxListings && player != null &&
-                    PermissionsData.getCurrentListings(player) >= PermissionsData.getHighestInt(PermissionsData.PermissionType.MAX_LISTINGS, player)) {
-                return CompletableFuture.completedFuture(PostResult.MAX_LISTINGS);
+            if (!bypassMaxListings && player != null) {
+                int currentListings = CacheAccess.amountByPlayer(Listing.class, player.getUniqueId());
+                int maxListings = PermissionsHook.getValue(Integer.class, Permission.MAX_LISTINGS, player);
+
+                if (currentListings >= maxListings) return CompletableFuture.completedFuture(PostResult.MAX_LISTINGS);
             }
 
             if (callEvent) {
@@ -106,8 +109,8 @@ public final class ImplPost extends Post {
                 Tuple.of("%item%", itemName),
                 Tuple.of("%price%", df.format(listing.getPrice())),
                 Tuple.of("%time%", TimeUtil.formatTimeUntil(listing.getDeletionDate())),
-                Tuple.of("%current_listings%", PermissionsData.getCurrentListings(player) + ""),
-                Tuple.of("%max_listings%", PermissionsData.getHighestInt(PermissionsData.PermissionType.MAX_LISTINGS, player) + ""),
+                Tuple.of("%current_listings%", CacheAccess.amountByPlayer(Listing.class, player.getUniqueId())),
+                Tuple.of("%max_listings%", PermissionsHook.getValue(String.class, Permission.MAX_LISTINGS, player)),
                 Tuple.of("%tax%", taxAmount + ""),
                 Tuple.of("%price_after_tax%", df.format((taxAmount / 100) * listing.getPrice()))
         ));
@@ -117,7 +120,7 @@ public final class ImplPost extends Post {
     private boolean postAdvert(Listing listing, boolean bypassAdvertCost) {
         if (player == null) return false;
 
-        double advertPrice = PermissionsData.getHighestDouble(PermissionsData.PermissionType.ADVERT_PRICE, player);
+        double advertPrice = PermissionsHook.getValue(Double.class, Permission.ADVERT_PRICE, player);
         if (!bypassAdvertCost && !listing.getCurrency().canAfford(player, advertPrice)) {
             Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getAdvertExpense());
             return false;

@@ -5,6 +5,8 @@ import info.preva1l.fadah.config.Config;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.FileHandler;
 
 public interface LoggingProvider {
@@ -13,9 +15,7 @@ public interface LoggingProvider {
     default void initLogger() {
         Fadah.getConsole().info("Initialising transaction logger...");
 
-        if (!Config.i().isLogToFile()) {
-            return;
-        }
+        if (!Config.i().isLogToFile()) return;
         try {
             File logsFolder = new File(getPlugin().getDataFolder(), "logs");
             if (!logsFolder.exists()) {
@@ -25,11 +25,22 @@ public interface LoggingProvider {
                 }
             }
 
-            File logFile = new File(logsFolder, "transaction-log.log");
+            File logFile = new File(logsFolder, "transactions.log");
+
+            String archivedLogNameFormat = "transactions_%s%s";
             if (logFile.exists()) {
-                long epochMillis = System.currentTimeMillis();
-                String newFileName = "transaction-log_" + epochMillis + ".log";
-                File renamedFile = new File(logsFolder, newFileName);
+                String date = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                        .format(Instant.now());
+
+                String newFileName = archivedLogNameFormat.formatted(date, "");
+
+                int i = 0;
+                while (new File(logsFolder, newFileName + ".log").exists()) {
+                    newFileName = archivedLogNameFormat.formatted(date, "-" + ++i);
+                }
+
+                File renamedFile = new File(logsFolder, newFileName + ".log");
+
                 if (!logFile.renameTo(renamedFile)) {
                     Fadah.getConsole().warning("Could not rename logfile!");
                 }

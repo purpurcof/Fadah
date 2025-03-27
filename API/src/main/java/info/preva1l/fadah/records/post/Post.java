@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
  * <br>
  * Created on 7/03/2025
  *
- * @since 2.9.0
+ * @since 3.0.0
  * @author Preva1l
  */
 @SuppressWarnings("unused")
@@ -61,7 +61,7 @@ public abstract class Post {
      * Create a new post from a listing builder.
      *
      * @param listing the listing builder to post.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     protected Post(ListingBuilder listing) {
         this.listingBuilder = listing;
@@ -72,7 +72,7 @@ public abstract class Post {
      *
      * @param postAdvert whether an advert should attempt to be posted.
      * @return the post.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public Post postAdvert(boolean postAdvert) {
         this.postAdvert = postAdvert;
@@ -84,7 +84,7 @@ public abstract class Post {
      *
      * @param bypassAdvertCost whether the advert should post even if the player does not have funds.
      * @return the post.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public Post bypassAdvertCost(boolean bypassAdvertCost) {
         this.bypassAdvertCost = bypassAdvertCost;
@@ -96,7 +96,7 @@ public abstract class Post {
      *
      * @param bypassMaxListings whether the listing should still be posted even if the player has reached their max listings.
      * @return the post.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public Post bypassMaxListings(boolean bypassMaxListings) {
         this.bypassMaxListings = bypassMaxListings;
@@ -108,7 +108,7 @@ public abstract class Post {
      *
      * @param bypassRestrictedItems whether the listing should still be posted even if the item is restricted.
      * @return the post.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public Post bypassRestrictedItems(boolean bypassRestrictedItems) {
         this.bypassRestrictedItems = bypassRestrictedItems;
@@ -120,7 +120,7 @@ public abstract class Post {
      *
      * @param bypassTax whether the player should be taxed on the sale of the listing.
      * @return the post.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public Post bypassTax(boolean bypassTax) {
         this.bypassTax = bypassTax;
@@ -132,7 +132,7 @@ public abstract class Post {
      *
      * @param callEvent whether the {@link ListingCreateEvent} event should be called.
      * @return the post.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public Post callEvent(boolean callEvent) {
         this.callEvent = callEvent;
@@ -144,7 +144,7 @@ public abstract class Post {
      *
      * @param notifyPlayer whether the player should be notified about the new listing.
      * @return the post.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public Post notifyPlayer(boolean notifyPlayer) {
         this.notifyPlayer = notifyPlayer;
@@ -156,7 +156,7 @@ public abstract class Post {
      *
      * @param submitLog whether the listing should be logged into history and log file.
      * @return the post.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public Post submitLog(boolean submitLog) {
         this.submitLog = submitLog;
@@ -168,7 +168,7 @@ public abstract class Post {
      *
      * @param alertWatchers whether the players watching for a listing should get alerted.
      * @return the post.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public Post alertWatchers(boolean alertWatchers) {
         this.alertWatchers = alertWatchers;

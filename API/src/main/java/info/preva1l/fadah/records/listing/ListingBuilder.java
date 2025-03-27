@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
  * Created on 7/03/2025
  *
  * @author Preva1l
- * @since 2.9.0
+ * @since 3.0.0
  */
 public abstract class ListingBuilder {
     /**
@@ -60,7 +60,7 @@ public abstract class ListingBuilder {
      * Create a new builder instance.
      *
      * @param owner the player who will own the listing.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public ListingBuilder(Player owner) {
         this.ownerUuid = owner.getUniqueId();
@@ -72,7 +72,7 @@ public abstract class ListingBuilder {
      *
      * @param ownerUuid the uuid of the player who will own the listing.
      * @param ownerName the name of the player who will own the listing.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public ListingBuilder(UUID ownerUuid, String ownerName) {
         this.ownerUuid = ownerUuid;
@@ -84,7 +84,7 @@ public abstract class ListingBuilder {
      *
      * @param itemStack the item to list.
      * @return the listing builder instance.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public ListingBuilder itemStack(@NotNull ItemStack itemStack) {
         Preconditions.checkNotNull(itemStack);
@@ -97,7 +97,7 @@ public abstract class ListingBuilder {
      *
      * @param currency the currency to use.
      * @return the listing builder instance.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public ListingBuilder currency(@NotNull Currency currency) {
         Preconditions.checkNotNull(currency);
@@ -110,7 +110,7 @@ public abstract class ListingBuilder {
      *
      * @param price the price to set.
      * @return the listing builder instance.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public ListingBuilder price(double price) {
         this.price = price;
@@ -122,7 +122,7 @@ public abstract class ListingBuilder {
      *
      * @param tax the percentage of tax to take.
      * @return the listing builder instance.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public ListingBuilder tax(double tax) {
         this.tax = tax;
@@ -134,7 +134,7 @@ public abstract class ListingBuilder {
      *
      * @param length length in milliseconds.
      * @return the listing builder instance.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public ListingBuilder length(long length) {
         this.length = length;
@@ -146,7 +146,7 @@ public abstract class ListingBuilder {
      *
      * @param biddable whether the listing is biddable or not
      * @return the listing builder instance.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public ListingBuilder biddable(boolean biddable) {
         this.biddable = biddable;
@@ -157,7 +157,7 @@ public abstract class ListingBuilder {
      * Convert the listing builder into a post.
      *
      * @return the post.
-     * @since 2.9.0
+     * @since 3.0.0
      */
     public abstract Post toPost();
 
@@ -167,7 +167,7 @@ public abstract class ListingBuilder {
      * Scans for the correct category and builds the object.
      *
      * @return a completable future of an unlisted listing object
-     * @since 2.9.0
+     * @since 3.0.0
      */
     @ApiStatus.Internal
     public abstract CompletableFuture<Listing> build();
