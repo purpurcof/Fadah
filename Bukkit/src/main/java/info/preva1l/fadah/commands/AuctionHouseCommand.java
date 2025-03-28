@@ -28,11 +28,11 @@ public class AuctionHouseCommand extends Command {
         subCommands.add(new ToggleSubCommand(plugin));
         subCommands.add(new ExpiredItemsSubCommand());
         subCommands.add(new HelpSubCommand(plugin));
-        subCommands.add(new ActiveListingsSubCommand(plugin));
+        subCommands.add(new InspectSubCommands.ViewSubCommand(plugin));
+        subCommands.add(new InspectSubCommands.ActiveListingsSubCommand(plugin));
         subCommands.add(new HistorySubCommand());
         subCommands.add(new ViewListingCommand(plugin));
         subCommands.add(new AboutSubCommand(plugin));
-        subCommands.add(new ViewSubCommand(plugin));
         subCommands.add(new WatchSubCommand(plugin));
         subCommands.add(new SearchSubCommand(plugin));
     }
