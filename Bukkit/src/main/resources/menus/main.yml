@@ -7,7 +7,7 @@ lang:
       - '&fSeller: &e%seller%'
       - '&fCategory: &e%category%'
       - '&r '
-      - '&f%mode%: &6$%amount%'
+      - '&f%mode%: &6$%price%'
       - '&fCurrency: &9%currency%'
       - '&r '
       - '&fExpires In: &e%expiry%'

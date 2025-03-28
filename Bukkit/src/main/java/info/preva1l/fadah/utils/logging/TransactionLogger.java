@@ -12,7 +12,6 @@ import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 @UtilityClass
@@ -143,7 +142,7 @@ public class TransactionLogger {
         DatabaseManager.getInstance()
                 .get(History.class, owner)
                 .thenAccept(historyOpt -> {
-                    var history = historyOpt.orElseGet(() -> new History(owner, new ArrayList<>()));
+                    var history = historyOpt.orElseGet(() -> History.empty(owner));
                     history.add(historicItem);
                     DatabaseManager.getInstance().save(History.class, history);
                 });

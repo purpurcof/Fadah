@@ -68,45 +68,25 @@ public class LanguageConfig {
         return material;
     }
 
-    public @NotNull Component getStringFormatted(String path)  {
-        String f = superSection.getString(path);
-        if (f == null || f.equals(path)) {
-            throw new RuntimeException("No value at path %s".formatted(path));
-        }
-        return Text.modernMessage(f);
-    }
-
     public @NotNull String getString(String path, String def) {
         return superSection.getString(path, def);
     }
 
-    public @NotNull Component getStringFormatted(String path, String def) {
-        return Text.modernMessage(superSection.getString(path, def));
+    public @NotNull Component getStringFormatted(String path) {
+        return getStringFormatted(path, path);
     }
 
     @SafeVarargs
     public final @NotNull Component getStringFormatted(String path, String def, Tuple<String, Object>... replacements) {
         String f = superSection.getString(path);
         if (f == null || f.equals(path)) {
-            return Component.empty();
+            return Component.text(def);
         }
-        return Text.modernMessage(Text.replace(f, replacements));
+        return Text.text(f, replacements);
     }
 
     public @NotNull List<Component> getLore(String path) {
-        List<String> str = superSection.getStringList(path);
-        if (str.isEmpty() || str.getFirst().equals(path) || str.getFirst().equals("null")) {
-            return Collections.emptyList();
-        }
-        return Text.modernList(str);
-    }
-
-    public @NotNull List<Component> getLore(String path, List<String> def) {
-        List<String> str = superSection.getStringList(path);
-        if (str.isEmpty() || str.getFirst().equals(path) || str.getFirst().equals("null")) {
-            return Text.modernList(def);
-        }
-        return Text.modernList(str);
+        return getLore(null, path);
     }
 
     @SafeVarargs
@@ -120,27 +100,10 @@ public class LanguageConfig {
         if (str.isEmpty() || str.getFirst().equals(path) || str.getFirst().equals("null")) {
             return Collections.emptyList();
         }
-        List<String> ret = new ArrayList<>();
+        List<Component> ret = new ArrayList<>();
         for (String line : str) {
-            ret.add(Text.replace(line, replacements));
+            ret.add(Text.text(player, line, replacements));
         }
-        return Text.modernList(player, ret);
-    }
-
-    @SafeVarargs
-    public final @NotNull List<Component> getLore(String path, List<String> def, Tuple<String, Object>... replacements) {
-        List<String> str = superSection.getStringList(path);
-        if (str.isEmpty() || str.getFirst().equals(path) || str.getFirst().equals("null")) {
-            List<String> ret = new ArrayList<>();
-            for (String line : def) {
-                ret.add(Text.replace(line, replacements));
-            }
-            return Text.modernList(ret);
-        }
-        List<String> ret = new ArrayList<>();
-        for (String line : str) {
-            ret.add(Text.replace(line, replacements));
-        }
-        return Text.modernList(ret);
+        return ret;
     }
 }

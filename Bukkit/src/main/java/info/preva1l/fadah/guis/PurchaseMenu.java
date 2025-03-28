@@ -19,6 +19,7 @@ import info.preva1l.fadah.utils.guis.PaginatedItem;
 import info.preva1l.fadah.utils.guis.ScrollBarFastInv;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -36,6 +37,8 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
     protected final Supplier<List<Listing>> listingSupplier;
     protected final List<Listing> listings;
 
+    protected final OfflinePlayer owner;
+
     // Filters
     protected final String search;
     protected SortingMethod sortingMethod;
@@ -43,17 +46,19 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
 
     protected PurchaseMenu(
             Player player,
-            Component title,
+            OfflinePlayer owner,
             LayoutManager.MenuType menuType,
             Supplier<List<Listing>> listings,
             @Nullable String search,
             @Nullable SortingMethod sortingMethod,
             @Nullable SortingDirection sortingDirection
     ) {
-        super(menuType.getLayout().guiSize(), title, player, menuType);
+        super(menuType.getLayout().guiSize(), menuType.getLayout().guiTitle(), player, menuType);
 
         this.listingSupplier = listings;
         this.listings = listingSupplier.get();
+
+        this.owner = owner;
 
         this.search = search;
         this.sortingMethod = (sortingMethod == null ? SortingMethod.AGE : sortingMethod);
@@ -143,6 +148,16 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
     }
 
     protected void addFilterButtons() {
+        // Search
+        removeItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.SEARCH,-1));
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.SEARCH,-1),
+                new ItemBuilder(getLang().getAsMaterial("filter.search.icon", Material.OAK_SIGN))
+                        .name(getLang().getStringFormatted("filter.search.name", "&3&lSearch"))
+                        .modelData(getLang().getInt("filter.search.model-data"))
+                        .lore(getLang().getLore("filter.search.lore")).build(), e ->
+                        new SearchMenu(player, getLang().getString("filter.search.placeholder", "Search Query..."), search ->
+                                new ViewListingsMenu(player, owner, search, sortingMethod, sortingDirection).open(player)));
+
         // Filter Type Cycle
         SortingMethod prev = sortingMethod.previous();
         SortingMethod next = sortingMethod.next();

@@ -149,7 +149,6 @@ fun variables(): Map<String, String> =
         "mongoVersion" to rootProject.property("mongoVersion") as String,
         "influxdbVersion" to rootProject.property("influxdbVersion") as String,
         "minimessageVersion" to rootProject.property("minimessageVersion") as String,
-        "mmPlatformVersion" to rootProject.property("mmPlatformVersion") as String,
     )
 
 project.delete("$rootDir/target")

@@ -18,7 +18,7 @@ public class LayoutManager {
     public void loadLayout(BasicConfig config) {
         final MenuType menuType = getMenuType(config.getFileName());
 
-        final Component guiTitle = Text.modernMessage(config.getString("title"));
+        final Component guiTitle = Text.text(config.getString("title"));
 
         final List<Integer> fillerSlots = new ArrayList<>();
         final List<Integer> paginationSlots = new ArrayList<>();
@@ -99,7 +99,6 @@ public class LayoutManager {
             case "collection-box.yml": yield MenuType.COLLECTION_BOX;
             case "expired-listings.yml": yield MenuType.EXPIRED_LISTINGS;
             case "historic-items.yml": yield MenuType.HISTORY;
-            case "active-listings.yml": yield MenuType.ACTIVE_LISTINGS;
             case "view-listings.yml": yield MenuType.VIEW_LISTINGS;
             case "watch.yml": yield MenuType.WATCH;
             default: throw new IllegalStateException("The config file %s is not related to a GuiLayout".formatted(fileName));
@@ -134,7 +133,6 @@ public class LayoutManager {
         EXPIRED_LISTINGS,
         CONFIRM_PURCHASE,
         COLLECTION_BOX,
-        ACTIVE_LISTINGS,
         VIEW_LISTINGS,
         WATCH,
         /**

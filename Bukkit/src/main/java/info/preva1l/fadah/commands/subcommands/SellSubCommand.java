@@ -34,6 +34,11 @@ public class SellSubCommand extends SubCommand {
         super(plugin, Lang.i().getCommands().getSell().getAliases(), Lang.i().getCommands().getSell().getDescription());
     }
 
+    public static void addRunning(UUID uuid) {
+        running.add(uuid);
+        TaskManager.Async.runLater(Fadah.getInstance(), () -> running.remove(uuid), 20 * 60L);
+    }
+
     @SubCommandArgs(name = "sell", permission = "fadah.use")
     public void execute(@NotNull CommandArguments command) {
         if (!Config.i().isEnabled()) {
@@ -42,7 +47,7 @@ public class SellSubCommand extends SubCommand {
         }
         assert command.getPlayer() != null;
         if (running.contains(command.getPlayer().getUniqueId())) return;
-        running.add(command.getPlayer().getUniqueId());
+        addRunning(command.getPlayer().getUniqueId());
         if (command.getPlayer().getInventory().getItemInMainHand().getType() == Material.AIR) {
             command.reply(Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMustHoldItem());
             running.remove(command.getPlayer().getUniqueId());

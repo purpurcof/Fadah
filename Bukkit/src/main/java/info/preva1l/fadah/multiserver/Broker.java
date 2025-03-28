@@ -4,19 +4,13 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.Gson;
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.data.DatabaseType;
-import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.TaskManager;
-import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.FastInvManager;
-import info.preva1l.fadah.watcher.AuctionWatcher;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +29,7 @@ public abstract class Broker {
 
     protected Broker(@NotNull Fadah plugin) {
         this.plugin = plugin;
-        this.gson = new Gson();
+        this.gson = GsonComponentSerializer.gson().serializer();
         this.cachedIds = CacheBuilder.newBuilder().expireAfterWrite(60, TimeUnit.SECONDS).build();
     }
 
@@ -43,34 +37,17 @@ public abstract class Broker {
         switch (message.getType()) {
             case NOTIFICATION -> message.getPayload()
                     .getNotification().ifPresentOrElse(notification -> {
-                        Player player = Bukkit.getPlayer(notification.getPlayer());
+                        if (notification.getTarget() == null) {
+                            Bukkit.broadcast(notification.getMessage());
+                            return;
+                        }
+                        Player player = Bukkit.getPlayer(notification.getTarget());
                         if (player == null) return;
 
-                        player.sendMessage(Text.modernMessage(notification.getMessage()));
+                        player.sendMessage(notification.getMessage());
                     }, () -> {
                         throw new IllegalStateException("Notification message received with no notification info!");
                     });
-
-            case BROADCAST -> message.getPayload()
-                    .getBroadcast().ifPresentOrElse(broadcast ->
-                            TaskManager.Async.run(Fadah.getInstance(), () -> {
-                                Component textComponent = Text.modernMessage(broadcast.getMessage());
-                                if (broadcast.getClickCommand() != null) {
-                                    textComponent = textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, broadcast.getClickCommand()));
-                                }
-                                for (Player announce : Bukkit.getOnlinePlayers()) {
-                                    announce.sendMessage(textComponent);
-                                }
-                            }), () -> {
-                        throw new IllegalStateException("Broadcast message received with no broadcast info!");
-                    });
-
-            case WATCHER -> message.getPayload()
-                    .getWatchNotification()
-                    .ifPresent(watchNotification ->
-                            CacheAccess.get(Listing.class, watchNotification.getListing())
-                                    .ifPresent(listing ->
-                                            AuctionWatcher.sendAlert(watchNotification.getPlayer(), listing)));
 
             case RELOAD -> {
                 Fadah.getInstance().reload();

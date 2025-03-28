@@ -61,7 +61,7 @@ public class WatchMenu extends FastInv {
                             try {
                                 watching.setMinPrice(Text.getAmountFromString(search));
                             } catch (NumberFormatException ex) {
-                                player.sendMessage(Text.modernMessage(Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMustBeNumber()));
+                                player.sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMustBeNumber()));
                             }
                             buttons();
                             open(player);
@@ -80,7 +80,7 @@ public class WatchMenu extends FastInv {
                             try {
                                 watching.setMaxPrice(Text.getAmountFromString(search));
                             } catch (NumberFormatException ex) {
-                                player.sendMessage(Text.modernMessage(Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMustBeNumber()));
+                                player.sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMustBeNumber()));
                             }
                             buttons();
                             open(player);

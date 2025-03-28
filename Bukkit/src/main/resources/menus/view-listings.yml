@@ -1,4 +1,4 @@
-title: '&9&lAuction House &8> &1%dynamic% Listings' # %dynamic% = "Your" or the players name if in management mode, %username% = the players username
+title: '&9&lAuction House &8> &1%dynamic% Listings' # %dynamic% = "Your" or the players name if not the owner, %username% = the players username
 
 lang:
   listing:
@@ -7,7 +7,7 @@ lang:
       - '&fSeller: &e%seller%'
       - '&fCategory: &e%category%'
       - '&r '
-      - '&f%mode%: &6$%amount%'
+      - '&f%mode%: &6$%price%'
       - '&fCurrency: &9%currency%'
       - '&r '
       - '&fExpires In: &e%expiry%'

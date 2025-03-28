@@ -21,7 +21,6 @@ import info.preva1l.fadah.watcher.Watching;
 import info.preva1l.hooker.Hooker;
 import org.bukkit.Bukkit;
 
-import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -40,7 +39,6 @@ public interface DataProvider {
                 LayoutManager.MenuType.NEW_LISTING,
                 LayoutManager.MenuType.PROFILE,
                 LayoutManager.MenuType.EXPIRED_LISTINGS,
-                LayoutManager.MenuType.ACTIVE_LISTINGS,
                 LayoutManager.MenuType.COLLECTION_BOX,
                 LayoutManager.MenuType.CONFIRM_PURCHASE,
                 LayoutManager.MenuType.HISTORY,
@@ -70,9 +68,9 @@ public interface DataProvider {
 
         return db.fixPlayerData(uuid)
                 .thenCompose(ignored -> CompletableFuture.allOf(
-                        loadAndCache(CollectionBox.class, uuid, () -> new CollectionBox(uuid, new ArrayList<>())),
-                        loadAndCache(ExpiredItems.class, uuid, () -> new ExpiredItems(uuid, new ArrayList<>())),
-                        loadAndCache(History.class, uuid, () -> new History(uuid, new ArrayList<>())),
+                        loadAndCache(CollectionBox.class, uuid, () -> CollectionBox.empty(uuid)),
+                        loadAndCache(ExpiredItems.class, uuid, () -> ExpiredItems.empty(uuid)),
+                        loadAndCache(History.class, uuid, () -> History.empty(uuid)),
                         db.get(Watching.class, uuid)
                                 .thenAccept(opt -> opt.ifPresent(AuctionWatcher::watch))
                 ));
@@ -107,9 +105,10 @@ public interface DataProvider {
     private Runnable listingExpiryTask() {
         return () -> {
             for (Listing listing : CacheAccess.getAll(Listing.class)) {
-                if (System.currentTimeMillis() < listing.getDeletionDate()) continue;
+                if (System.currentTimeMillis() <= listing.getDeletionDate()) continue;
 
                 CacheAccess.invalidate(Listing.class, listing);
+                DatabaseManager.getInstance().delete(Listing.class, listing);
 
                 CollectableItem collectableItem = new CollectableItem(listing.getItemStack(), System.currentTimeMillis());
 

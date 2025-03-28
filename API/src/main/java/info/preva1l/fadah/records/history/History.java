@@ -1,5 +1,6 @@
 package info.preva1l.fadah.records.history;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +19,16 @@ public record History(
         UUID owner,
         List<HistoricItem> historicItems
 ) {
+    /**
+     * Create a new empty history for a player.
+     *
+     * @param owner the player to create the history for.
+     * @return the history instance.
+     */
+    public static History empty(UUID owner) {
+        return new History(owner, new ArrayList<>());
+    }
+
     /**
      * Add a {@link HistoricItem} to the history.
      *

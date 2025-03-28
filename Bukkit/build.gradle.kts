@@ -11,7 +11,6 @@ val mariadbVersion: String by project
 val mongoVersion: String by project
 val influxdbVersion: String by project
 val minimessageVersion: String by project
-val mmPlatformVersion: String by project
 
 repositories {
     maven(url = "https://repo.auxilor.io/repository/maven-public/")
@@ -49,6 +48,8 @@ dependencies {
     compileOnly("org.mongodb:mongodb-driver-sync:$mongoVersion")
 
     implementation("net.wesjd:anvilgui:1.10.4-SNAPSHOT") // Search Menu
+
+    compileOnly("net.kyori:adventure-text-serializer-gson:$minimessageVersion")
 
     compileOnly("org.mozilla:rhino:$rhinoVersion")
 

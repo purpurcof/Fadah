@@ -66,6 +66,11 @@ public abstract class ActiveListing extends Listing {
             return false;
         }
 
+        if (System.currentTimeMillis() <= getDeletionDate()) {
+            Lang.sendMessage(player,  Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist());
+            return false;
+        }
+
         return true;
     }
 

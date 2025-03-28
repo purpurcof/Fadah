@@ -9,7 +9,6 @@ import info.preva1l.fadah.config.Menus;
 import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.currency.Currency;
 import info.preva1l.fadah.currency.CurrencyRegistry;
-import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.hooks.impl.permissions.Permission;
 import info.preva1l.fadah.hooks.impl.permissions.PermissionsHook;
 import info.preva1l.fadah.records.listing.ImplListingBuilder;
@@ -41,7 +40,7 @@ public class NewListingMenu extends FastInv {
     private Currency currency;
 
     private boolean startButtonClicked = false;
-    private boolean giveItemBack = true;
+    private volatile boolean giveItemBack = true;
 
     public NewListingMenu(Player player, double price) {
         super(LayoutManager.MenuType.NEW_LISTING.getLayout().guiSize(),
@@ -88,7 +87,7 @@ public class NewListingMenu extends FastInv {
                 .biddable(isBidding)
                 .toPost()
                 .postAdvert(advertise)
-                .buildAndSubmit().thenAcceptAsync(result -> TaskManager.Sync.run(plugin, player, () -> {
+                .buildAndSubmit().thenAccept(result -> TaskManager.Sync.run(plugin, player, () -> {
                     if (result == PostResult.RESTRICTED_ITEM) {
                         giveItemBack = true;
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getRestricted());
@@ -103,6 +102,7 @@ public class NewListingMenu extends FastInv {
                                 .replace("%current%", String.valueOf(CacheAccess.amountByPlayer(Listing.class, player.getUniqueId())))
                         );
                         SellSubCommand.running.remove(player.getUniqueId());
+                        player.closeInventory();
                         return;
                     }
 
@@ -112,8 +112,7 @@ public class NewListingMenu extends FastInv {
                     }
 
                     player.closeInventory();
-                    SellSubCommand.running.remove(player.getUniqueId());
-                }), DatabaseManager.getInstance().getThreadPool())
+                }))
                 .exceptionally(t -> {
                     Fadah.getConsole().log(Level.SEVERE, t.getMessage(), t);
                     return null;

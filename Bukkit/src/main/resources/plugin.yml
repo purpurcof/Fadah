@@ -30,9 +30,6 @@ libraries:
   - org.xerial:sqlite-jdbc:${sqliteVersion}
   - com.mysql:mysql-connector-j:${mysqlVersion}
   - org.mariadb.jdbc:mariadb-java-client:${mariadbVersion}
-  - net.kyori:adventure-text-minimessage:${minimessageVersion}
-  - net.kyori:adventure-api:${minimessageVersion}
-  - net.kyori:adventure-platform-bukkit:${mmPlatformVersion}
   - com.influxdb:influxdb-client-java:${influxdbVersion}
   - com.zaxxer:HikariCP:${hikariVersion}
   - org.mozilla:rhino:${rhinoVersion}

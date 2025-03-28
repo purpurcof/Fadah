@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 public class SearchMenu implements Listener {
     public SearchMenu(Player player, String placeholder, Consumer<String> callback) {
         AnvilGUI.Builder guiBuilder = new AnvilGUI.Builder().plugin(Fadah.getInstance())
-                .jsonTitle(JSONComponentSerializer.json().serialize(Text.modernMessage(Menus.i().getSearchTitle())));
+                .jsonTitle(JSONComponentSerializer.json().serialize(Text.text(Menus.i().getSearchTitle())));
         guiBuilder.text(placeholder);
 
         guiBuilder.onClick((slot, state) -> {

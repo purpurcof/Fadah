@@ -11,6 +11,6 @@ public record CommandArguments(CommandSender sender, String label, String[] args
     }
 
     public void reply(String message) {
-        sender.sendMessage(Text.modernMessage(message));
+        sender.sendMessage(Text.text(message));
     }
 }

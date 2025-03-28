@@ -8,6 +8,8 @@ import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.internal.parser.Token;
+import net.kyori.adventure.text.minimessage.internal.parser.TokenParser;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -15,7 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -26,32 +28,124 @@ import java.util.stream.Collectors;
  */
 @UtilityClass
 public class Text {
-    private final MiniMessage miniMessage = MiniMessage.miniMessage();
+    private final MiniMessage miniMessage = MiniMessage.builder().build();
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
     private final Pattern REMOVE_PATTERN = Pattern.compile("&#(\\w{5}[0-9a-fA-F])|&[0-9a-fA-Fk-orK-OR]");
 
-    /**
-     * Takes a string formatted in minimessage OR legacy and turns it into an Adventure Component.
-     *
-     * @param message the modernMessage
-     * @return colorized component
-     */
-    public Component modernMessage(@NotNull String message) {
-        return miniMessage.deserialize("<!italic>" + miniMessage.serialize(legacySerializer.deserialize(message)));
+    @SafeVarargs
+    public Component text(@NotNull String message, Tuple<String, Object>... args) {
+        return text(null, message, args);
     }
 
-    public Component modernMessage(@Nullable Player player, @NotNull String message) {
+    @SafeVarargs
+    public Component text(@NotNull List<String> message, Tuple<String, Object>... args) {
+        return text(String.join("\n", message), args);
+    }
+
+    @SafeVarargs
+    public Component text(@Nullable Player player, @NotNull String message, Tuple<String, Object>... args) {
         Optional<PapiHook> hook = Hooker.getHook(PapiHook.class);
         if (hook.isPresent()) message = hook.get().format(player, message);
-        return miniMessage.deserialize("<!italic>" + miniMessage.serialize(legacySerializer.deserialize(message)));
+        return replace(miniMessage.deserialize(unescape(miniMessage.serialize(
+                                        legacySerializer.deserialize("<!italic>" + message)))), args);
     }
 
-    public List<Component> modernList(@NotNull List<String> list) {
-        return list.stream().map(Text::modernMessage).collect(Collectors.toList());
+    @SafeVarargs
+    public List<Component> list(@NotNull List<String> list, Tuple<String, Object>... args) {
+        return list(null, list, args);
     }
 
-    public List<Component> modernList(@Nullable Player player, List<String> list) {
-        return list.stream().map(string -> Text.modernMessage(player, string)).collect(Collectors.toList());
+    @SafeVarargs
+    public List<Component> list(@Nullable Player player, List<String> list, Tuple<String, Object>... args) {
+        return list.stream().map(string -> Text.text(player, string, args)).collect(Collectors.toList());
+    }
+
+    /**
+     * Unescapes minimessage tags.
+     * <p>
+     *     This will be removed once minimessage adds the option to prevent the serializer from escaping them in the first place.
+     * </p>
+     *
+     * @param input the minimessage formatted string with escaped tags
+     * @return the minimessage formatted string without escaped tags
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    private String unescape(@NotNull String input) {
+        List<Token> tokens = TokenParser.tokenize(input, false);
+        tokens.sort(Comparator.comparingInt(Token::startIndex));
+        StringBuilder output = new StringBuilder();
+        int lastIndex = 0;
+        for (Token token : tokens) {
+            int start = token.startIndex();
+            int end = token.endIndex();
+            if (lastIndex < start) output.append(input, lastIndex, start);
+            output.append(
+                    TokenParser.unescape(input.substring(start, end),
+                            0, end - start,
+                            escape -> escape == TokenParser.TAG_START || escape == TokenParser.ESCAPE)
+            );
+            lastIndex = end;
+        }
+
+        if (lastIndex < input.length()) output.append(input.substring(lastIndex));
+        return output.toString();
+    }
+
+    /**
+     * Formats a message with placeholders.
+     *
+     * @param message message with placeholders
+     * @param args    placeholders to replace
+     * @return formatted string
+     */
+    @SafeVarargs
+    public String replace(String message, Tuple<String, Object>... args) {
+        for (Tuple<String, Object> replacement : args) {
+            if (!message.contains(replacement.first)) continue;
+
+            if (replacement.second instanceof Component comp) {
+                message = message.replace(replacement.first, legacySerializer.serialize(comp));
+                continue;
+            }
+
+            message = message.replace(replacement.first, String.valueOf(replacement.second));
+        }
+        return message;
+    }
+
+    /**
+     * Formats a message with placeholders.
+     *
+     * @param message message with placeholders
+     * @param args    placeholders to replace
+     * @return formatted string
+     */
+    @SafeVarargs
+    public Component replace(Component message, Tuple<String, Object>... args) {
+        if (args == null) return message;
+        for (Tuple<String, Object> replacement : args) {
+            TextComponent text = (TextComponent) message;
+            if (!text.content().contains(replacement.first)) continue;
+
+            if (replacement.second instanceof Component comp) {
+                message = message.replaceText(conf -> conf.match(replacement.first).replacement(comp));
+                continue;
+            }
+
+            message = message.replaceText(conf -> conf.match(replacement.first).replacement(String.valueOf(replacement.second)));
+        }
+        return message;
+    }
+
+    /**
+     * Capitalizes the first letter in a string.
+     *
+     * @param str String
+     * @return Capitalized String
+     */
+    public String capitalizeFirst(String str) {
+        if (str == null || str.isEmpty()) return str;
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
     /**
@@ -97,76 +191,6 @@ public class Text {
         }
 
         return Double.parseDouble(priceString) * multi;
-    }
-
-    /**
-     * Formats a message with placeholders.
-     *
-     * @param message message with placeholders
-     * @param args    placeholders to replace
-     * @return formatted string
-     */
-    @SafeVarargs
-    public String replace(String message, Tuple<String, Object>... args) {
-        for (Tuple<String, Object> replacement : args) {
-            if (!message.contains(replacement.first)) continue;
-
-            if (replacement.second instanceof Component comp) {
-                message = message.replace(replacement.first, legacySerializer.serialize(comp));
-                continue;
-            }
-
-            message = message.replace(replacement.first, String.valueOf(replacement.second));
-        }
-        return message;
-    }
-
-    /**
-     * Formats a message with placeholders.
-     *
-     * @param message message with placeholders
-     * @param args    placeholders to replace
-     * @return formatted string
-     */
-    @SafeVarargs
-    public Component replace(Component message, Tuple<String, Object>... args) {
-        for (Tuple<String, Object> replacement : args) {
-            TextComponent text = (TextComponent) message;
-            if (!text.content().contains(replacement.first)) continue;
-
-            if (replacement.second instanceof Component comp) {
-                message = message.replaceText(conf -> conf.match(replacement.first).replacement(comp));
-                continue;
-            }
-
-            message = message.replaceText(conf -> conf.match(replacement.first).replacement(String.valueOf(replacement.second)));
-        }
-        return message;
-    }
-
-    /**
-     * Formats a list with placeholders.
-     *
-     * @param strings the list to format
-     * @param args    placeholders to replace
-     * @return formatted string
-     */
-    @SafeVarargs
-    public List<String> replace(List<String> strings, Tuple<String, Object>... args) {
-        List<String> result = new ArrayList<>(strings.size());
-        strings.forEach(string -> result.add(replace(string, args)));
-        return result;
-    }
-
-    /**
-     * Capitalizes the first letter in a string.
-     *
-     * @param str String
-     * @return Capitalized String
-     */
-    public String capitalizeFirst(String str) {
-        if (str == null || str.isEmpty()) return str;
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
     /**

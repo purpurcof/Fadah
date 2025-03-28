@@ -13,6 +13,7 @@ import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -31,15 +32,7 @@ public final class BinListing extends ActiveListing {
 
     @Override
     public void purchase(@NotNull Player buyer) {
-        if (!getCurrency().canAfford(buyer, this.getPrice())) {
-            buyer.sendMessage(Lang.i().getPrefix() + Lang.i().getErrors().getTooExpensive());
-            return;
-        }
-
-        if (CacheAccess.get(Listing.class, this.getId()).isEmpty()) {
-            buyer.sendMessage(Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist());
-            return;
-        }
+        if (!canBuy(buyer)) return;
 
         // Money Transfer
         getCurrency().withdraw(buyer, this.getPrice());
@@ -59,14 +52,14 @@ public final class BinListing extends ActiveListing {
 
         String itemName = Text.extractItemName(itemStack);
         String formattedPrice = Config.i().getFormatting().numbers().format(this.getPrice() - taxed);
-        String message = String.join("\n", Text.replace(Lang.i().getNotifications().getSale(),
+        Component message = Text.text(Lang.i().getNotifications().getSale(),
                 Tuple.of("%item%", itemName),
                 Tuple.of("%price%", formattedPrice),
-                Tuple.of("%buyer%", buyer.getName())));
+                Tuple.of("%buyer%", buyer.getName()));
 
         Player seller = Bukkit.getPlayer(this.getOwner());
         if (seller != null) {
-            Lang.sendMessage(seller, message);
+            seller.sendMessage(message);
         } else {
             if (Broker.getInstance().isConnected()) {
                 Message.builder()

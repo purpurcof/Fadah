@@ -73,6 +73,11 @@ public class SQLiteHandler implements DatabaseHandler {
                 destroy();
                 throw new IllegalStateException("Failed to create database tables.", e);
             }
+
+            registerDaos();
+            v2Fixer = new SQLFixerV2(dataSource);
+            v3Fixer = V3Fixer.empty();
+            connected = true;
         } catch (IOException e) {
             Fadah.getConsole().log(Level.SEVERE, "An exception occurred creating the database file", e);
             destroy();
@@ -82,10 +87,6 @@ public class SQLiteHandler implements DatabaseHandler {
         } finally {
             databaseFileLock.unlock();
         }
-        registerDaos();
-        v2Fixer = new SQLFixerV2(dataSource);
-        v3Fixer = V3Fixer.empty();
-        connected = true;
     }
 
     @SuppressWarnings("SameParameterValue")
@@ -111,6 +112,7 @@ public class SQLiteHandler implements DatabaseHandler {
     @Override
     public void destroy() {
         if (dataSource != null) dataSource.close();
+        connected = false;
     }
 
     @Override
@@ -125,38 +127,51 @@ public class SQLiteHandler implements DatabaseHandler {
     @Override
     public <T> List<T> getAll(Class<T> clazz) {
         databaseFileLock.lock();
-        List<T> ret = (List<T>) getDao(clazz).getAll();
-        databaseFileLock.unlock();
-        return ret;
+        try {
+            return (List<T>) getDao(clazz).getAll();
+        } finally {
+            databaseFileLock.unlock();
+        }
     }
 
     @Override
     public <T> Optional<T> get(Class<T> clazz, UUID id) {
         databaseFileLock.lock();
-        Optional<T> ret = (Optional<T>) getDao(clazz).get(id);
-        databaseFileLock.unlock();
-        return ret;
+        try {
+             return (Optional<T>) getDao(clazz).get(id);
+        } finally {
+            databaseFileLock.unlock();
+        }
     }
 
     @Override
     public <T> void save(Class<T> clazz, T t) {
         databaseFileLock.lock();
-        getDao(clazz).save(t);
-        databaseFileLock.unlock();
+        try {
+            getDao(clazz).save(t);
+        } finally {
+            databaseFileLock.unlock();
+        }
     }
 
     @Override
     public <T> void update(Class<T> clazz, T t, String[] params) {
         databaseFileLock.lock();
-        getDao(clazz).update(t, params);
-        databaseFileLock.unlock();
+        try {
+            getDao(clazz).update(t, params);
+        } finally {
+            databaseFileLock.unlock();
+        }
     }
 
     @Override
     public <T> void delete(Class<T> clazz, T t) {
         databaseFileLock.lock();
-        getDao(clazz).delete(t);
-        databaseFileLock.unlock();
+        try {
+            getDao(clazz).delete(t);
+        } finally {
+            databaseFileLock.unlock();
+        }
     }
 
     @Override

@@ -15,8 +15,19 @@ import java.util.function.BiFunction;
 public abstract class PermissionsHook {
     private static BiFunction<Permission, Player, Number> valueRetriever = (perm, player) -> 0;
 
-    protected PermissionsHook() {
-        setRetriever(defaultValueRetriever());
+    static {
+        setRetriever((perm, player) -> {
+            String nodePrefix = perm.nodePrefix;
+
+            return player.getEffectivePermissions()
+                    .stream()
+                    .filter(PermissionAttachmentInfo::getValue)
+                    .filter(n -> n.getPermission().startsWith(nodePrefix))
+                    .filter(p -> canParse(p, nodePrefix))
+                    .map(p -> Double.parseDouble(p.getPermission().substring(nodePrefix.length())))
+                    .max(perm.findHighest ? Comparator.naturalOrder() : Comparator.reverseOrder())
+                    .orElseGet(perm.defaultValue::doubleValue);
+        });
     }
 
     /**
@@ -36,9 +47,9 @@ public abstract class PermissionsHook {
         } else if (type == Float.class) {
             return type.cast(value.floatValue());
         } else if (type == Integer.class) {
-            return type.cast(value);
+            return type.cast(value.intValue());
         } else if (type == String.class) {
-            return type.cast(String.valueOf(value));
+            return type.cast(value.toString());
         }
         throw new IllegalArgumentException("Unsupported return type: " + type.getSimpleName());
     }
@@ -47,24 +58,9 @@ public abstract class PermissionsHook {
         valueRetriever = newRetriever;
     }
 
-    private BiFunction<Permission, Player, Number> defaultValueRetriever() {
-        return (perm, player) -> {
-            String nodePrefix = perm.nodePrefix;
-
-            return player.getEffectivePermissions()
-                    .stream()
-                    .filter(PermissionAttachmentInfo::getValue)
-                    .filter(n -> n.getPermission().startsWith(nodePrefix))
-                    .filter(p -> canParse(p, nodePrefix))
-                    .map(p -> Integer.parseInt(p.getPermission().substring(nodePrefix.length())))
-                    .max(perm.findHighest ? Comparator.naturalOrder() : Comparator.reverseOrder())
-                    .orElseGet(perm.defaultValue::intValue);
-        };
-    }
-
-    private boolean canParse(@NotNull PermissionAttachmentInfo permission, @NotNull String nodePrefix) {
+    private static boolean canParse(@NotNull PermissionAttachmentInfo permission, @NotNull String nodePrefix) {
         try {
-            Integer.parseInt(permission.getPermission().substring(nodePrefix.length()));
+            Double.parseDouble(permission.getPermission().substring(nodePrefix.length()));
             return true;
         } catch (NumberFormatException e) {
             return false;

@@ -3,12 +3,14 @@ package info.preva1l.fadah.watcher;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.misc.Tuple;
+import info.preva1l.fadah.multiserver.Broker;
+import info.preva1l.fadah.multiserver.Message;
+import info.preva1l.fadah.multiserver.Payload;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.Text;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -63,19 +65,25 @@ public class AuctionWatcher {
     }
 
     public void sendAlert(UUID uuid, Listing listing) {
-        Player player = Bukkit.getPlayer(uuid);
-        if (player == null) return;
-
-        String alertMessage = String.join("&r\n", Text.replace(Lang.i().getNotifications().getWatched(),
-                Tuple.of("%player%", player.getName()),
+        Component alertMessage = Text.text(Lang.i().getNotifications().getWatched(),
+                Tuple.of("%player%", listing.getOwnerName()),
                 Tuple.of("%item%", Text.extractItemName(listing.getItemStack())),
-                Tuple.of("%price%", Config.i().getFormatting().numbers().format(listing.getPrice()))
-        ));
+                Tuple.of("%price%", Config.i().getFormatting().numbers().format(listing.getPrice())),
+                Tuple.of("%listing_id%", listing.getId())
+        );
 
-        Component textComponent = Text.modernMessage(alertMessage);
-        textComponent = textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/ah view-listing " + listing.getId()));
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null) {
+            if (Broker.getInstance().isConnected()) {
+                Message.builder()
+                        .type(Message.Type.NOTIFICATION)
+                        .payload(Payload.withNotification(uuid, alertMessage))
+                        .build().send(Broker.getInstance());
+            }
+            return;
+        }
 
-        player.sendMessage(textComponent);
+        player.sendMessage(alertMessage);
     }
 
     private boolean checkForEnchantmentOnBook(String enchant, ItemStack enchantedBook) {

@@ -34,7 +34,7 @@ public interface UpdatesProvider {
         boolean critical = isCritical(checked);
         if (recipient instanceof Player && !Config.i().isUpdateChecker() && !critical) return;
 
-        recipient.sendMessage(Text.modernMessage(
+        recipient.sendMessage(Text.text(
                 "&7[Fadah]&f Fadah is &#D63C3COUTDATED&f! &7Current: &#D63C3C%s &7Latest: &#18D53A%s %s"
                         .formatted(checked.getCurrentVersion(),
                                 checked.getLatestVersion(),

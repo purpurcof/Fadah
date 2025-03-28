@@ -23,7 +23,6 @@ import info.preva1l.fadah.utils.logging.TransactionLogger;
 import info.preva1l.fadah.watcher.AuctionWatcher;
 import info.preva1l.hooker.Hooker;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -104,7 +103,7 @@ public final class ImplPost extends Post {
 
         double taxAmount = listing.getTax();
         String itemName = Text.extractItemName(listing.getItemStack());
-        String message = String.join("\n", Text.replace(
+        Component message = Text.text(
                 Lang.i().getNotifications().getNewListing(),
                 Tuple.of("%item%", itemName),
                 Tuple.of("%price%", df.format(listing.getPrice())),
@@ -113,8 +112,8 @@ public final class ImplPost extends Post {
                 Tuple.of("%max_listings%", PermissionsHook.getValue(String.class, Permission.MAX_LISTINGS, player)),
                 Tuple.of("%tax%", taxAmount + ""),
                 Tuple.of("%price_after_tax%", df.format((taxAmount / 100) * listing.getPrice()))
-        ));
-        Lang.sendMessage(player, message);
+        );
+        player.sendMessage(message);
     }
 
     private boolean postAdvert(Listing listing, boolean bypassAdvertCost) {
@@ -128,27 +127,21 @@ public final class ImplPost extends Post {
 
         listing.getCurrency().withdraw(player, advertPrice);
 
-        String advertMessage = String.join("&r\n", Text.replace(
+        Component advertMessage = Text.text(
                 Lang.i().getNotifications().getAdvert(),
                 Tuple.of("%player%", player.getName()),
                 Tuple.of("%item%", Text.extractItemName(listing.getItemStack())),
-                Tuple.of("%price%", df.format(listing.getPrice()))
-        ));
+                Tuple.of("%price%", df.format(listing.getPrice())),
+                Tuple.of("%listing_id%", listing.getId())
+        );
 
-        Component textComponent = Text.modernMessage(advertMessage);
-        textComponent = textComponent.clickEvent(
-                ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/ah view-listing " + listing.getId()));
-
-        for (Player announce : Bukkit.getOnlinePlayers()) {
-            announce.sendMessage(textComponent);
-        }
+        Bukkit.broadcast(advertMessage);
 
         if (Broker.getInstance().isConnected()) {
             Message.builder()
-                    .type(Message.Type.BROADCAST)
-                    .payload(Payload.withBroadcast(advertMessage, "/ah view-listing " + listing.getId()))
-                    .build()
-                    .send(Broker.getInstance());
+                    .type(Message.Type.NOTIFICATION)
+                    .payload(Payload.withNotification(null, advertMessage))
+                    .build().send(Broker.getInstance());
         }
         return true;
     }

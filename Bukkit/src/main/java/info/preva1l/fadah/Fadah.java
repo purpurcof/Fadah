@@ -49,6 +49,7 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
         instance = this;
         console = getLogger();
         loadHooks();
+        initLogger();
     }
 
     @Override
@@ -72,11 +73,10 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
         Hooker.enable();
         loadMigrators();
 
-        initLogger();
         setupMetrics();
 
-        Text.modernList(List.of(
-                        "&2&l-------------------------------",
+        Text.list(List.of(
+                        "<green>&l-------------------------------",
                         "&a Finally a Decent Auction House",
                         "&a   has successfully started!",
                         "&2&l-------------------------------")
@@ -111,7 +111,6 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
                 new BasicConfig(this, "menus/main.yml"),
                 new BasicConfig(this, "menus/new-listing.yml"),
                 new BasicConfig(this, "menus/expired-listings.yml"),
-                new BasicConfig(this, "menus/active-listings.yml"),
                 new BasicConfig(this, "menus/historic-items.yml"),
                 new BasicConfig(this, "menus/confirm.yml"),
                 new BasicConfig(this, "menus/collection-box.yml"),

@@ -54,10 +54,10 @@ public class PapiHook {
 
         static {
             online("listings_max", player -> PermissionsHook.getValue(String.class, Permission.MAX_LISTINGS, player));
-            offline("listings_current", player -> CacheAccess.amountByPlayer(Listing.class, player.getUniqueId()));
-
             online("expired", player -> CacheAccess.amountByPlayer(ExpiredItems.class, player.getUniqueId()));
             online("collectable", player -> CacheAccess.amountByPlayer(CollectionBox.class, player.getUniqueId()));
+
+            offline("listings_current", player -> CacheAccess.amountByPlayer(Listing.class, player.getUniqueId()));
 
             any("listings_all", () -> CacheAccess.size(Listing.class));
             any("enabled", () -> Config.i().isEnabled());

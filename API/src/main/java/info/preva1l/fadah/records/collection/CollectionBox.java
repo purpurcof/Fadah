@@ -1,5 +1,6 @@
 package info.preva1l.fadah.records.collection;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +19,16 @@ public record CollectionBox(
         UUID owner,
         List<CollectableItem> collectableItems
 ) {
+    /**
+     * Create a new empty collection box for a player.
+     *
+     * @param owner the player to create the collection box for.
+     * @return the collection box instance.
+     */
+    public static CollectionBox empty(UUID owner) {
+        return new CollectionBox(owner, new ArrayList<>());
+    }
+
     /**
      * Add a {@link CollectableItem} to the collection box.
      *

@@ -15,14 +15,14 @@ public enum SortingDirection {
     private final String priceName;
 
     public Component getAlphaName() {
-        return Text.modernMessage(alphaName);
+        return Text.text(alphaName);
     }
 
     public Component getAgeName() {
-        return Text.modernMessage(ageName);
+        return Text.text(ageName);
     }
 
     public Component getPriceName() {
-        return Text.modernMessage(priceName);
+        return Text.text(priceName);
     }
 }

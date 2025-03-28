@@ -50,7 +50,7 @@ public class Lang {
                 "&f%player% &ehas just made a new listing on the auction house!",
                 "&fItem: &e%item%",
                 "&fPrice: &a$%price%",
-                "&7(Click this message to view the listing!)",
+                "&7&n<click:run_command:'/ah view-listing %listing_id%'><hover:show_text:'Click to view!'>(Click here to view the listing!)</hover></click>",
                 "&f--------------------------------------------------"
         );
         private List<String> newListing = List.of(
@@ -82,7 +82,7 @@ public class Lang {
                 "&eA listing meeting your criteria has come on the market!",
                 "&fItem: &e%item%",
                 "&fPrice: &a$%price%",
-                "&7(Click this message to view the listing!)",
+                "&7&n<click:run_command:'/ah view-listing %listing_id%'><hover:show_text:'Click to view!'>(Click here to view the listing!)</hover></click>",
                 "&f-------------------------------------------------------"
         );
         private String cancelled = "&cListing Cancelled!";
@@ -385,7 +385,7 @@ public class Lang {
     }
 
     public static void sendMessage(CommandSender sender, String message) {
-        sender.sendMessage(Text.modernMessage(sender instanceof Player player ? player : null, message));
+        sender.sendMessage(Text.text(sender instanceof Player player ? player : null, message));
     }
 
     public void save() {

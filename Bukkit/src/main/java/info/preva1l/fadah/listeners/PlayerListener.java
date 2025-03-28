@@ -26,7 +26,7 @@ public class PlayerListener implements Listener {
     public void joinListener(AsyncPlayerPreLoginEvent e) {
         if (!DatabaseManager.getInstance().isConnected()) {
             e.setLoginResult(AsyncPlayerPreLoginEvent.Result.KICK_OTHER);
-            e.kickMessage(Text.modernMessage(Lang.i().getPrefix() + Lang.i().getErrors().getDatabaseLoading()));
+            e.kickMessage(Text.text(Lang.i().getPrefix() + Lang.i().getErrors().getDatabaseLoading()));
             return;
         }
 

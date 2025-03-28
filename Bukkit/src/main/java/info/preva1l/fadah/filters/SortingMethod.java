@@ -35,7 +35,7 @@ public enum SortingMethod {
     private final Comparator<Listing> reversedSorter;
 
     public Component getFriendlyName() {
-        return Text.modernMessage(friendlyName);
+        return Text.text(friendlyName);
     }
 
     public Comparator<Listing> getSorter(@NotNull SortingDirection direction) {

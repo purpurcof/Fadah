@@ -1,5 +1,6 @@
 package info.preva1l.fadah.utils.guis;
 
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimap;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
@@ -181,9 +182,12 @@ public class ItemBuilder {
         });
     }
 
-
     public ItemBuilder flags(ItemFlag... flags) {
-        return meta(meta -> meta.addItemFlags(flags));
+        return meta(meta -> {
+            for (ItemFlag flag : flags) {
+                meta.addItemFlags(flag);
+            }
+        });
     }
 
     public ItemBuilder flags() {
@@ -198,11 +202,15 @@ public class ItemBuilder {
         return removeFlags(ItemFlag.values());
     }
 
-    public ItemBuilder setAttributes(Multimap<Attribute,AttributeModifier> map){
-        return meta(meta -> meta.setAttributeModifiers(map));
+    public ItemBuilder attributeSillyStuff() {
+        for (Attribute attribute : Attribute.values()) {
+            meta(meta -> meta.setAttributeModifiers(ImmutableListMultimap.of()));
+        }
+        return this;
     }
-    public ItemBuilder addAttribute(Attribute attribute, AttributeModifier value) {
-        return meta(meta -> meta.addAttributeModifier(attribute, value));
+
+    public ItemBuilder setAttributes(Multimap<Attribute,AttributeModifier> map) {
+        return meta(meta -> meta.setAttributeModifiers(map));
     }
 
     public ItemBuilder armorColor(Color color) {

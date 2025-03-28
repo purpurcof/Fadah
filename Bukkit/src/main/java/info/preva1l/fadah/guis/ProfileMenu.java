@@ -80,7 +80,6 @@ public class ProfileMenu extends FastInv {
                         new ViewListingsMenu(
                                 viewer,
                                 owner,
-                                LayoutManager.MenuType.ACTIVE_LISTINGS,
                                 null,
                                 null,
                                 null

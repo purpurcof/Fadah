@@ -14,7 +14,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -61,7 +60,7 @@ public class SQLFixerV2 implements V2Fixer {
                 WHERE `playerUUID`=?;""")) {
                 statement.setString(1, player.toString());
                 final ResultSet resultSet = statement.executeQuery();
-                CollectionBox box = new CollectionBox(player, new ArrayList<>());
+                CollectionBox box = CollectionBox.empty(player);
                 while (resultSet.next()) {
                     final ItemStack itemStack = ItemSerializer.deserialize(resultSet.getString("itemStack"))[0];
                     final long dateAdded = resultSet.getLong("dateAdded");

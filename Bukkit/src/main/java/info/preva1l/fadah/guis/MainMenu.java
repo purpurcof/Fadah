@@ -15,6 +15,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +30,7 @@ public class MainMenu extends PurchaseMenu {
             @Nullable SortingDirection sortingDirection) {
         super(
                 player,
-                LayoutManager.MenuType.MAIN.getLayout().guiTitle(),
+                player,
                 LayoutManager.MenuType.MAIN,
                 () -> CacheAccess.getAll(Listing.class),
                 search,
@@ -47,24 +48,21 @@ public class MainMenu extends PurchaseMenu {
     public void fillScrollbarItems() {
         for (Category cat : CategoryRegistry.getCategories()) {
             ItemBuilder itemBuilder = new ItemBuilder(cat.icon())
-                    .name(Text.modernMessage(cat.name()))
-                    .addLore(Text.modernList(cat.description()))
+                    .name(Text.text(cat.name()))
+                    .addLore(Text.list(cat.description()))
                     .modelData(cat.modelData())
-                    .setAttributes(null)
-                    .flags(ItemFlag.HIDE_ENCHANTS,
-                            ItemFlag.HIDE_ATTRIBUTES,
-                            ItemFlag.HIDE_UNBREAKABLE,
-                            ItemFlag.HIDE_DESTROYS,
-                            ItemFlag.HIDE_PLACED_ON,
-                            ItemFlag.HIDE_DYE,
-                            ItemFlag.HIDE_POTION_EFFECTS);
+                    .attributeSillyStuff();
             if (category == cat) {
-                itemBuilder.name(Text.modernMessage(cat.name() + "&r " + Lang.i().getCategorySelected()))
+                itemBuilder.name(Text.text(cat.name() + "&r " + Lang.i().getCategorySelected()))
                         .enchant(Enchantment.DURABILITY);
-                itemBuilder.flags(ItemFlag.HIDE_ENCHANTS);
             }
 
-            addScrollbarItem(new PaginatedItem(itemBuilder.build(), e -> {
+            ItemStack stack = itemBuilder.flags().build();
+            System.out.println("All Flags On Item");
+            for (ItemFlag flag : stack.getItemMeta().getItemFlags()) {
+                System.out.println(flag.name());
+            }
+            addScrollbarItem(new PaginatedItem(stack, e -> {
                 if (category != cat) {
                     this.category = cat;
                 } else {

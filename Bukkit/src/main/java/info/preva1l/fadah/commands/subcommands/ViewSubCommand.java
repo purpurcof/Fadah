@@ -7,7 +7,6 @@ import info.preva1l.fadah.guis.ViewListingsMenu;
 import info.preva1l.fadah.utils.commands.CommandArguments;
 import info.preva1l.fadah.utils.commands.SubCommand;
 import info.preva1l.fadah.utils.commands.SubCommandArgs;
-import info.preva1l.fadah.utils.guis.LayoutManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +37,6 @@ public class ViewSubCommand extends SubCommand {
         new ViewListingsMenu(
                 command.getPlayer(),
                 owner,
-                LayoutManager.MenuType.VIEW_LISTINGS,
                 null,
                 null,
                 null

@@ -12,7 +12,6 @@ import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
 
-import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -43,7 +42,7 @@ public final class BukkitAuctionHouseAPI extends AuctionHouseAPI {
 
         return DatabaseManager.getInstance()
                 .get(CollectionBox.class, playerUniqueId)
-                .thenApply(it -> it.orElse(new CollectionBox(playerUniqueId, new ArrayList<>())));
+                .thenApply(it -> it.orElse(CollectionBox.empty(playerUniqueId)));
     }
 
     @Override
@@ -59,7 +58,7 @@ public final class BukkitAuctionHouseAPI extends AuctionHouseAPI {
 
         return DatabaseManager.getInstance()
                 .get(ExpiredItems.class, playerUniqueId)
-                .thenApply(it -> it.orElse(new ExpiredItems(playerUniqueId, new ArrayList<>())));
+                .thenApply(it -> it.orElse(ExpiredItems.empty(playerUniqueId)));
     }
 
     @Override
@@ -75,7 +74,7 @@ public final class BukkitAuctionHouseAPI extends AuctionHouseAPI {
 
         return DatabaseManager.getInstance()
                 .get(History.class, playerUniqueId)
-                .thenApply(it -> it.orElse(new History(playerUniqueId, new ArrayList<>())));
+                .thenApply(it -> it.orElse(History.empty(playerUniqueId)));
     }
 
     @Override
