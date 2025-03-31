@@ -4,8 +4,8 @@ import info.preva1l.fadah.cache.CategoryRegistry;
 import info.preva1l.fadah.records.Category;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public final class ImplCategoryManager implements CategoryManager {
     @Override
-    public @Nullable Category get(@NotNull String id) {
+    public Optional<Category> get(@NotNull String id) {
         return CategoryRegistry.getCategory(id);
     }
 

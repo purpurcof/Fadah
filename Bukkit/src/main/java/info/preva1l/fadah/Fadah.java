@@ -12,7 +12,6 @@ import info.preva1l.fadah.hooks.HookProvider;
 import info.preva1l.fadah.listeners.PlayerListener;
 import info.preva1l.fadah.metrics.MetricsProvider;
 import info.preva1l.fadah.migrator.MigrationProvider;
-import info.preva1l.fadah.migrator.MigratorManager;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.processor.DefaultProcessorArgsProvider;
 import info.preva1l.fadah.utils.Text;
@@ -23,7 +22,6 @@ import info.preva1l.fadah.utils.guis.LayoutManager;
 import info.preva1l.fadah.utils.logging.LoggingProvider;
 import info.preva1l.hooker.Hooker;
 import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,8 +39,6 @@ public final class Fadah extends JavaPlugin implements MigrationProvider, Curren
     @Getter private BasicConfig menusFile;
 
     @Getter private LayoutManager layoutManager;
-
-    @Getter @Setter private MigratorManager migrationManager;
 
     @Override
     public void onLoad() {

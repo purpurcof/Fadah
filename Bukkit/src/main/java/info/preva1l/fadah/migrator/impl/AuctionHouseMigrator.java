@@ -1,14 +1,16 @@
-package info.preva1l.fadah.migrator;
+package info.preva1l.fadah.migrator.impl;
 
 import com.spawnchunk.auctionhouse.AuctionHouse;
 import com.spawnchunk.auctionhouse.modules.ListingType;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CategoryRegistry;
+import info.preva1l.fadah.migrator.Migrator;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.listing.BinListing;
 import info.preva1l.fadah.records.listing.Listing;
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.*;
@@ -46,16 +48,19 @@ public final class AuctionHouseMigrator implements Migrator {
 
     @Override
     public Map<UUID, List<CollectableItem>> migrateCollectionBoxes() {
-        Fadah.getConsole().warning("Not migrating collection boxes! (AuctionHouse does not permit)");
-        return Collections.emptyMap();
+        Map<Long, com.spawnchunk.auctionhouse.modules.Listing> listingMap = AuctionHouse.listings.getUnclaimedListings().getListings();
+        return convert(listingMap);
     }
 
     @Override
     public Map<UUID, List<CollectableItem>> migrateExpiredListings() {
         Map<Long, com.spawnchunk.auctionhouse.modules.Listing> listingMap = AuctionHouse.listings.getExpiredListings().getListings();
+        return convert(listingMap);
+    }
+
+    private @NotNull Map<UUID, List<CollectableItem>> convert(Map<Long, com.spawnchunk.auctionhouse.modules.Listing> listingMap) {
         Map<UUID, List<CollectableItem>> allItems = new ConcurrentHashMap<>();
-        for (long added : listingMap.keySet()) {
-            com.spawnchunk.auctionhouse.modules.Listing listing = listingMap.get(added);
+        for (com.spawnchunk.auctionhouse.modules.Listing listing : listingMap.values()) {
             UUID owner = UUID.fromString(listing.getSeller_UUID());
             ItemStack itemStack = listing.getItem();
             CollectableItem item = new CollectableItem(itemStack, Instant.now().toEpochMilli());

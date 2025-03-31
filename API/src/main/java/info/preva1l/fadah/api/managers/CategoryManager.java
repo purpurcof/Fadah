@@ -3,8 +3,8 @@ package info.preva1l.fadah.api.managers;
 import info.preva1l.fadah.records.Category;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -21,11 +21,10 @@ public interface CategoryManager {
      * Get a category by id.
      *
      * @param id the category id
-     * @return the category matching that ID, or null if no category with that id exists.
+     * @return an optional of the category matching that ID, or an empty optional if none exists
      * @since 3.0.0
      */
-    @Nullable
-    Category get(@NotNull String id);
+    Optional<Category> get(@NotNull String id);
 
     /**
      * Get a category for an item.

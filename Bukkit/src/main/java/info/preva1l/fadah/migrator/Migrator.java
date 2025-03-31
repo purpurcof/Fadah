@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 public interface Migrator {
     String getMigratorName();
 
-    default CompletableFuture<Void> startMigration(Fadah plugin) {
+    default CompletableFuture<Void> startMigration() {
         return CompletableFuture.supplyAsync(() -> {
             int migratedListings = 0;
             List<Listing> listings = migrateListings();

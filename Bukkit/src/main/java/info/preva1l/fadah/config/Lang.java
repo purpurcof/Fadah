@@ -268,7 +268,7 @@ public class Lang {
         @NoArgsConstructor(access = AccessLevel.PRIVATE)
         public static class Search {
             private String description = "Search active listings";
-            private String usage = "ah search <query...>";
+            private String usage = "ah search <query...> [(-cat|--category)=tools, (-p|--player)=player_name, (-sort|--sorting-method)=price, (-direction|--sorting-direction)=ascending)]";
             private List<String> aliases = List.of("s");
         }
     }
@@ -354,6 +354,7 @@ public class Lang {
         private String noPermission = "&cYou do not have permission to execute this command!";
         private String playerNotFound = "&c%player% was not found!";
         private String invalidUsage = "&cUsage: /%command%";
+        private String invalidArgument = "&cArgument %arg% is not the required type of %type%!";
         private String doesNotExist = "&cThis listing does not exist!";
         private String ownListings = "&cYou cannot buy your own listing!";
         private String tooExpensive = "&cYou cannot afford this item!";

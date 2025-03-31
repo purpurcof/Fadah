@@ -1,26 +1,45 @@
 package info.preva1l.fadah.migrator;
 
 import info.preva1l.fadah.Fadah;
+import info.preva1l.fadah.migrator.impl.AkarianAuctionHouseMigrator;
+import info.preva1l.fadah.migrator.impl.AuctionHouseMigrator;
+import info.preva1l.fadah.migrator.impl.zAuctionHouseMigrator;
 import org.bukkit.Bukkit;
 
-public interface MigrationProvider {
-    MigratorManager getMigrationManager();
-    void setMigrationManager(MigratorManager migratorManager);
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+public interface MigrationProvider {
     default void loadMigrators() {
         Fadah.getConsole().info("Loading migrators...");
 
-        setMigrationManager(new MigratorManager());
-
         if (Bukkit.getServer().getPluginManager().getPlugin("zAuctionHouseV3") != null) {
-            getMigrationManager().loadMigrator(new zAuctionHouseMigrator());
+            registerMigrator(new zAuctionHouseMigrator());
         }
 
         if (Bukkit.getServer().getPluginManager().getPlugin("AuctionHouse") != null) {
-            getMigrationManager().loadMigrator(new AuctionHouseMigrator());
-            getMigrationManager().loadMigrator(new AkarianAuctionHouseMigrator());
+            registerMigrator(new AuctionHouseMigrator());
+            registerMigrator(new AkarianAuctionHouseMigrator());
         }
 
-        Fadah.getConsole().info("%s Migrators Loaded!".formatted(getMigrationManager().getMigratorNames().size()));
+        Fadah.getConsole().info("%s Migrators Loaded!".formatted(MigratorHolder.migrators.size()));
+    }
+
+    default Optional<Migrator> getMigrator(String migratorName) {
+        return Optional.ofNullable(MigratorHolder.migrators.get(migratorName));
+    }
+
+    default List<String> getMigratorNames() {
+        return MigratorHolder.migrators.keySet().stream().toList();
+    }
+
+    private void registerMigrator(Migrator migrator) {
+        MigratorHolder.migrators.put(migrator.getMigratorName(), migrator);
+    }
+
+    class MigratorHolder {
+        private static final Map<String, Migrator> migrators = new HashMap<>();
     }
 }

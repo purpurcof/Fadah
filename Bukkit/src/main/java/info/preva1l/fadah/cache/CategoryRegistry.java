@@ -19,15 +19,15 @@ public final class CategoryRegistry {
     private final SortedSet<Category> categories = new TreeSet<>();
     private final BasicConfig categoriesFile = Fadah.getInstance().getCategoriesFile();
 
-    public Category getCategory(String id) {
-        return categories.stream().filter(category -> category.id().equals(id)).findFirst().orElse(null);
+    public Optional<Category> getCategory(String id) {
+        return categories.stream().filter(category -> category.id().equals(id)).findFirst();
     }
 
     public String getCatName(String id) {
         if (id.equals("_none_")) {
             return "N/A";
         }
-        Category category = getCategory(id);
+        Category category = getCategory(id).orElse(null);
         if (category == null) {
             return "N/A";
         }

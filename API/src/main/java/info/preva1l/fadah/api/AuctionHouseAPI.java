@@ -65,7 +65,7 @@ public abstract class AuctionHouseAPI {
      * @since 1.0
      * @deprecated replaced with {@link AuctionHouseAPI#listingManager()} and {@link ListingManager#get(UUID)}
      */
-    @Deprecated(since = "2.9")
+    @Deprecated(since = "3.0.0")
     public Listing getListing(UUID uuid) {
         return listingManager().get(uuid).orElse(null);
     }
@@ -87,9 +87,9 @@ public abstract class AuctionHouseAPI {
      * @since 1.0
      * @deprecated replaced with {@link AuctionHouseAPI#categoryManager()} and {@link CategoryManager#get(String)}
      */
-    @Deprecated(since = "2.9")
+    @Deprecated(since = "3.0.0")
     public Category getCategory(String id) {
-        return categoryManager().get(id);
+        return categoryManager().get(id).orElse(null);
     }
 
     /**
@@ -155,7 +155,7 @@ public abstract class AuctionHouseAPI {
      * @since 1.0
      * @deprecated replaced with {@link AuctionHouseAPI#collectionBox(Player)}
      */
-    @Deprecated(since = "2.9")
+    @Deprecated(since = "3.0.0")
     public List<CollectableItem> getCollectionBox(OfflinePlayer offlinePlayer) {
         return collectionBox(offlinePlayer.getUniqueId()).collectableItems();
     }
@@ -168,7 +168,7 @@ public abstract class AuctionHouseAPI {
      * @since 1.0
      * @deprecated replaced with {@link AuctionHouseAPI#collectionBox(UUID)}
      */
-    @Deprecated(since = "2.9")
+    @Deprecated(since = "3.0.0")
     public List<CollectableItem> getCollectionBox(UUID uuid) {
         return collectionBox(uuid).collectableItems();
     }
@@ -227,7 +227,7 @@ public abstract class AuctionHouseAPI {
      * @since 1.0
      * @deprecated replaced with {@link AuctionHouseAPI#expiredItems(Player)}
      */
-    @Deprecated(since = "2.9")
+    @Deprecated(since = "3.0.0")
     public List<CollectableItem> getExpiredItems(OfflinePlayer offlinePlayer) {
         return expiredItems(offlinePlayer.getUniqueId()).expiredItems();
     }
@@ -240,7 +240,7 @@ public abstract class AuctionHouseAPI {
      * @since 1.0
      * @deprecated replaced with {@link AuctionHouseAPI#expiredItems(UUID)}
      */
-    @Deprecated(since = "2.9")
+    @Deprecated(since = "3.0.0")
     public List<CollectableItem> getExpiredItems(UUID uuid) {
         return expiredItems(uuid).expiredItems();
     }
@@ -298,7 +298,7 @@ public abstract class AuctionHouseAPI {
      * @return the players history, ordered from newest to oldest
      * @deprecated replaced with {@link AuctionHouseAPI#history(Player)}
      */
-    @Deprecated(since = "2.9")
+    @Deprecated(since = "3.0.0")
     public List<HistoricItem> getHistory(OfflinePlayer offlinePlayer) {
         return history(offlinePlayer.getUniqueId()).historicItems();
     }
@@ -310,7 +310,7 @@ public abstract class AuctionHouseAPI {
      * @return the players history, ordered from newest to oldest
      * @deprecated replaced with {@link AuctionHouseAPI#history(UUID)}
      */
-    @Deprecated(since = "2.9")
+    @Deprecated(since = "3.0.0")
     public List<HistoricItem> getHistory(UUID uuid) {
         return history(uuid).historicItems();
     }

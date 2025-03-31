@@ -22,6 +22,7 @@ repositories {
     maven(url = "https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven(url = "https://mvn-repo.arim.space/lesser-gpl3/")
     maven(url = "https://repo.rosewooddev.io/repository/public/")
+    maven(url = "https://repo.triumphteam.dev/snapshots/")
 }
 
 dependencies {
@@ -31,7 +32,7 @@ dependencies {
     compileOnly("de.exlll:configlib-yaml:$configlibVersion") // Configs
 
     implementation("com.github.puregero:multilib:1.2.4") // Folia & Shreddedpaper support
-
+    implementation("dev.triumphteam:triumph-cmd-bukkit:2.0.0-SNAPSHOT") // Command lib
     implementation("net.william278:desertwell:2.0.4") // Update Checker & About Page
 
     // Cross Server Support
@@ -78,5 +79,6 @@ dependencies {
 tasks.withType<ShadowJar> {
     relocate("net.wesjd", "info.preva1l.fadah.libs")
     relocate("com.github.puregero.multilib", "info.preva1l.fadah.libs.multilib")
+    relocate("dev.triumphteam.cmd", "info.preva1l.fadah.commands.lib")
     relocate("info.preva1l.hooker", "info.preva1l.fadah.hooks.lib")
 }

@@ -1,4 +1,4 @@
-package info.preva1l.fadah.migrator;
+package info.preva1l.fadah.migrator.impl;
 
 import com.google.common.base.Suppliers;
 import fr.maxlego08.zauctionhouse.api.AuctionItem;
@@ -8,6 +8,7 @@ import fr.maxlego08.zauctionhouse.api.enums.StorageType;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CategoryRegistry;
 import info.preva1l.fadah.currency.CurrencyRegistry;
+import info.preva1l.fadah.migrator.Migrator;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.listing.BinListing;
 import info.preva1l.fadah.records.listing.Listing;
@@ -18,26 +19,19 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 @Getter
 public final class zAuctionHouseMigrator implements Migrator {
+    private static final Supplier<AuctionPlugin> PLUGIN = Suppliers.memoize(() -> (AuctionPlugin) Bukkit.getPluginManager().getPlugin("zAuctionHouseV3"));
 
-    private static final Supplier<AuctionPlugin> PLUGIN = Suppliers.memoize(() -> (AuctionPlugin) Bukkit.getPluginManager().getPlugin("zAuctionHouse"));
-
-    private final String migratorName = "zAuctionHouse";
+    private final String migratorName = "zAuctionHouseV3";
     private final AuctionManager auctionManager;
 
     public zAuctionHouseMigrator() {
-        auctionManager = getProvider(AuctionManager.class);
-    }
-
-    @Override
-    public CompletableFuture<Void> startMigration(Fadah plugin) {
-        // auctionManager.getStorage().save(PLUGIN.get());
-        return Migrator.super.startMigration(plugin);
+        RegisteredServiceProvider<AuctionManager> provider = Bukkit.getServicesManager().getRegistration(AuctionManager.class);
+        auctionManager = provider == null ? null : provider.getProvider();
     }
 
     @Override
@@ -81,12 +75,5 @@ public final class zAuctionHouseMigrator implements Migrator {
             });
         }
         return allItems;
-    }
-
-    private <T> T getProvider(Class<T> clazz) {
-        RegisteredServiceProvider<T> provider = Bukkit.getServicesManager().getRegistration(clazz);
-        if (provider == null) return null;
-        provider.getProvider();
-        return provider.getProvider();
     }
 }
