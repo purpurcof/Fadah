@@ -12,14 +12,11 @@ import info.preva1l.fadah.utils.guis.ItemBuilder;
 import info.preva1l.fadah.utils.guis.LayoutManager;
 import info.preva1l.fadah.utils.guis.PaginatedItem;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class MainMenu extends PurchaseMenu {
+public class MainMenu extends BrowseMenu {
     private Category category;
 
     public MainMenu(
@@ -35,13 +32,9 @@ public class MainMenu extends PurchaseMenu {
                 () -> CacheAccess.getAll(Listing.class),
                 search,
                 sortingMethod,
-                sortingDirection
+                sortingDirection,
+                category
         );
-        this.category = category;
-
-        if (category != null) {
-            listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
-        }
     }
 
     @Override
@@ -53,16 +46,12 @@ public class MainMenu extends PurchaseMenu {
                     .modelData(cat.modelData())
                     .attributeSillyStuff();
             if (category == cat) {
-                itemBuilder.name(Text.text(cat.name() + "&r " + Lang.i().getCategorySelected()))
-                        .enchant(Enchantment.DURABILITY);
+                itemBuilder
+                        .name(Text.text(cat.name() + "&r " + Lang.i().getCategorySelected()))
+                        .glow(true);
             }
 
-            ItemStack stack = itemBuilder.flags().build();
-            System.out.println("All Flags On Item");
-            for (ItemFlag flag : stack.getItemMeta().getItemFlags()) {
-                System.out.println(flag.name());
-            }
-            addScrollbarItem(new PaginatedItem(stack, e -> {
+            addScrollbarItem(new PaginatedItem(itemBuilder.flags().build(), e -> {
                 if (category != cat) {
                     this.category = cat;
                 } else {
@@ -98,14 +87,5 @@ public class MainMenu extends PurchaseMenu {
                         .addLore(getLang().getLore("profile-button.lore"))
                         .modelData(getLang().getInt("profile-button.model-data"))
                         .build(), e -> new ProfileMenu(player, player).open(player));
-    }
-
-    @Override
-    protected void updatePagination() {
-        super.updatePagination();
-
-        if (category != null) {
-            listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
-        }
     }
 }

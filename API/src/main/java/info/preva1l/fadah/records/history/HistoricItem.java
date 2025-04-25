@@ -26,20 +26,23 @@ public record HistoricItem(
         @Expose @NotNull LoggedAction action,
         @Expose @NotNull ItemStack itemStack,
         @Expose @Nullable Double price,
-        @Expose @Nullable UUID playerUUID
-) {
+        @Expose @Nullable UUID playerUUID,
+        @Expose @Nullable Boolean biddable
+) implements Comparable<HistoricItem> {
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof HistoricItem(
                 Long date, LoggedAction action1, ItemStack stack, Double price1, UUID buyerUid
+                , Boolean biddable1
         ))) return false;
         return Objects.equals(price, price1)
                 && Objects.equals(loggedDate, date)
                 && Objects.equals(playerUUID, buyerUid)
                 && action == action1
-                && Objects.equals(itemStack, stack);
+                && Objects.equals(itemStack, stack)
+                && Objects.equals(biddable, biddable1);
     }
 
     /**
@@ -95,5 +98,10 @@ public record HistoricItem(
         public String getLocaleActionName() {
             return AuctionHouseAPI.getInstance().getLoggedActionLocale(this);
         }
+    }
+
+    @Override
+    public int compareTo(@NotNull HistoricItem o) {
+        return Long.compare(o.loggedDate, this.loggedDate);
     }
 }

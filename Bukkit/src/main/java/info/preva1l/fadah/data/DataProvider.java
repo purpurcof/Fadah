@@ -5,52 +5,28 @@ import info.preva1l.fadah.api.ListingEndEvent;
 import info.preva1l.fadah.api.ListingEndReason;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.cache.CategoryRegistry;
-import info.preva1l.fadah.config.Config;
-import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.records.history.History;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.TaskManager;
-import info.preva1l.fadah.utils.guis.FastInvManager;
-import info.preva1l.fadah.utils.guis.LayoutManager;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
 import info.preva1l.fadah.watcher.AuctionWatcher;
 import info.preva1l.fadah.watcher.Watching;
-import info.preva1l.hooker.Hooker;
+import info.preva1l.trashcan.plugin.annotations.PluginEnable;
 import org.bukkit.Bukkit;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public interface DataProvider {
     Fadah getPlugin();
 
-    default void reload() {
-        FastInvManager.closeAll(getPlugin());
-        Config.reload();
-        Lang.reload();
-        getPlugin().getMenusFile().load();
-        Stream.of(
-                LayoutManager.MenuType.MAIN,
-                LayoutManager.MenuType.NEW_LISTING,
-                LayoutManager.MenuType.PROFILE,
-                LayoutManager.MenuType.EXPIRED_LISTINGS,
-                LayoutManager.MenuType.COLLECTION_BOX,
-                LayoutManager.MenuType.CONFIRM_PURCHASE,
-                LayoutManager.MenuType.HISTORY,
-                LayoutManager.MenuType.WATCH
-        ).forEach(getPlugin().getLayoutManager()::reloadLayout);
-        CategoryRegistry.loadCategories();
-        Hooker.reload();
-    }
-
-    default void loadDataAndPopulateCaches() {
+    @PluginEnable
+    static void loadDataAndPopulateCaches() {
         DatabaseManager.getInstance(); // Make the connection happen during startup
-        CacheAccess.init();
         CategoryRegistry.loadCategories();
 
         DatabaseManager.getInstance().getAll(Listing.class)
@@ -58,7 +34,7 @@ public interface DataProvider {
                         listings.forEach(listing ->
                                 CacheAccess.add(Listing.class, listing))).join();
 
-        TaskManager.Async.runTask(getPlugin(), listingExpiryTask(), 10L);
+        TaskManager.Async.runTask(Fadah.getInstance(), listingExpiryTask(), 10L);
     }
 
 
@@ -102,7 +78,7 @@ public interface DataProvider {
                 .orElseGet(() -> CompletableFuture.completedFuture(null));
     }
 
-    private Runnable listingExpiryTask() {
+    private static Runnable listingExpiryTask() {
         return () -> {
             for (Listing listing : CacheAccess.getAll(Listing.class)) {
                 if (System.currentTimeMillis() <= listing.getDeletionDate()) continue;

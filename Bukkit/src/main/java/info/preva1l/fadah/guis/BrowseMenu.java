@@ -8,7 +8,9 @@ import info.preva1l.fadah.config.Menus;
 import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.filters.SortingDirection;
 import info.preva1l.fadah.filters.SortingMethod;
+import info.preva1l.fadah.records.Category;
 import info.preva1l.fadah.records.listing.BidListing;
+import info.preva1l.fadah.records.listing.BinListing;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.CooldownManager;
 import info.preva1l.fadah.utils.Text;
@@ -33,7 +35,7 @@ import java.util.function.Supplier;
  *
  * @author Preva1l
  */
-public abstract class PurchaseMenu extends ScrollBarFastInv {
+public abstract class BrowseMenu extends ScrollBarFastInv {
     protected final Supplier<List<Listing>> listingSupplier;
     protected final List<Listing> listings;
 
@@ -43,17 +45,29 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
     protected final String search;
     protected SortingMethod sortingMethod;
     protected SortingDirection sortingDirection;
+    protected Category category;
 
-    protected PurchaseMenu(
+    protected BrowseMenu(
             Player player,
             OfflinePlayer owner,
             LayoutManager.MenuType menuType,
             Supplier<List<Listing>> listings,
             @Nullable String search,
             @Nullable SortingMethod sortingMethod,
-            @Nullable SortingDirection sortingDirection
+            @Nullable SortingDirection sortingDirection,
+            @Nullable Category category
     ) {
-        super(menuType.getLayout().guiSize(), menuType.getLayout().guiTitle(), player, menuType);
+        super(
+                menuType.getLayout().guiSize(),
+                menuType.getLayout().formattedTitle(
+                        Tuple.of("%dynamic%", player.getUniqueId() == owner.getUniqueId()
+                                ? Text.capitalizeFirst(Lang.i().getWords().getYour())
+                                : owner.getName()),
+                        Tuple.of("%username%", owner.getName())
+                ),
+                player,
+                menuType
+        );
 
         this.listingSupplier = listings;
         this.listings = listingSupplier.get();
@@ -63,6 +77,7 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
         this.search = search;
         this.sortingMethod = (sortingMethod == null ? SortingMethod.AGE : sortingMethod);
         this.sortingDirection = (sortingDirection == null ? SortingDirection.ASCENDING : sortingDirection);
+        this.category = category;
 
         this.listings.sort(this.sortingMethod.getSorter(this.sortingDirection));
 
@@ -71,6 +86,10 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
                     listing -> !(Text.doesItemHaveString(search, listing.getItemStack())
                             || doesBookHaveEnchant(search, listing.getItemStack()))
             );
+        }
+
+        if (category != null) {
+            this.listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
         }
 
         fillers();
@@ -135,7 +154,9 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
 
                 if (!listing.canBuy(player)) return;
 
-                new ConfirmPurchaseMenu(listing, player, () -> open(player)).open(player);
+                if (listing instanceof BinListing bin) {
+                    new ConfirmPurchaseMenu(bin, player, () -> open(player)).open(player);
+                }
             }));
         }
     }
@@ -192,14 +213,30 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
                 });
 
         // Filter Direction Toggle
-        Component asc = Text.replace(sortingDirection == SortingDirection.ASCENDING
-                        ? getLang().getStringFormatted("filter.change-direction.options.selected", "&8> &e%option%")
-                        : getLang().getStringFormatted("filter.change-direction.options.not-selected", "&f%option%"),
-                Tuple.of("%option%", sortingMethod.getLang(SortingDirection.ASCENDING)));
-        Component desc = Text.replace(sortingDirection == SortingDirection.DESCENDING
-                        ? getLang().getStringFormatted("filter.change-direction.options.selected", "&8> &e%option%")
-                        : getLang().getStringFormatted("filter.change-direction.options.not-selected", "&f%option%"),
-                Tuple.of("%option%", sortingMethod.getLang(SortingDirection.DESCENDING)));
+        Component asc =
+                sortingDirection == SortingDirection.ASCENDING
+                        ? getLang().getStringFormatted(
+                        "filter.change-direction.options.selected",
+                        "&8> &e%option%",
+                        Tuple.of("%option%", sortingMethod.getLang(SortingDirection.ASCENDING))
+                )
+                        : getLang().getStringFormatted(
+                        "filter.change-direction.options.not-selected",
+                        "&f%option%",
+                        Tuple.of("%option%", sortingMethod.getLang(SortingDirection.ASCENDING))
+                );
+        Component desc =
+                sortingDirection == SortingDirection.DESCENDING
+                        ? getLang().getStringFormatted(
+                        "filter.change-direction.options.selected",
+                        "&8> &e%option%",
+                        Tuple.of("%option%", sortingMethod.getLang(SortingDirection.DESCENDING))
+                )
+                        : getLang().getStringFormatted(
+                        "filter.change-direction.options.not-selected",
+                        "&f%option%",
+                        Tuple.of("%option%", sortingMethod.getLang(SortingDirection.DESCENDING))
+                );
 
         removeItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.FILTER_DIRECTION,-1));
         setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.FILTER_DIRECTION,-1),
@@ -247,6 +284,11 @@ public abstract class PurchaseMenu extends ScrollBarFastInv {
             listings.removeIf(listing -> !(Text.doesItemHaveString(search, listing.getItemStack())
                     || doesBookHaveEnchant(search, listing.getItemStack())));
         }
+
+        if (category != null) {
+            this.listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
+        }
+
 
         listings.sort(this.sortingMethod.getSorter(this.sortingDirection));
 

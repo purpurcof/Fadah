@@ -1,9 +1,9 @@
 package info.preva1l.fadah.commands.subcommands;
 
 import info.preva1l.fadah.Fadah;
+import info.preva1l.trashcan.chat.AboutMenu;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import net.william278.desertwell.about.AboutMenu;
 import org.bukkit.command.CommandSender;
 
 /**
@@ -28,7 +28,7 @@ public interface AboutSubCommand {
                         AboutMenu.Link.of("https://discord.gg/4KcF7S94HF").text("Discord Support").icon("⭐"),
                         AboutMenu.Link.of("https://docs.preva1l.info/fadlc/").text("Documentation").icon("📖")
                 )
-                .version(plugin.getVersion())
+                .version(plugin.getCurrentVersion())
                 .themeColor(TextColor.fromHexString("#9555FF"))
                 .secondaryColor(TextColor.fromHexString("#bba4e0"))
                 .build();
