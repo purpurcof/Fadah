@@ -1,7 +1,7 @@
 package info.preva1l.fadah.api;
 
 import info.preva1l.fadah.records.listing.Listing;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public final class ListingPurchaseEvent extends Event {
     private static final HandlerList handlerList = new HandlerList();
     private final Listing listing;
-    private final Player buyer;
+    private final OfflinePlayer buyer;
 
     /**
      * Create a new instance of this event.
@@ -25,7 +25,7 @@ public final class ListingPurchaseEvent extends Event {
      * @param listing the listing.
      * @param buyer the player who purchased the listing.
      */
-    public ListingPurchaseEvent(Listing listing, Player buyer) {
+    public ListingPurchaseEvent(Listing listing, OfflinePlayer buyer) {
         super();
         this.listing = listing;
         this.buyer = buyer;
@@ -48,7 +48,7 @@ public final class ListingPurchaseEvent extends Event {
      *
      * @return the buyer.
      */
-    public Player getBuyer() {
+    public OfflinePlayer getBuyer() {
         return buyer;
     }
 

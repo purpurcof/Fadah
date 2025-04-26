@@ -1,6 +1,5 @@
 package info.preva1l.fadah.records.listing;
 
-import info.preva1l.fadah.api.ListingPurchaseEvent;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
@@ -12,10 +11,10 @@ import info.preva1l.fadah.multiserver.Payload;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.utils.Text;
-import info.preva1l.fadah.utils.logging.TransactionLogger;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -132,9 +131,10 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
                 );
 
         // Notify Both Players
-        Player buyer = Bukkit.getPlayer(winningBid.bidder());
-        if (buyer != null) {
-            buyer.sendMessage(Text.text(Lang.i().getNotifications().getNewItem()));
+        Player onlineBuyer = Bukkit.getPlayer(winningBid.bidder());
+        OfflinePlayer buyer = Bukkit.getOfflinePlayer(winningBid.bidder());
+        if (onlineBuyer != null) {
+            onlineBuyer.sendMessage(Text.text(Lang.i().getNotifications().getNewItem()));
         } else {
             if (Broker.getInstance().isConnected()) {
                 Message.builder()
@@ -151,20 +151,6 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
                 Tuple.of("%price%", formattedPrice),
                 Tuple.of("%buyer%", winningBid.bidderName()));
 
-        Player seller = Bukkit.getPlayer(this.getOwner());
-        if (seller != null) {
-            seller.sendMessage(message);
-        } else {
-            if (Broker.getInstance().isConnected()) {
-                Message.builder()
-                        .type(Message.Type.NOTIFICATION)
-                        .payload(Payload.withNotification(this.getOwner(), message))
-                        .build().send(Broker.getInstance());
-            }
-        }
-
-        TransactionLogger.listingSold(this, buyer);
-
-        Bukkit.getServer().getPluginManager().callEvent(new ListingPurchaseEvent(this.getAsStale(), buyer));
+        complete(message, buyer);
     }
 }

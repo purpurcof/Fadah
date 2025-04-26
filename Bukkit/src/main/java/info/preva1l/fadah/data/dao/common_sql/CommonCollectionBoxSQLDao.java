@@ -77,7 +77,17 @@ public abstract class CommonCollectionBoxSQLDao implements Dao<CollectionBox> {
      */
     @Override
     public void delete(CollectionBox collectableItem) {
-        throw new NotImplementedException();
+        try (Connection connection = getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement("""
+                DELETE FROM `collection_boxV2`
+                WHERE `playerUUID` = ?;""")) {
+                statement.setString(1, collectableItem.owner().toString());
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            Fadah.getConsole().severe("Failed to delete collection box!");
+            throw new RuntimeException(e);
+        }
     }
 
     /**

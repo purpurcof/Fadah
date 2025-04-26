@@ -25,7 +25,7 @@ public class HistorySQLDao extends CommonHistorySQLDao {
     public void save(History history) {
         try (Connection connection = getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement("""
-                    INSERT INTO `historyV3`
+                    INSERT INTO `historyV2`
                         (`playerUUID`, `items`)
                     VALUES (?, ?)
                     ON DUPLICATE KEY UPDATE

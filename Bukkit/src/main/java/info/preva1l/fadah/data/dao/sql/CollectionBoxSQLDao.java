@@ -21,6 +21,10 @@ public class CollectionBoxSQLDao extends CommonCollectionBoxSQLDao {
      */
     @Override
     public void save(CollectionBox collectableList) {
+        if (collectableList.collectableItems().isEmpty()) {
+            delete(collectableList);
+            return;
+        }
         try (Connection connection = getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement("""
                     INSERT INTO `collection_boxV2`

@@ -3,14 +3,20 @@ package info.preva1l.fadah.records.listing;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.api.ListingEndEvent;
 import info.preva1l.fadah.api.ListingEndReason;
+import info.preva1l.fadah.api.ListingPurchaseEvent;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.multiserver.Broker;
+import info.preva1l.fadah.multiserver.Message;
+import info.preva1l.fadah.multiserver.Payload;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -66,6 +72,24 @@ public abstract class ActiveListing extends BaseListing {
         }
 
         return true;
+    }
+
+    protected void complete(Component message, OfflinePlayer buyer) {
+        Player seller = Bukkit.getPlayer(this.getOwner());
+        if (seller != null) {
+            seller.sendMessage(message);
+        } else {
+            if (Broker.getInstance().isConnected()) {
+                Message.builder()
+                        .type(Message.Type.NOTIFICATION)
+                        .payload(Payload.withNotification(this.getOwner(), message))
+                        .build().send(Broker.getInstance());
+            }
+        }
+
+        TransactionLogger.listingSold(this, buyer);
+
+        Bukkit.getServer().getPluginManager().callEvent(new ListingPurchaseEvent(this.getAsStale(), buyer));
     }
 
     public abstract StaleListing getAsStale();

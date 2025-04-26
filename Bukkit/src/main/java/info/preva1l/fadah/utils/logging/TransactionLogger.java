@@ -12,7 +12,7 @@ import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.hooker.Hooker;
 import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 
 import java.util.UUID;
 
@@ -52,7 +52,7 @@ public class TransactionLogger {
         Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }
 
-    public void listingSold(Listing listing, Player buyer) {
+    public void listingSold(Listing listing, OfflinePlayer buyer) {
         boolean bidding = false;
         double price;
         if (listing instanceof BinListing bin) {
@@ -109,23 +109,8 @@ public class TransactionLogger {
     }
 
     public void listingRemoval(Listing listing, boolean isAdmin) {
-        boolean bidding = listing instanceof BidListing;
-
         // In game logs
-        HistoricItem historicItem = new HistoricItem(
-                System.currentTimeMillis(),
-                isAdmin ? HistoricItem.LoggedAction.LISTING_ADMIN_CANCEL : HistoricItem.LoggedAction.LISTING_CANCEL,
-                listing.getItemStack(),
-                null,
-                null,
-                bidding
-        );
-
-        CacheAccess.get(History.class, listing.getOwner())
-                .ifPresentOrElse(
-                        cache -> cache.add(historicItem),
-                        () -> fetchAndSaveHistory(listing.getOwner(), historicItem)
-                );
+        listingInGame(listing, isAdmin ? HistoricItem.LoggedAction.LISTING_ADMIN_CANCEL : HistoricItem.LoggedAction.LISTING_CANCEL);
 
         // Log file logs
         String logMessage = "[LISTING REMOVED] Seller: %s (%s), ItemStack: %s".formatted(
@@ -140,22 +125,8 @@ public class TransactionLogger {
     }
 
     public void listingExpired(Listing listing) {
-        boolean bidding = listing instanceof BidListing;
-
         // In game logs
-        HistoricItem historicItem = new HistoricItem(
-                System.currentTimeMillis(),
-                HistoricItem.LoggedAction.LISTING_EXPIRE,
-                listing.getItemStack(),
-                null,
-                null,
-                bidding
-        );
-        CacheAccess.get(History.class, listing.getOwner())
-                .ifPresentOrElse(
-                        cache -> cache.add(historicItem),
-                        () -> fetchAndSaveHistory(listing.getOwner(), historicItem)
-                );
+        listingInGame(listing, HistoricItem.LoggedAction.LISTING_EXPIRE);
 
         // Log file logs
         String logMessage = "[LISTING EXPIRED] Seller: %s (%s), ItemStack: %s".formatted(
@@ -167,6 +138,24 @@ public class TransactionLogger {
         Fadah.getInstance().getTransactionLogger().info(logMessage);
 
         Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
+    }
+
+    private void listingInGame(Listing listing, HistoricItem.LoggedAction loggedAction) {
+        boolean bidding = listing instanceof BidListing;
+
+        HistoricItem historicItem = new HistoricItem(
+                System.currentTimeMillis(),
+                loggedAction,
+                listing.getItemStack(),
+                null,
+                null,
+                bidding
+        );
+        CacheAccess.get(History.class, listing.getOwner())
+                .ifPresentOrElse(
+                        cache -> cache.add(historicItem),
+                        () -> fetchAndSaveHistory(listing.getOwner(), historicItem)
+                );
     }
 
     private void fetchAndSaveHistory(UUID owner, HistoricItem historicItem) {
