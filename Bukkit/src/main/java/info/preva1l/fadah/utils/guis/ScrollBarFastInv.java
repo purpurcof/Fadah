@@ -1,6 +1,6 @@
 package info.preva1l.fadah.utils.guis;
 
-import info.preva1l.fadah.cache.CategoryRegistry;
+import info.preva1l.fadah.config.Categories;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +66,7 @@ public abstract class ScrollBarFastInv extends PaginatedFastInv {
     }
 
     protected synchronized void scrollDown() {
-        if (scrollbarSlots.containsKey(CategoryRegistry.getCategories().size() - 1)) return;
+        if (scrollbarSlots.containsKey(Categories.i().getCategories().size() - 1)) return;
         Map<Integer, Integer> newMappings = new HashMap<>();
         for (Map.Entry<Integer, Integer> entry : scrollbarSlots.entrySet()) {
             newMappings.put(entry.getKey() + 1, entry.getValue());

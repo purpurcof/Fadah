@@ -18,6 +18,9 @@ import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.migrator.MigrationProvider;
 import info.preva1l.fadah.utils.Text;
+import info.preva1l.trashcan.flavor.annotations.Configure;
+import info.preva1l.trashcan.flavor.annotations.Service;
+import info.preva1l.trashcan.flavor.annotations.inject.Inject;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -31,35 +34,43 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Stream;
 
-public interface CommandProvider {
-    Fadah getPlugin();
+@Service
+public class CommandService {
+    public static final CommandService instance = new CommandService();
+    
+    @Inject private Fadah plugin;
 
-    default void loadCommands() {
+    private BukkitCommandManager<CommandSender> commandManager;
+    private static final Map<String, BukkitCommand<CommandSender>> commands = new HashMap<>();
+    private static final Map<String, List<SubCommandInfo>> subCommands = new HashMap<>();
+    
+    @Configure
+    public void configure() {
         loadCommandManager();
         registerCommands();
         loadCommandCache();
     }
 
-    default List<SubCommandInfo> getSubCommands(String command) {
-        return CommandManagerHolder.subCommands.get(command);
+    public List<SubCommandInfo> getSubCommands(String command) {
+        return subCommands.get(command);
     }
 
     private void registerCommands() {
-        getPlugin().getLogger().info("Registering Commands...");
+        plugin.getLogger().info("Registering Commands...");
         Stream.of(
-                new AuctionHouseCommand(getPlugin()),
+                new AuctionHouseCommand(plugin),
                 new MigrateCommand()
-        ).forEach(CommandManagerHolder.commandManager::registerCommand);
-        getPlugin().getLogger().info("Commands Registered!");
+        ).forEach(commandManager::registerCommand);
+        plugin.getLogger().info("Commands Registered!");
     }
 
     private void loadCommandManager() {
-        getPlugin().getLogger().info("Loading CommandManager...");
-        CommandManagerHolder.commandManager = BukkitCommandManager.create(getPlugin());
+        plugin.getLogger().info("Loading CommandManager...");
+        commandManager = BukkitCommandManager.create(plugin);
         registerMessages();
         registerArguments();
 
-        CommandManagerHolder.commandManager.registerRequirement(
+        commandManager.registerRequirement(
                 RequirementKey.of("enabled"),
                 sender -> {
                     boolean enabled = Config.i().isEnabled();
@@ -69,32 +80,32 @@ public interface CommandProvider {
                     return enabled;
                 }
         );
-        getPlugin().getLogger().info("CommandManager Registered!");
+        plugin.getLogger().info("CommandManager Registered!");
     }
 
     private void registerMessages() {
-        CommandManagerHolder.commandManager.registerMessage(MessageKey.NOT_ENOUGH_ARGUMENTS, this::badArgs);
-        CommandManagerHolder.commandManager.registerMessage(MessageKey.INVALID_ARGUMENT, this::badArgs);
-        CommandManagerHolder.commandManager.registerMessage(
+        commandManager.registerMessage(MessageKey.NOT_ENOUGH_ARGUMENTS, this::badArgs);
+        commandManager.registerMessage(MessageKey.INVALID_ARGUMENT, this::badArgs);
+        commandManager.registerMessage(
                 MessageKey.UNKNOWN_COMMAND,
                 (user, context) -> send(user, Lang.i().getErrors().getCommandNotFound())
         );
-        CommandManagerHolder.commandManager.registerMessage(
+        commandManager.registerMessage(
                 MessageKey.of("NO_PERMISSION", NoPermissionMessageContext.class),
                 (user, context) -> send(user, Lang.i().getErrors().getNoPermission())
         );
-        CommandManagerHolder.commandManager.registerMessage(
+        commandManager.registerMessage(
                 MessageKey.of("PLAYER_ONLY", DefaultMessageContext.class),
                 (user, context) -> send(user, Lang.i().getErrors().getMustBePlayer())
         );
     }
 
     private void registerArguments() {
-        CommandManagerHolder.commandManager.registerArgument(
+        commandManager.registerArgument(
                 OfflinePlayer.class,
                 (sender, argument) -> Bukkit.getOfflinePlayerIfCached(argument)
         );
-        CommandManagerHolder.commandManager.registerArgument(
+        commandManager.registerArgument(
                 UUID.class,
                 (sender, argument) -> {
                     try {
@@ -104,7 +115,7 @@ public interface CommandProvider {
                     }
                 }
         );
-        CommandManagerHolder.commandManager.registerArgument(
+        commandManager.registerArgument(
                 Double.TYPE,
                 (sender, argument) -> {
                     try {
@@ -115,7 +126,7 @@ public interface CommandProvider {
                 }
         );
         // Plugin Migrators
-        CommandManagerHolder.commandManager.registerArgument(
+        commandManager.registerArgument(
                 Plugin.class,
                 (sender, argument) -> {
                     Plugin plugin = Bukkit.getPluginManager().getPlugin(argument);
@@ -125,7 +136,7 @@ public interface CommandProvider {
                     return plugin;
                 }
         );
-        CommandManagerHolder.commandManager.registerSuggestion(
+        commandManager.registerSuggestion(
                 Plugin.class,
                 (sender, context) -> MigrationProvider.getMigratorNames()
         );
@@ -172,8 +183,8 @@ public interface CommandProvider {
                 if (!(bukkitCommand instanceof BukkitCommand<?>)) continue;
                 BukkitCommand<CommandSender> triumphCommand = (BukkitCommand<CommandSender>) bukkitCommand;
 
-                CommandManagerHolder.commands.put(bukkitCommand.getName(), triumphCommand);
-                CommandManagerHolder.subCommands.put(triumphCommand.getName(), extractSubCommands(triumphCommand));
+                commands.put(bukkitCommand.getName(), triumphCommand);
+                subCommands.put(triumphCommand.getName(), extractSubCommands(triumphCommand));
             }
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
@@ -183,7 +194,7 @@ public interface CommandProvider {
     private CommandMap getCommandMap() throws NoSuchFieldException, IllegalAccessException {
         Field commandMapField = BukkitCommandManager.class.getDeclaredField("commandMap");
         commandMapField.setAccessible(true);
-        return (CommandMap) commandMapField.get(CommandManagerHolder.commandManager);
+        return (CommandMap) commandMapField.get(commandManager);
     }
 
     @SuppressWarnings("unchecked")
@@ -198,14 +209,14 @@ public interface CommandProvider {
         List<SubCommandInfo> infos = new ArrayList<>();
         for (BukkitSubCommand<CommandSender> cmd : subCommands.values()) {
             Tuple<List<String>, String> descriptionAndAliases = getCommandInfo(cmd.getName());
-            descriptionAndAliases.first.forEach(alias -> command.addSubCommandAlias(alias, cmd));
-            CommandManagerHolder.commands.put(command.getName(), command);
+            descriptionAndAliases.first().forEach(alias -> command.addSubCommandAlias(alias, cmd));
+            commands.put(command.getName(), command);
 
             CommandPermission permission = cmd.getPermission() != null
                     ? cmd.getPermission()
                     : new CommandPermission(List.of(), "Default Permission Handle", PermissionDefault.TRUE);
 
-            infos.add(new SubCommandInfo(cmd.getName(), descriptionAndAliases.second, permission));
+            infos.add(new SubCommandInfo(cmd.getName(), descriptionAndAliases.second(), permission));
         }
         return infos;
     }
@@ -228,11 +239,5 @@ public interface CommandProvider {
             case "toggle" -> Tuple.of(Lang.i().getCommands().getToggle().getAliases(), Lang.i().getCommands().getToggle().getDescription());
             default -> Tuple.of(List.of("bla"), "Unknown");
         };
-    }
-
-    class CommandManagerHolder {
-        public static BukkitCommandManager<CommandSender> commandManager;
-        private static final Map<String, BukkitCommand<CommandSender>> commands = new HashMap<>();
-        private static final Map<String, List<SubCommandInfo>> subCommands = new HashMap<>();
     }
 }

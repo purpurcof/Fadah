@@ -1,6 +1,5 @@
 package info.preva1l.fadah.utils.logging;
 
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.hooks.impl.InfluxDBHook;
@@ -47,7 +46,7 @@ public class TransactionLogger {
                 price,
                 listing.getItemStack().toString());
 
-        Fadah.getInstance().getTransactionLogger().info(logMessage);
+        LoggingService.instance.transactionLogger.info(logMessage);
 
         Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }
@@ -103,7 +102,7 @@ public class TransactionLogger {
                 listing.getItemStack()
         );
 
-        Fadah.getInstance().getTransactionLogger().info(logMessage);
+        LoggingService.instance.transactionLogger.info(logMessage);
 
         Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }
@@ -119,7 +118,7 @@ public class TransactionLogger {
                 listing.getItemStack().toString()
         );
 
-        Fadah.getInstance().getTransactionLogger().info(logMessage);
+        LoggingService.instance.transactionLogger.info(logMessage);
 
         Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }
@@ -135,7 +134,7 @@ public class TransactionLogger {
                 listing.getItemStack().toString()
         );
 
-        Fadah.getInstance().getTransactionLogger().info(logMessage);
+        LoggingService.instance.transactionLogger.info(logMessage);
 
         Hooker.getHook(InfluxDBHook.class).ifPresent(hook -> hook.log(logMessage));
     }

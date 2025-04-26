@@ -2,7 +2,8 @@ package info.preva1l.fadah.utils.logging;
 
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
-import info.preva1l.trashcan.plugin.annotations.PluginLoad;
+import info.preva1l.trashcan.flavor.annotations.Configure;
+import info.preva1l.trashcan.flavor.annotations.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,10 +12,16 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
+import java.util.logging.Logger;
 
-public interface LoggingProvider {
-    @PluginLoad
-    static void initLogger() {
+@Service
+public class LoggingService {
+    public static final LoggingService instance = new LoggingService();
+
+    final Logger transactionLogger = Logger.getLogger("AuctionHouse-Transactions");
+
+    @Configure
+    public void initLogger() {
         Fadah.getConsole().info("Initialising transaction logger...");
 
         if (!Config.i().isLogToFile()) return;
@@ -51,11 +58,11 @@ public interface LoggingProvider {
 
             FileHandler fileHandler = new FileHandler(logFile.getAbsolutePath());
             fileHandler.setFormatter(new TransactionLogFormatter());
-            Fadah.getInstance().getTransactionLogger().setUseParentHandlers(false);
-            for (Handler handler : Fadah.getInstance().getTransactionLogger().getHandlers()) {
-                Fadah.getInstance().getTransactionLogger().removeHandler(handler);
+            transactionLogger.setUseParentHandlers(false);
+            for (Handler handler : transactionLogger.getHandlers()) {
+                transactionLogger.removeHandler(handler);
             }
-            Fadah.getInstance().getTransactionLogger().addHandler(fileHandler);
+            transactionLogger.addHandler(fileHandler);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

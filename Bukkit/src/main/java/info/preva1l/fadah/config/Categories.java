@@ -1,0 +1,228 @@
+package info.preva1l.fadah.config;
+
+import com.google.common.collect.Sets;
+import de.exlll.configlib.Configuration;
+import de.exlll.configlib.NameFormatters;
+import de.exlll.configlib.YamlConfigurationProperties;
+import de.exlll.configlib.YamlConfigurations;
+import info.preva1l.fadah.Fadah;
+import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.processor.JavaScriptProcessor;
+import info.preva1l.fadah.records.Category;
+import info.preva1l.trashcan.plugin.annotations.PluginReload;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Optional;
+import java.util.SortedSet;
+import java.util.concurrent.CompletableFuture;
+
+/**
+ * Created on 26/04/2025
+ *
+ * @author Preva1l
+ */
+@Getter
+@Configuration
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("FieldMayBeFinal")
+public class Categories {
+    private static Categories instance;
+
+    private static final YamlConfigurationProperties PROPERTIES = YamlConfigurationProperties.newBuilder()
+            .charset(StandardCharsets.UTF_8)
+            .setNameFormatter(NameFormatters.LOWER_KEBAB_CASE)
+            .build();
+
+    private SortedSet<Category> categories = Sets.newTreeSet(List.of(
+            new Category(
+                    "tools",
+                    "&aTools",
+                    2,
+                    0,
+                    Material.DIAMOND_PICKAXE,
+                    List.of(
+                            "&7▪ &fPickaxes",
+                            "&7▪ &fAxes",
+                            "&7▪ &fShovels",
+                            "&7▪ &fHoes"
+                    ),
+                    List.of(
+                            "%material%.endsWith(\"_AXE\")",
+                            "%material%.endsWith(\"_PICKAXE\")",
+                            "%material%.endsWith(\"_HOE\")",
+                            "%material%.endsWith(\"_SHOVEL\")"
+                    )
+            ),
+            new Category(
+                    "combat",
+                    "&cCombat",
+                    2,
+                    0,
+                    Material.DIAMOND_SWORD,
+                    List.of(
+                            "&7▪ &fSwords",
+                            "&7▪ &fArmour",
+                            "&7▪ &fBows",
+                            "&7▪ &fShields"
+                    ),
+                    List.of(
+                            "%material%.endsWith(\"_SWORD\")",
+                            "%material%.endsWith(\"_BOOTS\")",
+                            "%material%.endsWith(\"_LEGGINGS\")",
+                            "%material%.endsWith(\"_CHESTPLATE\")",
+                            "%material%.endsWith(\"_HELMET\")",
+                            "%material% == \"BOW\""
+                    )
+            ),
+            new Category(
+                    "keys",
+                    "&3Crate Keys",
+                    4,
+                    0,
+                    Material.TRIPWIRE_HOOK,
+                    List.of(
+                            "&fPickaxes, Axes, Hoes, etc"
+                    ),
+                    List.of(
+                            "%material% == \"TRIPWIRE_HOOK\""
+                    )
+            ),
+            new Category(
+                    "spawners-and-eggs",
+                    "&5Spawners and Mob Eggs",
+                    2,
+                    0,
+                    Material.CHICKEN_SPAWN_EGG,
+                    List.of(
+                            "&fAll Mob Spawners and Mob Spawn Eggs"
+                    ),
+                    List.of(
+                            "%material% == \"SPAWNER\"",
+                            "%material%.endsWith(\"_SPAWN_EGG\")"
+                    )
+            ),
+            new Category(
+                    "building-blocks",
+                    "&dBuilding Blocks",
+                    2,
+                    0,
+                    Material.BRICKS,
+                    List.of(
+                            "&fBlocks used to make &ebeautiful &fbuildings!"
+                    ),
+                    List.of(
+                            "%material% == \"COARSE_DIRT\"",
+                            "%material% == \"TERRACOTTA\"",
+                            "%material%.endsWith(\"_WOOL\")",
+                            "%material%.endsWith(\"_TERRACOTTA\")",
+                            "%material%.endsWith(\"_CONCRETE\")",
+                            "%material%.endsWith(\"_CONCRETE_POWDER\")",
+                            "%material% == \"GLASS\"",
+                            "%material%.endsWith(\"_GLASS\")",
+                            "%material%.endsWith(\"_GLASS_PANE\")"
+                    )
+            ),
+            new Category(
+                    "redstone",
+                    "&cRedstone",
+                    3,
+                    0,
+                    Material.REPEATER,
+                    List.of(
+                            "&fRedstone components."
+                    ),
+                    List.of(
+                            "%material%.includes(\"REDSTONE\")",
+                            "%material% == \"REPEATER\"",
+                            "%material% == \"COMPARATOR\""
+                    )
+            ),
+            new Category(
+                    "eco-items",
+                    "&fEco Items Example",
+                    3,
+                    0,
+                    Material.BLUE_DYE,
+                    List.of(
+                            "&fAn example usage for the ecoitems hook"
+                    ),
+                    List.of(
+                            "%ecoitems_id% == \"your_custom_item\""
+                    )
+            ),
+            new Category(
+                    "misc",
+                    "&eMisc",
+                    1,
+                    0,
+                    Material.LEATHER,
+                    List.of(
+                            "&fItems that don't fit under any other category."
+                    ),
+                    List.of(
+                            "true"
+                    )
+            )
+    ));
+
+    public static Optional<Category> getCategory(String id) {
+        return i().categories.stream().filter(category -> category.id().equals(id)).findFirst();
+    }
+
+    public static String getCatName(String id) {
+        if (id.equals("_none_")) {
+            return "N/A";
+        }
+        Category category = getCategory(id).orElse(null);
+        if (category == null) {
+            return "N/A";
+        }
+        return category.name();
+    }
+
+    public static CompletableFuture<String> getCategoryForItem(ItemStack item) {
+        if (i().categories.isEmpty()) {
+            return CompletableFuture.completedFuture("_none_");
+        }
+        return CompletableFuture.supplyAsync(() -> {
+            for (Category category : i().categories) {
+                for (String matcher : category.matchers()) {
+                    // default to false so we don't add it to a broken category
+                    if (JavaScriptProcessor.process(matcher, false, item)) {
+                        return category.id();
+                    }
+                }
+            }
+            return "_none_";
+        }, DatabaseManager.getInstance().getThreadPool());
+    }
+
+    public static boolean registerCategory(@NotNull Category category) {
+        return i().categories.add(category);
+    }
+
+    public static boolean unregisterCategory(@NotNull String id) {
+        return i().categories.removeIf(category -> category.id().equals(id));
+    }
+
+    @PluginReload
+    public static void reload() {
+        instance = YamlConfigurations.load(new File(Fadah.getInstance().getDataFolder(), "categories.yml").toPath(), Categories.class, PROPERTIES);
+    }
+
+    public static Categories i() {
+        if (instance != null) {
+            return instance;
+        }
+
+        return instance = YamlConfigurations.update(new File(Fadah.getInstance().getDataFolder(), "categories.yml").toPath(), Categories.class, PROPERTIES);
+    }
+}

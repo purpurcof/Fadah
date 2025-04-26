@@ -1,7 +1,7 @@
 package info.preva1l.fadah.guis;
 
 import info.preva1l.fadah.cache.CacheAccess;
-import info.preva1l.fadah.cache.CategoryRegistry;
+import info.preva1l.fadah.config.Categories;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.filters.SortingDirection;
 import info.preva1l.fadah.filters.SortingMethod;
@@ -39,7 +39,7 @@ public class MainMenu extends BrowseMenu {
 
     @Override
     public void fillScrollbarItems() {
-        for (Category cat : CategoryRegistry.getCategories()) {
+        for (Category cat : Categories.i().getCategories()) {
             ItemBuilder itemBuilder = new ItemBuilder(cat.icon())
                     .name(Text.text(cat.name()))
                     .addLore(Text.list(cat.description()))

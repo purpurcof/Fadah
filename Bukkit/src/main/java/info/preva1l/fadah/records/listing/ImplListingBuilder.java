@@ -1,7 +1,7 @@
 package info.preva1l.fadah.records.listing;
 
 import com.google.common.base.Preconditions;
-import info.preva1l.fadah.cache.CategoryRegistry;
+import info.preva1l.fadah.config.Categories;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.hooks.impl.permissions.Permission;
@@ -57,7 +57,7 @@ public final class ImplListingBuilder extends ListingBuilder {
         Preconditions.checkNotNull(tax);
         Preconditions.checkNotNull(length);
 
-        return CategoryRegistry.getCategoryForItem(itemStack)
+        return Categories.getCategoryForItem(itemStack)
                 .thenApplyAsync(category -> {
                     if (biddable) {
                         return new ImplBidListing(

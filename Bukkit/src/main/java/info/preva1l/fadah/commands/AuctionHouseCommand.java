@@ -6,8 +6,8 @@ import dev.triumphteam.cmd.core.annotation.*;
 import dev.triumphteam.cmd.core.flag.Flags;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CacheAccess;
-import info.preva1l.fadah.cache.CategoryRegistry;
 import info.preva1l.fadah.commands.subcommands.*;
+import info.preva1l.fadah.config.Categories;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.filters.SortingDirection;
 import info.preva1l.fadah.filters.SortingMethod;
@@ -66,7 +66,7 @@ public class AuctionHouseCommand extends BaseCommand
     })
     public void search(Player player, String search, Flags flags) {
         Category category = flags.getValue("c")
-                .flatMap(CategoryRegistry::getCategory)
+                .flatMap(Categories::getCategory)
                 .orElse(null);
         SortingMethod sort = flags.getValue("s", SortingMethod.class).orElse(null);
         SortingDirection direction = flags.getValue("d", SortingDirection.class).orElse(null);
@@ -175,7 +175,7 @@ public class AuctionHouseCommand extends BaseCommand
     @Permission("fadah.help")
     public void help(CommandSender sender) {
         StringBuilder message = new StringBuilder(Lang.i().getCommands().getHelp().getHeader());
-        for (SubCommandInfo subCommand : plugin.getSubCommands("fadah")) {
+        for (SubCommandInfo subCommand : CommandService.instance.getSubCommands("fadah")) {
             if (!subCommand.permission().hasPermission(sender)) continue;
             message.append("\n").append(Lang.i().getCommands().getHelp().getFormat()
                     .replace("%command%", subCommand.name())

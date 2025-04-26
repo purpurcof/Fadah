@@ -3,11 +3,12 @@ package info.preva1l.fadah.listeners;
 import com.github.puregero.multilib.regionized.RegionizedTask;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Lang;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.guis.NewListingMenu;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.Text;
-import info.preva1l.fadah.utils.UpdatesProvider;
+import info.preva1l.fadah.utils.UpdateService;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -32,10 +33,10 @@ public class PlayerListener implements Listener {
         }
 
         invalidateIfNoJoin.put(e.getUniqueId(), TaskManager.Sync.runLater(Fadah.getInstance(),
-                () -> Fadah.getInstance()
+                () -> DataService.instance
                         .invalidateAndSavePlayerData(e.getUniqueId())
                         .thenRun(() -> invalidateIfNoJoin.remove(e.getUniqueId())), 1200L));
-        Fadah.getInstance().loadPlayerData(e.getUniqueId()).join();
+        DataService.instance.loadPlayerData(e.getUniqueId()).join();
     }
 
     @EventHandler
@@ -44,12 +45,12 @@ public class PlayerListener implements Listener {
         if (task != null) {
             task.cancel();
         }
-        UpdatesProvider.notifyUpdate(e.getPlayer());
+        UpdateService.instance.notifyUpdate(e.getPlayer());
     }
 
     @EventHandler
     public void leaveListener(PlayerQuitEvent e) {
-        Fadah.getInstance().invalidateAndSavePlayerData(e.getPlayer().getUniqueId());
+        DataService.instance.invalidateAndSavePlayerData(e.getPlayer().getUniqueId());
     }
 
     @EventHandler

@@ -3,13 +3,11 @@ package info.preva1l.fadah.hooks;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.hooker.Hooker;
-import info.preva1l.trashcan.plugin.annotations.PluginEnable;
 import info.preva1l.trashcan.plugin.annotations.PluginLoad;
-import info.preva1l.trashcan.plugin.annotations.PluginReload;
 
-public interface HookProvider {
+public class HookService {
     @PluginLoad
-    static void loadHooks() {
+    public static void loadHooks() {
         Hooker.register(
                 Fadah.getInstance(),
                 "info.preva1l.fadah.hooks.impl"
@@ -22,17 +20,5 @@ public interface HookProvider {
                     default -> true;
                 }
         );
-
-        Hooker.load();
-    }
-
-    @PluginEnable
-    static void enableHooks() {
-        Hooker.enable();
-    }
-
-    @PluginReload
-    static void reloadHooks() {
-        Hooker.reload();
     }
 }

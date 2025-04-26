@@ -101,14 +101,14 @@ public class Text {
     @SafeVarargs
     public String replace(String message, Tuple<String, Object>... args) {
         for (Tuple<String, Object> replacement : args) {
-            if (!message.contains(replacement.first)) continue;
+            if (!message.contains(replacement.first())) continue;
 
-            if (replacement.second instanceof Component comp) {
-                message = message.replace(replacement.first, legacySerializer.serialize(comp));
+            if (replacement.second() instanceof Component comp) {
+                message = message.replace(replacement.first(), legacySerializer.serialize(comp));
                 continue;
             }
 
-            message = message.replace(replacement.first, String.valueOf(replacement.second));
+            message = message.replace(replacement.first(), String.valueOf(replacement.second()));
         }
         return message;
     }

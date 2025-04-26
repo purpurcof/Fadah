@@ -4,7 +4,8 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.api.ListingEndEvent;
 import info.preva1l.fadah.api.ListingEndReason;
 import info.preva1l.fadah.cache.CacheAccess;
-import info.preva1l.fadah.cache.CategoryRegistry;
+import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
@@ -14,32 +15,41 @@ import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
 import info.preva1l.fadah.watcher.AuctionWatcher;
 import info.preva1l.fadah.watcher.Watching;
-import info.preva1l.trashcan.plugin.annotations.PluginEnable;
+import info.preva1l.trashcan.flavor.annotations.Close;
+import info.preva1l.trashcan.flavor.annotations.Configure;
+import info.preva1l.trashcan.flavor.annotations.Service;
+import info.preva1l.trashcan.flavor.annotations.inject.Inject;
 import org.bukkit.Bukkit;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-public interface DataProvider {
-    Fadah getPlugin();
+@Service
+public class DataService {
+    public static final DataService instance = new DataService();
 
-    @PluginEnable
-    static void loadDataAndPopulateCaches() {
-        DatabaseManager.getInstance(); // Make the connection happen during startup
-        CategoryRegistry.loadCategories();
+    @Inject private Fadah plugin;
+
+    @Configure
+    public void loadDataAndPopulateCaches() {
+        DatabaseManager.getInstance();
 
         DatabaseManager.getInstance().getAll(Listing.class)
                 .thenAccept(listings ->
                         listings.forEach(listing ->
                                 CacheAccess.add(Listing.class, listing))).join();
 
-        TaskManager.Async.runTask(Fadah.getInstance(), listingExpiryTask(), 10L);
+        TaskManager.Async.runTask(plugin, listingExpiryTask(), 10L);
     }
 
+    @Close
+    public void close() {
+        DatabaseManager.getInstance().shutdown();
+        if (Config.i().getBroker().isEnabled()) Broker.getInstance().destroy();
+    }
 
-
-    default CompletableFuture<Void> loadPlayerData(UUID uuid) {
+    public CompletableFuture<Void> loadPlayerData(UUID uuid) {
         DatabaseManager db = DatabaseManager.getInstance();
 
         return db.fixPlayerData(uuid)
@@ -52,7 +62,7 @@ public interface DataProvider {
                 ));
     }
 
-    default CompletableFuture<Void> invalidateAndSavePlayerData(UUID uuid) {
+    public CompletableFuture<Void> invalidateAndSavePlayerData(UUID uuid) {
         DatabaseManager db = DatabaseManager.getInstance();
 
         return CompletableFuture.allOf(
@@ -78,7 +88,7 @@ public interface DataProvider {
                 .orElseGet(() -> CompletableFuture.completedFuture(null));
     }
 
-    private static Runnable listingExpiryTask() {
+    private Runnable listingExpiryTask() {
         return () -> {
             for (Listing listing : CacheAccess.getAll(Listing.class)) {
                 if (System.currentTimeMillis() <= listing.getDeletionDate()) continue;
@@ -101,7 +111,7 @@ public interface DataProvider {
 
                 TransactionLogger.listingExpired(listing);
 
-                TaskManager.Sync.run(Fadah.getInstance(), () ->
+                TaskManager.Sync.run(plugin, () ->
                         Bukkit.getServer().getPluginManager().callEvent(
                                 new ListingEndEvent(listing, ListingEndReason.EXPIRED)
                         )
