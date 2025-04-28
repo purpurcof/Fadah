@@ -22,11 +22,14 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 
 public final class SellSubCommand {
     private final Fadah plugin;
     public static List<UUID> running = new ArrayList<>();
+
+    public static List<Predicate<Player>> restrictions = new ArrayList<>();
 
     public SellSubCommand(Fadah plugin) {
         this.plugin = plugin;
@@ -62,6 +65,12 @@ public final class SellSubCommand {
             );
             running.remove(player.getUniqueId());
             return;
+        }
+
+        for (Predicate<Player> restriction : restrictions) {
+            if (restriction.test(player)) {
+                return;
+            }
         }
 
         if (Config.i().isMinimalMode()) {

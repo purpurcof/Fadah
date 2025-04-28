@@ -386,6 +386,7 @@ public class Lang {
         private String other = "&cListing this item failed! (%ex%)";
         private String alreadyHighestBidder = "&cYou are already the highest bidder!";
         private String bidTooLow = "&cThe current bid is higher than your bid!";
+        private String mcmmoBlocking = "&cYou cannot list an item while using an mcMMO ability!";
     }
 
     private Words words = new Words();

@@ -14,6 +14,7 @@ repositories {
     maven(url = "https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven(url = "https://mvn-repo.arim.space/lesser-gpl3/")
     maven(url = "https://repo.rosewooddev.io/repository/public/")
+    maven(url = "https://nexus.neetgames.com/repository/maven-releases/")
 }
 
 dependencies {
@@ -51,6 +52,7 @@ dependencies {
     compileOnly("com.willfp:EcoItems:5.43.1")
     compileOnly("com.influxdb:influxdb-client-java:7.2.0") // InfluxDB logging
     compileOnly("net.luckperms:api:5.4") // Permissions enhancement
+    compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.2.004")
 
     // Migrators
     compileOnly("com.github.Maxlego08:zAuctionHouseV3-API:3.2.1.9") // zAuctionHouse
