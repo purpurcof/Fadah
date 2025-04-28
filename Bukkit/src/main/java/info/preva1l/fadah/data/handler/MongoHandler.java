@@ -7,9 +7,9 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.dao.mongo.*;
-import info.preva1l.fadah.data.fixers.v2.MongoFixerV2;
 import info.preva1l.fadah.data.fixers.v2.V2Fixer;
 import info.preva1l.fadah.data.fixers.v3.V3Fixer;
 import info.preva1l.fadah.records.collection.CollectionBox;
@@ -23,10 +23,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class MongoHandler implements DatabaseHandler {
     private final Map<Class<?>, Dao<?>> daos = new HashMap<>();
-
     @Getter private boolean connected = false;
 
     private MongoClient client;
@@ -34,13 +34,21 @@ public class MongoHandler implements DatabaseHandler {
     @Getter private V2Fixer v2Fixer;
     @Getter private V3Fixer v3Fixer;
 
+    private final Logger logger = DataService.instance.logger;
+
+    private final Fadah plugin;
+
+    public MongoHandler(Fadah plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public void connect() {
         Config.Database conf = Config.i().getDatabase();
         try {
             @NotNull String connectionURI = conf.getUri();
             @NotNull String database = conf.getDatabase();
-            Fadah.getConsole().info("Connecting to: " + connectionURI);
+            logger.info("Connecting to: " + connectionURI);
             final MongoClientSettings settings = MongoClientSettings.builder()
                     .applyConnectionString(new ConnectionString(connectionURI))
                     .uuidRepresentation(UuidRepresentation.STANDARD)
@@ -56,7 +64,7 @@ public class MongoHandler implements DatabaseHandler {
         }
 
         registerDaos();
-        v2Fixer = new MongoFixerV2();
+        v2Fixer = V2Fixer.empty();
         v3Fixer = V3Fixer.empty();
     }
 

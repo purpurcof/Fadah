@@ -1,7 +1,7 @@
 package info.preva1l.fadah.utils.logging;
 
 import info.preva1l.fadah.cache.CacheAccess;
-import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.hooks.impl.InfluxDBHook;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
@@ -158,12 +158,12 @@ public class TransactionLogger {
     }
 
     private void fetchAndSaveHistory(UUID owner, HistoricItem historicItem) {
-        DatabaseManager.getInstance()
+        DataService.getInstance()
                 .get(History.class, owner)
                 .thenAccept(historyOpt -> {
                     var history = historyOpt.orElseGet(() -> History.empty(owner));
                     history.add(historicItem);
-                    DatabaseManager.getInstance().save(History.class, history);
+                    DataService.getInstance().save(History.class, history);
                 });
     }
 }

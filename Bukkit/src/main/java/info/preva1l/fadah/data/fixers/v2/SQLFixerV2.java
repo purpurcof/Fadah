@@ -2,7 +2,7 @@ package info.preva1l.fadah.data.fixers.v2;
 
 import com.zaxxer.hikari.HikariDataSource;
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
@@ -18,6 +18,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class SQLFixerV2 implements V2Fixer {
+    private final Fadah plugin;
     private final HikariDataSource dataSource;
 
     @Override
@@ -36,7 +37,7 @@ public class SQLFixerV2 implements V2Fixer {
                     expiredItems.add(new CollectableItem(itemStack, dateAdded));
                 }
 
-                DatabaseManager.getInstance().save(ExpiredItems.class, expiredItems).join();
+                DataService.getInstance().save(ExpiredItems.class, expiredItems).join();
             }
 
             try (PreparedStatement deleteStatement = connection.prepareStatement("""
@@ -46,7 +47,7 @@ public class SQLFixerV2 implements V2Fixer {
                 deleteStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            Fadah.getConsole().severe("Failed to get or remove items from expired items!");
+            plugin.getLogger().severe("Failed to get or remove items from expired items!");
             throw new RuntimeException(e);
         }
     }
@@ -67,7 +68,7 @@ public class SQLFixerV2 implements V2Fixer {
                     box.add(new CollectableItem(itemStack, dateAdded));
                 }
 
-                DatabaseManager.getInstance().save(CollectionBox.class, box).join();
+                DataService.getInstance().save(CollectionBox.class, box).join();
             }
             try (PreparedStatement deleteStatement = connection.prepareStatement("""
                 DELETE FROM `collection_box`
@@ -76,7 +77,7 @@ public class SQLFixerV2 implements V2Fixer {
                 deleteStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            Fadah.getConsole().severe("Failed to get or remove items from collection box!");
+            plugin.getLogger().severe("Failed to get or remove items from collection box!");
             throw new RuntimeException(e);
         }
 
@@ -118,7 +119,7 @@ public class SQLFixerV2 implements V2Fixer {
             }
 
         } catch (SQLException e) {
-            Fadah.getConsole().severe("Failed to check if player needs fixing!");
+            plugin.getLogger().severe("Failed to check if player needs fixing!");
             throw new RuntimeException(e);
         }
 

@@ -3,7 +3,6 @@ package info.preva1l.fadah.data.dao.common_sql;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.history.HistoricItem;
@@ -54,7 +53,7 @@ public abstract class CommonHistorySQLDao implements Dao<History> {
                 }
             }
         } catch (SQLException e) {
-            Fadah.getConsole().log(Level.SEVERE, "Failed to get item from history!", e);
+            getLogger().log(Level.SEVERE, "Failed to get item from history!", e);
         }
         return Optional.empty();
     }

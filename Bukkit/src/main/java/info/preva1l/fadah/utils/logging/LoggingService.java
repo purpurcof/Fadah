@@ -4,6 +4,7 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.trashcan.flavor.annotations.Configure;
 import info.preva1l.trashcan.flavor.annotations.Service;
+import info.preva1l.trashcan.flavor.annotations.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,18 +19,19 @@ import java.util.logging.Logger;
 public class LoggingService {
     public static final LoggingService instance = new LoggingService();
 
+    @Inject private Fadah plugin;
+    @Inject private Logger logger;
+    
     final Logger transactionLogger = Logger.getLogger("AuctionHouse-Transactions");
 
     @Configure
     public void initLogger() {
-        Fadah.getConsole().info("Initialising transaction logger...");
-
         if (!Config.i().isLogToFile()) return;
         try {
-            File logsFolder = new File(Fadah.getInstance().getDataFolder(), "logs");
+            File logsFolder = new File(plugin.getDataFolder(), "logs");
             if (!logsFolder.exists()) {
                 if (!logsFolder.mkdirs()) {
-                    Fadah.getConsole().warning("Failed to create logs folder!");
+                    logger.warning("Failed to create logs folder!");
                     return;
                 }
             }
@@ -52,7 +54,7 @@ public class LoggingService {
                 File renamedFile = new File(logsFolder, newFileName + ".log");
 
                 if (!logFile.renameTo(renamedFile)) {
-                    Fadah.getConsole().warning("Could not rename logfile!");
+                    logger.warning("Could not rename logfile!");
                 }
             }
 
@@ -66,7 +68,5 @@ public class LoggingService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        Fadah.getConsole().info("Logger Started!");
     }
 }

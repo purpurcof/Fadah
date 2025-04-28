@@ -16,7 +16,7 @@ import info.preva1l.fadah.utils.CooldownManager;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.TimeUtil;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
-import info.preva1l.fadah.utils.guis.LayoutManager;
+import info.preva1l.fadah.utils.guis.LayoutService;
 import info.preva1l.fadah.utils.guis.PaginatedItem;
 import info.preva1l.fadah.utils.guis.ScrollBarFastInv;
 import net.kyori.adventure.text.Component;
@@ -50,7 +50,7 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
     protected BrowseMenu(
             Player player,
             OfflinePlayer owner,
-            LayoutManager.MenuType menuType,
+            LayoutService.MenuType menuType,
             Supplier<List<Listing>> listings,
             @Nullable String search,
             @Nullable SortingMethod sortingMethod,
@@ -113,7 +113,7 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
     protected void fillPaginationItems() {
         for (Listing listing : listings) {
             if (listing.getCurrency() == null) {
-                Fadah.getConsole().severe("Cannot load listing %s because currency %s is not on this server!".formatted(listing.getId(), listing.getCurrencyId()));
+                Fadah.getInstance().getLogger().severe("Cannot load listing %s because currency %s is not on this server!".formatted(listing.getId(), listing.getCurrencyId()));
                 continue;
             }
             Component buyMode = listing instanceof BidListing
@@ -162,16 +162,16 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
     }
 
     protected void addNavigationButtons() {
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.SCROLLBAR_CONTROL_ONE,-1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SCROLLBAR_CONTROL_ONE,-1),
                 Menus.i().getScrollPreviousButton().itemStack(), e -> scrollUp());
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.SCROLLBAR_CONTROL_TWO,-1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SCROLLBAR_CONTROL_TWO,-1),
                 Menus.i().getScrollNextButton().itemStack(),e -> scrollDown());
     }
 
     protected void addFilterButtons() {
         // Search
-        removeItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.SEARCH,-1));
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.SEARCH,-1),
+        removeItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SEARCH,-1));
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SEARCH,-1),
                 new ItemBuilder(getLang().getAsMaterial("filter.search.icon", Material.OAK_SIGN))
                         .name(getLang().getStringFormatted("filter.search.name", "&3&lSearch"))
                         .modelData(getLang().getInt("filter.search.model-data"))
@@ -182,8 +182,8 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
         // Filter Type Cycle
         SortingMethod prev = sortingMethod.previous();
         SortingMethod next = sortingMethod.next();
-        removeItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.FILTER,-1));
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.FILTER,-1),
+        removeItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.FILTER,-1));
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.FILTER,-1),
                 new ItemBuilder(getLang().getAsMaterial("filter.change-type.icon", Material.PUFFERFISH))
                         .name(getLang().getStringFormatted("filter.change-type.name", "&eListing Filter"))
                         .modelData(getLang().getInt("filter.change-type.model-data"))
@@ -238,8 +238,8 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
                         Tuple.of("%option%", sortingMethod.getLang(SortingDirection.DESCENDING))
                 );
 
-        removeItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.FILTER_DIRECTION,-1));
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.FILTER_DIRECTION,-1),
+        removeItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.FILTER_DIRECTION,-1));
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.FILTER_DIRECTION,-1),
                 new ItemBuilder(getLang().getAsMaterial("filter.change-direction.icon", Material.CLOCK))
                         .name(getLang().getStringFormatted("filter.change-direction.name", "&eFilter Direction"))
                         .modelData(getLang().getInt("filter.change-direction.model-data"))

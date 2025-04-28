@@ -5,9 +5,11 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.hooker.Hooker;
 import info.preva1l.trashcan.plugin.annotations.PluginLoad;
 
-public class HookService {
+public final class HookService {
+    public static final HookService instance = new HookService();
+
     @PluginLoad
-    public static void loadHooks() {
+    public void loadHooks() {
         Hooker.register(
                 Fadah.getInstance(),
                 "info.preva1l.fadah.hooks.impl"

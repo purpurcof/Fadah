@@ -3,7 +3,7 @@ package info.preva1l.fadah.records.listing;
 import com.google.common.base.Preconditions;
 import info.preva1l.fadah.config.Categories;
 import info.preva1l.fadah.config.Config;
-import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.hooks.impl.permissions.Permission;
 import info.preva1l.fadah.hooks.impl.permissions.PermissionsHook;
 import info.preva1l.fadah.records.post.ImplPost;
@@ -87,6 +87,6 @@ public final class ImplListingBuilder extends ListingBuilder {
                                 Instant.now().plus(length, ChronoUnit.MILLIS).toEpochMilli()
                         );
                     }
-                }, DatabaseManager.getInstance().getThreadPool());
+                }, DataService.getInstance().getThreadPool());
     }
 }

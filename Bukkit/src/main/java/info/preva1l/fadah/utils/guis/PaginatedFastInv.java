@@ -21,7 +21,7 @@ public abstract class PaginatedFastInv extends FastInv {
     protected boolean needsClearing = false;
     private final RegionizedTask updateTask;
 
-    protected PaginatedFastInv(int size, @NotNull String title, @NotNull Player player, LayoutManager.MenuType menuType) {
+    protected PaginatedFastInv(int size, @NotNull String title, @NotNull Player player, LayoutService.MenuType menuType) {
         super(size, title, menuType);
         this.player = player;
         this.paginationMappings = List.of(
@@ -34,7 +34,7 @@ public abstract class PaginatedFastInv extends FastInv {
         addCloseHandler(event -> updateTask.cancel());
     }
 
-    protected PaginatedFastInv(int size, @NotNull Component title, @NotNull Player player, LayoutManager.MenuType menuType) {
+    protected PaginatedFastInv(int size, @NotNull Component title, @NotNull Player player, LayoutService.MenuType menuType) {
         super(size, title, menuType);
         this.player = player;
         this.paginationMappings = List.of(
@@ -47,7 +47,7 @@ public abstract class PaginatedFastInv extends FastInv {
         addCloseHandler(event -> updateTask.cancel());
     }
 
-    protected PaginatedFastInv(int size, @NotNull Component title, @NotNull Player player, LayoutManager.MenuType menuType, @NotNull List<Integer> paginationMappings) {
+    protected PaginatedFastInv(int size, @NotNull Component title, @NotNull Player player, LayoutService.MenuType menuType, @NotNull List<Integer> paginationMappings) {
         super(size, title, menuType);
         this.player = player;
         this.paginationMappings = paginationMappings;
@@ -118,17 +118,17 @@ public abstract class PaginatedFastInv extends FastInv {
     protected abstract void fillPaginationItems();
 
     protected void addPaginationControls() {
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_ONE, -1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.PAGINATION_CONTROL_ONE, -1),
                 Menus.i().getBorder().itemStack());
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_TWO,-1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.PAGINATION_CONTROL_TWO,-1),
                 Menus.i().getBorder().itemStack());
         if (page > 0) {
-            setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_ONE, -1),
+            setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.PAGINATION_CONTROL_ONE, -1),
                     Menus.i().getPreviousButton().itemStack(), e -> previousPage());
         }
 
         if (paginatedItems != null && paginatedItems.size() >= index + 1) {
-            setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PAGINATION_CONTROL_TWO,-1),
+            setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.PAGINATION_CONTROL_TWO,-1),
                     Menus.i().getNextButton().itemStack(), e -> nextPage());
         }
     }

@@ -6,7 +6,6 @@ import com.google.gson.reflect.TypeToken;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.collection.CollectableItem;
@@ -48,7 +47,7 @@ public class CollectionBoxMongoDao implements Dao<CollectionBox> {
             if (items == null) items = new ArrayList<>();
             return Optional.of(new CollectionBox(id, items));
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
+            getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
         return Optional.empty();
     }
@@ -75,7 +74,7 @@ public class CollectionBoxMongoDao implements Dao<CollectionBox> {
                     .append("items", GSON.toJson(expiredItems.collectableItems(), COLLECTION_LIST_TYPE));
             database.getCollection("collection_box").insertOne(document);
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
+            getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
     }
 

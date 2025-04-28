@@ -11,12 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 
 public record GuiLayout(
-        @NotNull LayoutManager.MenuType menuType,
+        @NotNull LayoutService.MenuType menuType,
         @NotNull List<Integer> fillerSlots,
         @NotNull List<Integer> paginationSlots,
         @NotNull List<Integer> scrollbarSlots,
         @NotNull List<Integer> noItems,
-        @NotNull HashMap<LayoutManager.ButtonType, Integer> buttonSlots,
+        @NotNull HashMap<LayoutService.ButtonType, Integer> buttonSlots,
         @NotNull String guiTitle,
         int guiSize,
         @NotNull LanguageConfig language,

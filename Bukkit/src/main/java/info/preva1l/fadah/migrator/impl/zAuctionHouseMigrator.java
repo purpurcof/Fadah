@@ -5,9 +5,9 @@ import fr.maxlego08.zauctionhouse.api.AuctionItem;
 import fr.maxlego08.zauctionhouse.api.AuctionManager;
 import fr.maxlego08.zauctionhouse.api.AuctionPlugin;
 import fr.maxlego08.zauctionhouse.api.enums.StorageType;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Categories;
 import info.preva1l.fadah.currency.CurrencyRegistry;
+import info.preva1l.fadah.migrator.MigrationService;
 import info.preva1l.fadah.migrator.Migrator;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.listing.ImplBinListing;
@@ -55,7 +55,7 @@ public final class zAuctionHouseMigrator implements Migrator {
 
     @Override
     public Map<UUID, List<CollectableItem>> migrateCollectionBoxes() {
-        Fadah.getConsole().warning("Not migrating collection boxes! (zAuctionHouse API does not permit)");
+        MigrationService.instance.logger.warning("Not migrating collection boxes! (zAuctionHouse API does not permit)");
         return Collections.emptyMap();
     }
 

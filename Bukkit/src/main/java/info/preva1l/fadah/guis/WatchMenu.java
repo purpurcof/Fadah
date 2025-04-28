@@ -6,7 +6,7 @@ import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.FastInv;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
-import info.preva1l.fadah.utils.guis.LayoutManager;
+import info.preva1l.fadah.utils.guis.LayoutService;
 import info.preva1l.fadah.watcher.AuctionWatcher;
 import info.preva1l.fadah.watcher.Watching;
 import org.bukkit.Material;
@@ -19,7 +19,7 @@ public class WatchMenu extends FastInv {
     private final Player player;
 
     public WatchMenu(Player player) {
-        super(LayoutManager.MenuType.WATCH);
+        super(LayoutService.MenuType.WATCH);
         this.player = player;
         this.watching = AuctionWatcher.getWatchingListings().getOrDefault(player.getUniqueId(), Watching.base(player));
 
@@ -35,7 +35,7 @@ public class WatchMenu extends FastInv {
     }
 
     private void setSearch() {
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.SEARCH, -1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SEARCH, -1),
                 new ItemBuilder(getLang().getAsMaterial("search.icon"))
                         .name(getLang().getStringFormatted("search.name"))
                         .modelData(getLang().getInt("search.model-data"))
@@ -50,7 +50,7 @@ public class WatchMenu extends FastInv {
     }
 
     private void setMinPrice() {
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.MIN_PRICE, -1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.MIN_PRICE, -1),
                 new ItemBuilder(getLang().getAsMaterial("min-price.icon"))
                         .name(getLang().getStringFormatted("min-price.name"))
                         .modelData(getLang().getInt("min-price.model-data"))
@@ -69,7 +69,7 @@ public class WatchMenu extends FastInv {
     }
 
     private void setMaxPrice() {
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.MAX_PRICE, -1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.MAX_PRICE, -1),
                 new ItemBuilder(getLang().getAsMaterial("max-price.icon"))
                         .name(getLang().getStringFormatted("max-price.name"))
                         .modelData(getLang().getInt("max-price.model-data"))
@@ -88,7 +88,7 @@ public class WatchMenu extends FastInv {
     }
 
     private void setComplete() {
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_START, -1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.LISTING_START, -1),
                 new ItemBuilder(getLang().getAsMaterial("start.icon", Material.EMERALD))
                         .name(getLang().getStringFormatted("start.name"))
                         .modelData(getLang().getInt("start.model-data"))

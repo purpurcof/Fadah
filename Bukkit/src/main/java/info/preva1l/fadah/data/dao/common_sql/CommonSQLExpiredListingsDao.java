@@ -3,7 +3,6 @@ package info.preva1l.fadah.data.dao.common_sql;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.collection.CollectableItem;
@@ -53,7 +52,7 @@ public abstract class CommonSQLExpiredListingsDao implements Dao<ExpiredItems> {
                 }
             }
         } catch (SQLException e) {
-            Fadah.getConsole().severe("Failed to get items from expired listings!");
+            getLogger().severe("Failed to get items from expired listings!");
             throw new RuntimeException(e);
         }
         return Optional.empty();

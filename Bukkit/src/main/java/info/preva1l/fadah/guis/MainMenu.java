@@ -9,7 +9,7 @@ import info.preva1l.fadah.records.Category;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
-import info.preva1l.fadah.utils.guis.LayoutManager;
+import info.preva1l.fadah.utils.guis.LayoutService;
 import info.preva1l.fadah.utils.guis.PaginatedItem;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -17,8 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class MainMenu extends BrowseMenu {
-    private Category category;
-
     public MainMenu(
             @Nullable Category category,
             @NotNull Player player,
@@ -28,7 +26,7 @@ public class MainMenu extends BrowseMenu {
         super(
                 player,
                 player,
-                LayoutManager.MenuType.MAIN,
+                LayoutService.MenuType.MAIN,
                 () -> CacheAccess.getAll(Listing.class),
                 search,
                 sortingMethod,
@@ -39,7 +37,7 @@ public class MainMenu extends BrowseMenu {
 
     @Override
     public void fillScrollbarItems() {
-        for (Category cat : Categories.i().getCategories()) {
+        for (Category cat : Categories.getCategories()) {
             ItemBuilder itemBuilder = new ItemBuilder(cat.icon())
                     .name(Text.text(cat.name()))
                     .addLore(Text.list(cat.description()))
@@ -68,8 +66,8 @@ public class MainMenu extends BrowseMenu {
         super.addFilterButtons();
 
         // Search
-        removeItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.SEARCH,-1));
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.SEARCH,-1),
+        removeItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SEARCH,-1));
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SEARCH,-1),
                 new ItemBuilder(getLang().getAsMaterial("filter.search.icon", Material.OAK_SIGN))
                         .name(getLang().getStringFormatted("filter.search.name", "&3&lSearch"))
                         .modelData(getLang().getInt("filter.search.model-data"))
@@ -81,7 +79,7 @@ public class MainMenu extends BrowseMenu {
     protected void addNavigationButtons() {
         super.addNavigationButtons();
 
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.PROFILE,-1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.PROFILE,-1),
                 new ItemBuilder(getLang().getAsMaterial("profile-button.icon", Material.PLAYER_HEAD)).skullOwner(player)
                         .name(getLang().getStringFormatted("profile-button.name", "&e&lYour Profile"))
                         .addLore(getLang().getLore("profile-button.lore"))

@@ -5,7 +5,7 @@ import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.records.listing.BinListing;
 import info.preva1l.fadah.utils.guis.FastInv;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
-import info.preva1l.fadah.utils.guis.LayoutManager;
+import info.preva1l.fadah.utils.guis.LayoutService;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -13,12 +13,12 @@ public class ConfirmPurchaseMenu extends FastInv {
     public ConfirmPurchaseMenu(BinListing listing,
                                Player player,
                                Runnable returnFunction) {
-        super(LayoutManager.MenuType.CONFIRM_PURCHASE.getLayout().guiSize(),
-                LayoutManager.MenuType.CONFIRM_PURCHASE.getLayout().guiTitle(),
-                LayoutManager.MenuType.CONFIRM_PURCHASE);
+        super(LayoutService.MenuType.CONFIRM_PURCHASE.getLayout().guiSize(),
+                LayoutService.MenuType.CONFIRM_PURCHASE.getLayout().formattedTitle(),
+                LayoutService.MenuType.CONFIRM_PURCHASE);
 
         fillers();
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.CONFIRM, -1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.CONFIRM, -1),
                 new ItemBuilder(getLang().getAsMaterial("confirm.icon", Material.LIME_CONCRETE))
                         .name(getLang().getStringFormatted("confirm.name", "&a&lCONFIRM"))
                         .modelData(getLang().getInt("confirm.model-data"))
@@ -29,7 +29,7 @@ public class ConfirmPurchaseMenu extends FastInv {
             listing.purchase(((Player) e.getWhoClicked()));
         });
 
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.CANCEL, -1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.CANCEL, -1),
                 new ItemBuilder(getLang().getAsMaterial("cancel.icon", Material.RED_CONCRETE))
                         .name(getLang().getStringFormatted("cancel.name", "&c&lCANCEL"))
                         .modelData(getLang().getInt("cancel.model-data"))
@@ -37,7 +37,7 @@ public class ConfirmPurchaseMenu extends FastInv {
             returnFunction.run();
         });
 
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.ITEM_TO_PURCHASE, -1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.ITEM_TO_PURCHASE, -1),
                 listing.getItemStack().clone());
     }
 }

@@ -1,7 +1,6 @@
 package info.preva1l.fadah.currency;
 
 import dev.unnm3d.rediseconomy.api.RedisEconomyAPI;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.misc.SubEconomy;
 import lombok.Getter;
@@ -21,10 +20,10 @@ public class RedisEconomyCurrency implements MultiCurrency {
     public boolean preloadChecks() {
         api = RedisEconomyAPI.getAPI();
         if (api == null) {
-            Fadah.getConsole().severe("-------------------------------------");
-            Fadah.getConsole().severe("Cannot enable redis economy currency!");
-            Fadah.getConsole().severe("Plugin did not start correctly.");
-            Fadah.getConsole().severe("-------------------------------------");
+            CurrencyService.instance.logger.severe("-------------------------------------");
+            CurrencyService.instance.logger.severe("Cannot enable redis economy currency!");
+            CurrencyService.instance.logger.severe("Plugin did not start correctly.");
+            CurrencyService.instance.logger.severe("-------------------------------------");
             return false;
         }
         for (SubEconomy eco : Config.i().getCurrency().getRedisEconomy().getCurrencies()) {
@@ -37,10 +36,10 @@ public class RedisEconomyCurrency implements MultiCurrency {
                     p -> getCurrency(eco).getBalance(p),
                     v -> {
                         if (getCurrency(eco) == null) {
-                            Fadah.getConsole().severe("-------------------------------------");
-                            Fadah.getConsole().severe("Cannot enable redis economy currency!");
-                            Fadah.getConsole().severe("No currency with name: " + eco.economy());
-                            Fadah.getConsole().severe("-------------------------------------");
+                            CurrencyService.instance.logger.severe("-------------------------------------");
+                            CurrencyService.instance.logger.severe("Cannot enable redis economy currency!");
+                            CurrencyService.instance.logger.severe("No currency with name: " + eco.economy());
+                            CurrencyService.instance.logger.severe("-------------------------------------");
                             return false;
                         }
                         return true;

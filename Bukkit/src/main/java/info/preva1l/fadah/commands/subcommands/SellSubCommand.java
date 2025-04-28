@@ -6,7 +6,7 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.currency.CurrencyRegistry;
-import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.guis.NewListingMenu;
 import info.preva1l.fadah.hooks.impl.permissions.Permission;
 import info.preva1l.fadah.hooks.impl.permissions.PermissionsHook;
@@ -32,9 +32,9 @@ public final class SellSubCommand {
         this.plugin = plugin;
     }
 
-    public static void addRunning(UUID uuid) {
+    public void addRunning(UUID uuid) {
         running.add(uuid);
-        TaskManager.Async.runLater(Fadah.getInstance(), () -> running.remove(uuid), 20 * 60L);
+        TaskManager.Async.runLater(plugin, () -> running.remove(uuid), 20 * 60L);
     }
 
     public void execute(Player player, double price) {
@@ -105,9 +105,9 @@ public final class SellSubCommand {
                     }
 
                     running.remove(player.getUniqueId());
-                }), DatabaseManager.getInstance().getThreadPool())
+                }), DataService.getInstance().getThreadPool())
                 .exceptionally(t -> {
-                    Fadah.getConsole().log(Level.SEVERE, t.getMessage(), t);
+                    plugin.getLogger().log(Level.SEVERE, t.getMessage(), t);
                     running.remove(player.getUniqueId());
                     return null;
                 });

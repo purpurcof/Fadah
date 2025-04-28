@@ -1,22 +1,50 @@
 package info.preva1l.fadah.processor;
 
-import info.preva1l.fadah.Fadah;
+import info.preva1l.fadah.utils.Text;
+import info.preva1l.trashcan.flavor.annotations.Configure;
+import info.preva1l.trashcan.flavor.annotations.Service;
+import info.preva1l.trashcan.flavor.annotations.inject.Inject;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
+import java.util.ArrayList;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static info.preva1l.fadah.processor.ProcessorArgType.INTEGER;
+import static info.preva1l.fadah.processor.ProcessorArgType.STRING;
 
 /**
  * Created on 20/02/2025
  *
  * @author Preva1l
  */
-public class JavaScriptProcessor {
+@Service
+public final class JSProcessorService {
+    public static final JSProcessorService instance = new JSProcessorService();
+
+    @Inject private Logger logger;
+
+    @Configure
+    public void configure() {
+        ProcessorArgsRegistry.register(STRING, "material", item -> item.getType().toString());
+
+        ProcessorArgsRegistry.register(STRING, "name", Text::extractItemName);
+
+        ProcessorArgsRegistry.register(INTEGER, "amount", item -> String.valueOf(item.getAmount()));
+
+        ProcessorArgsRegistry.register(STRING, "lore", item -> {
+            var lore = item.getItemMeta().getLore();
+            if (lore == null) lore = new ArrayList<>();
+            return String.join("\\n", lore);
+        });
+    }
+
     @Blocking
-    public static Boolean process(String expression, boolean def) {
+    public Boolean process(String expression, boolean def) {
         return process(expression, def, null);
     }
 
@@ -24,7 +52,7 @@ public class JavaScriptProcessor {
      * Process a javascript expression that results in a boolean
      */
     @Blocking
-    public static Boolean process(String expression, boolean def, @Nullable ItemStack item) {
+    public Boolean process(String expression, boolean def, @Nullable ItemStack item) {
         if (item != null) {
             for (ProcessorArg replacement : ProcessorArgsRegistry.get()) {
                 if (replacement.type() == ProcessorArgType.STRING) {
@@ -41,7 +69,7 @@ public class JavaScriptProcessor {
             result = (Boolean) cx.evaluateString(scope, expression, "Fadah", 1, null);
             return result;
         } catch (ClassCastException e) {
-            Fadah.getConsole().severe(
+            logger.severe(
                     """
                     Unable to process expression: '%s'
                     This is likely related to a category matcher or a item blacklist.
@@ -50,7 +78,7 @@ public class JavaScriptProcessor {
             );
             return def;
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE,
+            logger.log(Level.SEVERE,
                     """
                     Unable to process expression: '%s'
                     (Report this to Fadah support)
@@ -60,7 +88,7 @@ public class JavaScriptProcessor {
         }
     }
 
-    private static String escape(String input) {
+    private String escape(String input) {
         input = input.replace("\\", "\\\\")
                 .replace("\"", "\\\"")
                 .replace("'", "\\'")

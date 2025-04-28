@@ -27,7 +27,7 @@ lang:
       - '&7Click To Toggle'
       - '&8-------------------------'
       - '%first%'
-      - '%first%'
+      - '%second%'
       - '&8-------------------------'
     options:
       selected: '&8> &e%option%'

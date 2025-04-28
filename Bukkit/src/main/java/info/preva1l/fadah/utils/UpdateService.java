@@ -2,8 +2,11 @@ package info.preva1l.fadah.utils;
 
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
+import info.preva1l.trashcan.Version;
 import info.preva1l.trashcan.flavor.annotations.Configure;
 import info.preva1l.trashcan.flavor.annotations.Service;
+import info.preva1l.trashcan.flavor.annotations.inject.Inject;
+import info.preva1l.trashcan.flavor.annotations.inject.condition.Named;
 import info.preva1l.trashcan.plugin.UpdateChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -16,18 +19,21 @@ public class UpdateService {
 
     private static final int SPIGOT_ID = 116157;
 
+    @Inject private Fadah plugin;
+    @Inject @Named("plugin:version") private Version currentVersion;
+
     private UpdateChecker.Completed completed;
 
     @Configure
     public void checkForUpdates() {
         final UpdateChecker checker = UpdateChecker.builder()
-                .currentVersion(Fadah.getInstance().getCurrentVersion())
+                .currentVersion(currentVersion)
                 .endpoint(UpdateChecker.Endpoint.SPIGOT)
                 .resource(Integer.toString(SPIGOT_ID))
                 .build();
         checker.check().thenAccept(checked -> completed = checked);
 
-        TaskManager.Sync.runLater(Fadah.getInstance(), () -> notifyUpdate(Bukkit.getConsoleSender()), 60L);
+        TaskManager.Sync.runLater(plugin, () -> notifyUpdate(Bukkit.getConsoleSender()), 60L);
     }
 
     public void notifyUpdate(@NotNull CommandSender recipient) {

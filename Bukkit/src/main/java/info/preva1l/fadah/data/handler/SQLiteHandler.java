@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.dao.sqlite.*;
 import info.preva1l.fadah.data.fixers.v2.SQLFixerV2;
@@ -28,27 +29,36 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SQLiteHandler implements DatabaseHandler {
-    private final Map<Class<?>, Dao<?>> daos = new HashMap<>();
-
-    @Getter private boolean connected = false;
-
     private static final String DATABASE_FILE_NAME = "FadahData.db";
+    
+    private final Map<Class<?>, Dao<?>> daos = new HashMap<>();
+    @Getter private boolean connected = false;
+    
     private HikariDataSource dataSource;
     @Getter private V2Fixer v2Fixer;
     @Getter private V3Fixer v3Fixer;
 
     private final Lock databaseFileLock = new ReentrantLock();
+    
+    private final Logger logger = DataService.instance.logger;
 
-    @Override
+    private final Fadah plugin;
+    
+    public SQLiteHandler(Fadah plugin) {
+        this.plugin = plugin;
+    }
+    
     @Blocking
+    @Override
     public void connect() {
         try {
             databaseFileLock.lock();
-            File databaseFile = new File(Fadah.getInstance().getDataFolder(), DATABASE_FILE_NAME);
+            File databaseFile = new File(plugin.getDataFolder(), DATABASE_FILE_NAME);
             if (databaseFile.createNewFile()) {
-                Fadah.getConsole().info("Created the SQLite database file");
+                logger.info("Created the SQLite database file");
             }
 
             Class.forName("org.sqlite.JDBC");
@@ -75,14 +85,14 @@ public class SQLiteHandler implements DatabaseHandler {
             }
 
             registerDaos();
-            v2Fixer = new SQLFixerV2(dataSource);
+            v2Fixer = new SQLFixerV2(plugin, dataSource);
             v3Fixer = V3Fixer.empty();
             connected = true;
         } catch (IOException e) {
-            Fadah.getConsole().log(Level.SEVERE, "An exception occurred creating the database file", e);
+            logger.log(Level.SEVERE, "An exception occurred creating the database file", e);
             destroy();
         } catch (ClassNotFoundException e) {
-            Fadah.getConsole().log(Level.SEVERE, "Failed to load the necessary SQLite driver", e);
+            logger.log(Level.SEVERE, "Failed to load the necessary SQLite driver", e);
             destroy();
         } finally {
             databaseFileLock.unlock();
@@ -92,7 +102,7 @@ public class SQLiteHandler implements DatabaseHandler {
     @SuppressWarnings("SameParameterValue")
     @NotNull
     private String[] getSchemaStatements(@NotNull String schemaFileName) throws IOException {
-        return new String(Objects.requireNonNull(Fadah.getInstance().getResource(schemaFileName))
+        return new String(Objects.requireNonNull(plugin.getResource(schemaFileName))
                 .readAllBytes(), StandardCharsets.UTF_8).split(";");
     }
 
@@ -105,7 +115,7 @@ public class SQLiteHandler implements DatabaseHandler {
                 Files.copy(file.toPath(), backup.toPath());
             }
         } catch (IOException e) {
-            Fadah.getConsole().log(Level.WARNING, "Failed to backup flat file database", e);
+            logger.log(Level.WARNING, "Failed to backup flat file database", e);
         }
     }
 

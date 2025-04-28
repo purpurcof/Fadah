@@ -6,7 +6,7 @@ import info.preva1l.fadah.api.managers.ImplListingManager;
 import info.preva1l.fadah.api.managers.ListingManager;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Lang;
-import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.records.history.HistoricItem;
@@ -40,7 +40,7 @@ public final class BukkitAuctionHouseAPI extends AuctionHouseAPI {
         var cached = CacheAccess.getNullable(CollectionBox.class, playerUniqueId);
         if (cached != null) return CompletableFuture.completedFuture(cached);
 
-        return DatabaseManager.getInstance()
+        return DataService.getInstance()
                 .get(CollectionBox.class, playerUniqueId)
                 .thenApply(it -> it.orElse(CollectionBox.empty(playerUniqueId)));
     }
@@ -56,7 +56,7 @@ public final class BukkitAuctionHouseAPI extends AuctionHouseAPI {
         var cached = CacheAccess.getNullable(ExpiredItems.class, playerUniqueId);
         if (cached != null) return CompletableFuture.completedFuture(cached);
 
-        return DatabaseManager.getInstance()
+        return DataService.getInstance()
                 .get(ExpiredItems.class, playerUniqueId)
                 .thenApply(it -> it.orElse(ExpiredItems.empty(playerUniqueId)));
     }
@@ -72,7 +72,7 @@ public final class BukkitAuctionHouseAPI extends AuctionHouseAPI {
         var cached = CacheAccess.getNullable(History.class, playerUniqueId);
         if (cached != null) return CompletableFuture.completedFuture(cached);
 
-        return DatabaseManager.getInstance()
+        return DataService.getInstance()
                 .get(History.class, playerUniqueId)
                 .thenApply(it -> it.orElse(History.empty(playerUniqueId)));
     }

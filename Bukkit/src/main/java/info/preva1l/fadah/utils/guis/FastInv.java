@@ -37,7 +37,7 @@ public class FastInv implements InventoryHolder {
     private final List<Consumer<InventoryClickEvent>> clickHandlers = new ArrayList<>();
 
     private final Inventory inventory;
-    private final LayoutManager.MenuType menuType;
+    private final LayoutService.MenuType menuType;
 
     private Predicate<Player> closeFilter;
 
@@ -45,7 +45,7 @@ public class FastInv implements InventoryHolder {
      * Create a new FastInv with a custom size.
      *
      */
-    public FastInv(LayoutManager.MenuType menuType) {
+    public FastInv(LayoutService.MenuType menuType) {
         this(owner -> Bukkit.createInventory(owner, menuType.getLayout().guiSize(), menuType.getLayout().formattedTitle()), menuType);
     }
 
@@ -55,15 +55,15 @@ public class FastInv implements InventoryHolder {
      * @param size  The size of the inventory.
      * @param title The title (name) of the inventory.
      */
-    public FastInv(int size, String title, LayoutManager.MenuType menuType) {
+    public FastInv(int size, String title, LayoutService.MenuType menuType) {
         this(owner -> Bukkit.createInventory(owner, size, title), menuType);
     }
 
-    public FastInv(int size, Component title, LayoutManager.MenuType menuType) {
+    public FastInv(int size, Component title, LayoutService.MenuType menuType) {
         this(owner -> Bukkit.createInventory(owner, size, title), menuType);
     }
 
-    public FastInv(Function<InventoryHolder, Inventory> inventoryFunction, LayoutManager.MenuType menuType) {
+    public FastInv(Function<InventoryHolder, Inventory> inventoryFunction, LayoutService.MenuType menuType) {
         Objects.requireNonNull(inventoryFunction, "inventoryFunction");
         Inventory inv = inventoryFunction.apply(this);
 
@@ -238,12 +238,12 @@ public class FastInv implements InventoryHolder {
         this.closeHandlers.add(handler);
     }
 
-    public @NotNull LayoutManager.MenuType getMenuType() {
+    public @NotNull LayoutService.MenuType getMenuType() {
         return menuType;
     }
 
     public @NotNull GuiLayout getLayout() {
-        return LayoutManager.instance.getLayout(this);
+        return LayoutService.instance.getLayout(this);
     }
 
     public @NotNull LanguageConfig getLang() {

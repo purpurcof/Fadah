@@ -7,7 +7,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.watcher.Watching;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +42,7 @@ public class WatchersMongoDao implements Dao<Watching> {
             Watching watching = GSON.fromJson(document.getString("watching"), Watching.class);
             return Optional.of(watching);
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
+            getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
         return Optional.empty();
     }
@@ -64,7 +63,7 @@ public class WatchersMongoDao implements Dao<Watching> {
                 result.add(watching);
             }
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
+            getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
         return result;
     }
@@ -82,7 +81,7 @@ public class WatchersMongoDao implements Dao<Watching> {
                     .append("watching", GSON.toJson(watching));
             collection.replaceOne(Filters.eq("playerUUID", watching.getPlayer().toString()), document, new ReplaceOptions().upsert(true));
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
+            getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
     }
 

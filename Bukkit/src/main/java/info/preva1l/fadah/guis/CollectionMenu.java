@@ -1,6 +1,5 @@
 package info.preva1l.fadah.guis;
 
-import com.github.puregero.multilib.MultiLib;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Lang;
@@ -11,10 +10,11 @@ import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
+import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.TimeUtil;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
-import info.preva1l.fadah.utils.guis.LayoutManager;
+import info.preva1l.fadah.utils.guis.LayoutService;
 import info.preva1l.fadah.utils.guis.PaginatedFastInv;
 import info.preva1l.fadah.utils.guis.PaginatedItem;
 import org.bukkit.OfflinePlayer;
@@ -34,7 +34,7 @@ public class CollectionMenu extends PaginatedFastInv {
 
     private final List<CollectableItem> items;
 
-    public CollectionMenu(Player viewer, OfflinePlayer owner, LayoutManager.MenuType menuType) {
+    public CollectionMenu(Player viewer, OfflinePlayer owner, LayoutService.MenuType menuType) {
         super(
                 menuType.getLayout().guiSize(),
                 menuType.getLayout().formattedTitle(
@@ -48,7 +48,7 @@ public class CollectionMenu extends PaginatedFastInv {
         );
 
         this.owner = owner;
-        this.expired = menuType == LayoutManager.MenuType.EXPIRED_LISTINGS;
+        this.expired = menuType == LayoutService.MenuType.EXPIRED_LISTINGS;
 
         this.items = expired
                 ? CacheAccess.getNotNull(ExpiredItems.class, owner.getUniqueId()).expiredItems()
@@ -71,7 +71,7 @@ public class CollectionMenu extends PaginatedFastInv {
                     .addLore(getLang().getLore("lore", Tuple.of("%time%", TimeUtil.formatTimeSince(expiredItem.dateAdded()))));
 
             addPaginationItem(new PaginatedItem(itemStack.build(), e -> {
-                MultiLib.getEntityScheduler(player).execute(Fadah.getInstance(), () -> {
+                TaskManager.Sync.run(Fadah.getInstance(), player, () -> {
                     int slot = player.getInventory().firstEmpty();
                     if (slot == -1) {
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getInventoryFull());
@@ -95,7 +95,7 @@ public class CollectionMenu extends PaginatedFastInv {
                             null,
                             null);
                     CacheAccess.getNotNull(History.class, owner.getUniqueId()).add(historicItem);
-                }, null, 0L);
+                });
             }));
 
         }
@@ -110,7 +110,7 @@ public class CollectionMenu extends PaginatedFastInv {
     }
 
     protected void addNavigationButtons() {
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.BACK, -1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.BACK, -1),
                 Menus.i().getBackButton().itemStack(), e ->
                         new ProfileMenu(player, owner).open(player));
     }

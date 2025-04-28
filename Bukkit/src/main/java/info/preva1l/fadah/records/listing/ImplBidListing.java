@@ -4,7 +4,7 @@ import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.misc.Tuple;
-import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
@@ -115,18 +115,18 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
 
         // Remove Listing
         CacheAccess.invalidate(Listing.class, this);
-        DatabaseManager.getInstance().delete(Listing.class, this);
+        DataService.getInstance().delete(Listing.class, this);
 
         // Add to collection box
         ItemStack itemStack = this.getItemStack().clone();
         CacheAccess.get(CollectionBox.class, winningBid.bidder())
                 .ifPresentOrElse(
                         cache -> cache.add(new CollectableItem(itemStack, System.currentTimeMillis())),
-                        () -> DatabaseManager.getInstance()
+                        () -> DataService.getInstance()
                                 .get(CollectionBox.class, winningBid.bidder())
                                 .thenCompose(items -> {
                                     var box = items.orElseGet(() -> CollectionBox.empty(winningBid.bidder()));
-                                    return DatabaseManager.getInstance().save(CollectionBox.class, box);
+                                    return DataService.getInstance().save(CollectionBox.class, box);
                                 })
                 );
 

@@ -14,6 +14,12 @@ import java.util.logging.Level;
 public class LegacyBukkitSerializableAdapter implements JsonSerializer<ConfigurationSerializable>, JsonDeserializer<ConfigurationSerializable> {
     private static final Type OBJECT_STRING_MAP_TYPE = new TypeToken<Map<String, Object>>() {}.getType();
 
+    private final Fadah plugin;
+
+    public LegacyBukkitSerializableAdapter(Fadah plugin) {
+        this.plugin = plugin;
+    }
+
     @Deprecated
     @Override
     public ConfigurationSerializable deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
@@ -35,7 +41,7 @@ public class LegacyBukkitSerializableAdapter implements JsonSerializer<Configura
 
             return ConfigurationSerialization.deserializeObject(map);
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.WARNING, e.getMessage(), e);
+            plugin.getLogger().log(Level.WARNING, e.getMessage(), e);
             return null;
         }
     }

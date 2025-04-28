@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.zaxxer.hikari.HikariDataSource;
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
@@ -28,6 +28,7 @@ public class MySQLFixerV3 implements V3Fixer {
             .serializeNulls().disableHtmlEscaping().create();
     private static final Type HISTORY_LIST_TYPE = new TypeToken<ArrayList<HistoricItem>>() {
     }.getType();
+    private final Fadah plugin;
     private final HikariDataSource dataSource;
 
     @Override
@@ -41,7 +42,7 @@ public class MySQLFixerV3 implements V3Fixer {
                 final ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
                     List<HistoricItem> items = GSON.fromJson(resultSet.getString("items"), HISTORY_LIST_TYPE);
-                    DatabaseManager.getInstance().save(History.class, new History(player, items));
+                    DataService.getInstance().save(History.class, new History(player, items));
                 }
             }
             try (PreparedStatement deleteStatement = connection.prepareStatement("""
@@ -51,7 +52,7 @@ public class MySQLFixerV3 implements V3Fixer {
                 deleteStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            Fadah.getConsole().severe("Failed to get or remove items from history!");
+            plugin.getLogger().severe("Failed to get or remove items from history!");
             throw new RuntimeException(e);
         }
     }
@@ -72,7 +73,7 @@ public class MySQLFixerV3 implements V3Fixer {
                 }
             }
         } catch (SQLException e) {
-            Fadah.getConsole().severe("Failed to get or remove items from history!");
+            plugin.getLogger().severe("Failed to get or remove items from history!");
             throw new RuntimeException(e);
         }
         return false;

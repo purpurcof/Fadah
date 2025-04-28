@@ -1,6 +1,5 @@
 package info.preva1l.fadah.currency;
 
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.misc.SubEconomy;
 import lombok.Getter;
@@ -27,10 +26,10 @@ public class CoinsEngineCurrency implements MultiCurrency {
                     p -> CoinsEngineAPI.getBalance(p.getUniqueId(), getCurrency(eco)),
                     v -> {
                         if (getCurrency(eco) == null) {
-                            Fadah.getConsole().severe("-------------------------------------");
-                            Fadah.getConsole().severe("Cannot enable coins engine currency!");
-                            Fadah.getConsole().severe("No currency with name: " + eco.economy());
-                            Fadah.getConsole().severe("-------------------------------------");
+                            CurrencyService.instance.logger.severe("-------------------------------------");
+                            CurrencyService.instance.logger.severe("Cannot enable coins engine currency!");
+                            CurrencyService.instance.logger.severe("No currency with name: " + eco.economy());
+                            CurrencyService.instance.logger.severe("-------------------------------------");
                             return false;
                         }
                         return true;

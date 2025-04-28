@@ -5,7 +5,7 @@ import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.FastInv;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
-import info.preva1l.fadah.utils.guis.LayoutManager;
+import info.preva1l.fadah.utils.guis.LayoutService;
 import org.bukkit.Material;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.inventory.ItemStack;
@@ -14,7 +14,7 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 public class ShulkerBoxPreviewMenu extends FastInv {
     public ShulkerBoxPreviewMenu(Listing listing,
                                  Runnable returnFunction) {
-        super(36, Text.extractItemName(listing.getItemStack()), LayoutManager.MenuType.SHULKER_PREVIEW);
+        super(36, Text.extractItemName(listing.getItemStack()), LayoutService.MenuType.SHULKER_PREVIEW);
 
         if (listing.getItemStack().getItemMeta() instanceof BlockStateMeta im) {
             if (im.getBlockState() instanceof ShulkerBox shulker) {

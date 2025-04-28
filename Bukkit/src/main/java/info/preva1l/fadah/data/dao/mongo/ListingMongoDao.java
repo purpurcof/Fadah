@@ -6,7 +6,6 @@ import com.google.gson.reflect.TypeToken;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.records.listing.*;
 import info.preva1l.fadah.utils.ItemSerializer;
@@ -44,7 +43,7 @@ public class ListingMongoDao implements Dao<Listing> {
 
             return Optional.of(createListing(id, doc));
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
+            getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
         return Optional.empty();
     }
@@ -66,7 +65,7 @@ public class ListingMongoDao implements Dao<Listing> {
             }
             return list;
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
+            getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
         return List.of();
     }
@@ -92,7 +91,7 @@ public class ListingMongoDao implements Dao<Listing> {
                     .append("bids", listing instanceof BidListing bid ? GSON.toJson(bid.getBids(), BIDS_TYPE) : "");
             database.getCollection("listings").insertOne(document);
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
+            getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
     }
 
@@ -117,7 +116,7 @@ public class ListingMongoDao implements Dao<Listing> {
         try {
             database.getCollection("listings").findOneAndDelete(Filters.eq("uuid", listing.getId()));
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
+            getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
     }
 

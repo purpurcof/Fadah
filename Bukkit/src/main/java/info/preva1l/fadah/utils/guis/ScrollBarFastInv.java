@@ -14,7 +14,7 @@ public abstract class ScrollBarFastInv extends PaginatedFastInv {
     private final Map<Integer, Integer> scrollbarSlots = new HashMap<>();
     private final List<PaginatedItem> scrollbarItems = new ArrayList<>();
 
-    protected ScrollBarFastInv(int size, @NotNull String title, @NotNull Player player, LayoutManager.MenuType menuType) {
+    protected ScrollBarFastInv(int size, @NotNull String title, @NotNull Player player, LayoutService.MenuType menuType) {
         super(size, title, player, menuType);
         scrollbarSlots.put(0, 9);
         scrollbarSlots.put(1, 18);
@@ -22,7 +22,7 @@ public abstract class ScrollBarFastInv extends PaginatedFastInv {
         scrollbarSlots.put(3, 36);
     }
 
-    protected ScrollBarFastInv(int size, @NotNull Component title, @NotNull Player player, LayoutManager.MenuType menuType) {
+    protected ScrollBarFastInv(int size, @NotNull Component title, @NotNull Player player, LayoutService.MenuType menuType) {
         super(size, title, player, menuType);
         scrollbarSlots.put(0, 9);
         scrollbarSlots.put(1, 18);
@@ -66,7 +66,7 @@ public abstract class ScrollBarFastInv extends PaginatedFastInv {
     }
 
     protected synchronized void scrollDown() {
-        if (scrollbarSlots.containsKey(Categories.i().getCategories().size() - 1)) return;
+        if (scrollbarSlots.containsKey(Categories.getCategories().size() - 1)) return;
         Map<Integer, Integer> newMappings = new HashMap<>();
         for (Map.Entry<Integer, Integer> entry : scrollbarSlots.entrySet()) {
             newMappings.put(entry.getKey() + 1, entry.getValue());

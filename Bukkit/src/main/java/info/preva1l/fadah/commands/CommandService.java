@@ -5,6 +5,7 @@ import dev.triumphteam.cmd.bukkit.BukkitCommandManager;
 import dev.triumphteam.cmd.bukkit.BukkitSubCommand;
 import dev.triumphteam.cmd.bukkit.CommandPermission;
 import dev.triumphteam.cmd.bukkit.message.NoPermissionMessageContext;
+import dev.triumphteam.cmd.core.BaseCommand;
 import dev.triumphteam.cmd.core.annotation.Default;
 import dev.triumphteam.cmd.core.message.MessageKey;
 import dev.triumphteam.cmd.core.message.context.DefaultMessageContext;
@@ -16,7 +17,7 @@ import info.preva1l.fadah.commands.subcommands.SubCommandInfo;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.misc.Tuple;
-import info.preva1l.fadah.migrator.MigrationProvider;
+import info.preva1l.fadah.migrator.MigrationService;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.trashcan.flavor.annotations.Configure;
 import info.preva1l.trashcan.flavor.annotations.Service;
@@ -35,37 +36,61 @@ import java.util.*;
 import java.util.stream.Stream;
 
 @Service
-public class CommandService {
+@SuppressWarnings("unchecked")
+public final class CommandService {
     public static final CommandService instance = new CommandService();
-    
+
     @Inject private Fadah plugin;
 
     private BukkitCommandManager<CommandSender> commandManager;
     private static final Map<String, BukkitCommand<CommandSender>> commands = new HashMap<>();
-    private static final Map<String, List<SubCommandInfo>> subCommands = new HashMap<>();
-    
+    private static final Map<String, Map<String, BukkitSubCommand<CommandSender>>> subCommands = new HashMap<>();
+
     @Configure
     public void configure() {
         loadCommandManager();
         registerCommands();
-        loadCommandCache();
-    }
-
-    public List<SubCommandInfo> getSubCommands(String command) {
-        return subCommands.get(command);
     }
 
     private void registerCommands() {
-        plugin.getLogger().info("Registering Commands...");
         Stream.of(
                 new AuctionHouseCommand(plugin),
                 new MigrateCommand()
-        ).forEach(commandManager::registerCommand);
-        plugin.getLogger().info("Commands Registered!");
+        ).forEach(this::registerCommand);
+    }
+
+    public void registerCommand(BaseCommand command) {
+        commandManager.registerCommand(command);
+        Command bukkitCommand = getCommandMap().getKnownCommands().get("fadah:" + command.getCommand());
+        if (!(bukkitCommand instanceof BukkitCommand<?>)) return;
+        BukkitCommand<CommandSender> triumphCommand = (BukkitCommand<CommandSender>) bukkitCommand;
+
+        commands.put(triumphCommand.getName(), triumphCommand);
+        subCommands.put(triumphCommand.getName(), extractSubCommands(triumphCommand));
+    }
+
+    public void unregisterCommand(String command) {
+        subCommands.remove(command);
+        BukkitCommand<CommandSender> cmd = commands.remove(command);
+
+        cmd.unregister(getCommandMap());
+    }
+
+    public List<SubCommandInfo> getSubCommands(String command) {
+        List<SubCommandInfo> infos = new ArrayList<>();
+        for (BukkitSubCommand<CommandSender> cmd : subCommands.get(command).values()) {
+            Tuple<List<String>, String> descriptionAndAliases = getSubCommandInfo(cmd.getName());
+
+            CommandPermission permission = cmd.getPermission() != null
+                    ? cmd.getPermission()
+                    : new CommandPermission(List.of(), "Default Permission Handle", PermissionDefault.TRUE);
+
+            infos.add(new SubCommandInfo(cmd.getName(), descriptionAndAliases.second(), permission));
+        }
+        return infos;
     }
 
     private void loadCommandManager() {
-        plugin.getLogger().info("Loading CommandManager...");
         commandManager = BukkitCommandManager.create(plugin);
         registerMessages();
         registerArguments();
@@ -80,7 +105,6 @@ public class CommandService {
                     return enabled;
                 }
         );
-        plugin.getLogger().info("CommandManager Registered!");
     }
 
     private void registerMessages() {
@@ -138,7 +162,7 @@ public class CommandService {
         );
         commandManager.registerSuggestion(
                 Plugin.class,
-                (sender, context) -> MigrationProvider.getMigratorNames()
+                (sender, context) -> MigrationService.instance.getMigratorNames()
         );
     }
 
@@ -176,67 +200,71 @@ public class CommandService {
         sender.sendMessage(Text.text(sender instanceof Player p ? p : null, message));
     }
 
-    private void loadCommandCache() {
+    private CommandMap getCommandMap() {
         try {
-            CommandMap commandMap = getCommandMap();
-            for (Command bukkitCommand : commandMap.getKnownCommands().values()) {
-                if (!(bukkitCommand instanceof BukkitCommand<?>)) continue;
-                BukkitCommand<CommandSender> triumphCommand = (BukkitCommand<CommandSender>) bukkitCommand;
-
-                commands.put(bukkitCommand.getName(), triumphCommand);
-                subCommands.put(triumphCommand.getName(), extractSubCommands(triumphCommand));
-            }
+            Field commandMapField = commandManager.getClass().getDeclaredField("commandMap");
+            commandMapField.setAccessible(true);
+            return (CommandMap) commandMapField.get(commandManager);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private CommandMap getCommandMap() throws NoSuchFieldException, IllegalAccessException {
-        Field commandMapField = BukkitCommandManager.class.getDeclaredField("commandMap");
-        commandMapField.setAccessible(true);
-        return (CommandMap) commandMapField.get(commandManager);
-    }
+    private Map<String, BukkitSubCommand<CommandSender>> extractSubCommands(BukkitCommand<CommandSender> command) {
+        try {
+            Field subCommandsField = command.getClass().getDeclaredField("subCommands");
+            subCommandsField.setAccessible(true);
 
-    @SuppressWarnings("unchecked")
-    private List<SubCommandInfo> extractSubCommands(BukkitCommand<CommandSender> command)
-            throws NoSuchFieldException, IllegalAccessException {
-        Field subCommandsField = BukkitCommand.class.getDeclaredField("subCommands");
-        subCommandsField.setAccessible(true);
+            Map<String, BukkitSubCommand<CommandSender>> subCommands = new HashMap<>();
 
-        Map<String, BukkitSubCommand<CommandSender>> subCommands =
-                (Map<String, BukkitSubCommand<CommandSender>>) subCommandsField.get(command);
+            for (Map.Entry<String, BukkitSubCommand<CommandSender>> entry
+                    : ((Map<String, BukkitSubCommand<CommandSender>>) subCommandsField.get(command)).entrySet()) {
+                String subCommandName = entry.getKey();
+                BukkitSubCommand<CommandSender> subCommand = entry.getValue();
 
-        List<SubCommandInfo> infos = new ArrayList<>();
-        for (BukkitSubCommand<CommandSender> cmd : subCommands.values()) {
-            Tuple<List<String>, String> descriptionAndAliases = getCommandInfo(cmd.getName());
-            descriptionAndAliases.first().forEach(alias -> command.addSubCommandAlias(alias, cmd));
-            commands.put(command.getName(), command);
+                for (String alias : getSubCommandInfo(subCommandName).first()) {
+                    command.addSubCommand(alias, subCommand);
+                    subCommands.put(alias, subCommand);
+                }
+                subCommands.put(entry.getKey(), entry.getValue());
+            }
 
-            CommandPermission permission = cmd.getPermission() != null
-                    ? cmd.getPermission()
-                    : new CommandPermission(List.of(), "Default Permission Handle", PermissionDefault.TRUE);
-
-            infos.add(new SubCommandInfo(cmd.getName(), descriptionAndAliases.second(), permission));
+            return subCommands;
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
-        return infos;
     }
 
-    private Tuple<List<String>, String> getCommandInfo(String commandName) {
+    private Tuple<List<String>, String> getSubCommandInfo(String commandName) {
         return switch (commandName) {
-            case "help" -> Tuple.of(Lang.i().getCommands().getHelp().getAliases(), Lang.i().getCommands().getHelp().getDescription());
-            case "view" -> Tuple.of(Lang.i().getCommands().getView().getAliases(), Lang.i().getCommands().getView().getDescription());
-            case "active-listings" -> Tuple.of(Lang.i().getCommands().getActiveListings().getAliases(), Lang.i().getCommands().getActiveListings().getDescription());
-            case "search" -> Tuple.of(Lang.i().getCommands().getSearch().getAliases(), Lang.i().getCommands().getSearch().getDescription());
-            case "sell" -> Tuple.of(Lang.i().getCommands().getSell().getAliases(), Lang.i().getCommands().getSell().getDescription());
-            case "view-listing" -> Tuple.of(Lang.i().getCommands().getViewListing().getAliases(), Lang.i().getCommands().getViewListing().getDescription());
-            case "history" -> Tuple.of(Lang.i().getCommands().getHistory().getAliases(), Lang.i().getCommands().getHistory().getDescription());
-            case "collection-box" -> Tuple.of(Lang.i().getCommands().getCollectionBox().getAliases(), Lang.i().getCommands().getCollectionBox().getDescription());
-            case "about" -> Tuple.of(Lang.i().getCommands().getAbout().getAliases(), Lang.i().getCommands().getAbout().getDescription());
-            case "expired-items" -> Tuple.of(Lang.i().getCommands().getExpiredItems().getAliases(), Lang.i().getCommands().getExpiredItems().getDescription());
-            case "profile" -> Tuple.of(Lang.i().getCommands().getProfile().getAliases(), Lang.i().getCommands().getProfile().getDescription());
-            case "watch" -> Tuple.of(Lang.i().getCommands().getWatch().getAliases(), Lang.i().getCommands().getWatch().getDescription());
-            case "reload" -> Tuple.of(Lang.i().getCommands().getReload().getAliases(), Lang.i().getCommands().getReload().getDescription());
-            case "toggle" -> Tuple.of(Lang.i().getCommands().getToggle().getAliases(), Lang.i().getCommands().getToggle().getDescription());
+            case "help" ->
+                    Tuple.of(Lang.i().getCommands().getHelp().getAliases(), Lang.i().getCommands().getHelp().getDescription());
+            case "view" ->
+                    Tuple.of(Lang.i().getCommands().getView().getAliases(), Lang.i().getCommands().getView().getDescription());
+            case "active-listings" ->
+                    Tuple.of(Lang.i().getCommands().getActiveListings().getAliases(), Lang.i().getCommands().getActiveListings().getDescription());
+            case "search" ->
+                    Tuple.of(Lang.i().getCommands().getSearch().getAliases(), Lang.i().getCommands().getSearch().getDescription());
+            case "sell" ->
+                    Tuple.of(Lang.i().getCommands().getSell().getAliases(), Lang.i().getCommands().getSell().getDescription());
+            case "view-listing" ->
+                    Tuple.of(Lang.i().getCommands().getViewListing().getAliases(), Lang.i().getCommands().getViewListing().getDescription());
+            case "history" ->
+                    Tuple.of(Lang.i().getCommands().getHistory().getAliases(), Lang.i().getCommands().getHistory().getDescription());
+            case "collection-box" ->
+                    Tuple.of(Lang.i().getCommands().getCollectionBox().getAliases(), Lang.i().getCommands().getCollectionBox().getDescription());
+            case "about" ->
+                    Tuple.of(Lang.i().getCommands().getAbout().getAliases(), Lang.i().getCommands().getAbout().getDescription());
+            case "expired-items" ->
+                    Tuple.of(Lang.i().getCommands().getExpiredItems().getAliases(), Lang.i().getCommands().getExpiredItems().getDescription());
+            case "profile" ->
+                    Tuple.of(Lang.i().getCommands().getProfile().getAliases(), Lang.i().getCommands().getProfile().getDescription());
+            case "watch" ->
+                    Tuple.of(Lang.i().getCommands().getWatch().getAliases(), Lang.i().getCommands().getWatch().getDescription());
+            case "reload" ->
+                    Tuple.of(Lang.i().getCommands().getReload().getAliases(), Lang.i().getCommands().getReload().getDescription());
+            case "toggle" ->
+                    Tuple.of(Lang.i().getCommands().getToggle().getAliases(), Lang.i().getCommands().getToggle().getDescription());
             default -> Tuple.of(List.of("bla"), "Unknown");
         };
     }

@@ -6,7 +6,6 @@ import com.google.gson.reflect.TypeToken;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.history.HistoricItem;
@@ -50,7 +49,7 @@ public class HistoryMongoDao implements Dao<History> {
 
             return Optional.of(new History(id, items));
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
+            getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
         return Optional.empty();
     }
@@ -77,7 +76,7 @@ public class HistoryMongoDao implements Dao<History> {
                     .append("items", GSON.toJson(expiredItems.historicItems(), HISTORY_LIST_TYPE));
             database.getCollection("history").replaceOne(Filters.eq("playerUUID", expiredItems.owner()), document);
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
+            getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
     }
 

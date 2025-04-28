@@ -6,7 +6,7 @@ import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.misc.Tuple;
-import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.filters.Restrictions;
 import info.preva1l.fadah.hooks.impl.DiscordHook;
 import info.preva1l.fadah.hooks.impl.permissions.Permission;
@@ -47,7 +47,7 @@ public final class ImplPost extends Post {
 
     @Override
     public CompletableFuture<PostResult> buildAndSubmit() {
-        ExecutorService executor = DatabaseManager.getInstance().getThreadPool();
+        ExecutorService executor = DataService.getInstance().getThreadPool();
 
         if (bypassTax) listingBuilder.tax(0.0);
 
@@ -71,7 +71,7 @@ public final class ImplPost extends Post {
             }
 
             CacheAccess.add(Listing.class, listing);
-            DatabaseManager.getInstance().save(Listing.class, listing);
+            DataService.getInstance().save(Listing.class, listing);
 
             if (!processMessages(listing)) {
                 return CompletableFuture.completedFuture(PostResult.SUCCESS_ADVERT_FAIL);

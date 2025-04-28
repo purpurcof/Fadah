@@ -2,8 +2,8 @@ package info.preva1l.fadah.migrator.impl;
 
 import com.spawnchunk.auctionhouse.AuctionHouse;
 import com.spawnchunk.auctionhouse.modules.ListingType;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Categories;
+import info.preva1l.fadah.migrator.MigrationService;
 import info.preva1l.fadah.migrator.Migrator;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.listing.ImplBinListing;
@@ -30,7 +30,7 @@ public final class AuctionHouseMigrator implements Migrator {
         for (long expiry : listingMap.keySet()) {
             com.spawnchunk.auctionhouse.modules.Listing listing = listingMap.get(expiry);
             if (listing.getType() == ListingType.PLAYER_AUCTION) {
-                Fadah.getConsole().warning("Not migrating listing %s! (Is a biddable listing, Not supported yet!)".formatted(listing.toString()));
+                MigrationService.instance.logger.warning("Not migrating listing %s! (Is a biddable listing, Not supported yet!)".formatted(listing.toString()));
                 continue;
             }
 

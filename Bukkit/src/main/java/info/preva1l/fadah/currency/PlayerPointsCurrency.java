@@ -1,6 +1,5 @@
 package info.preva1l.fadah.currency;
 
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import lombok.Getter;
 import org.black_ixx.playerpoints.PlayerPoints;
@@ -28,10 +27,10 @@ public class PlayerPointsCurrency implements Currency {
     public boolean preloadChecks() {
         this.api = PlayerPoints.getInstance().getAPI();
         if (api == null) {
-            Fadah.getConsole().severe("-------------------------------------");
-            Fadah.getConsole().severe("Cannot enable player points currency!");
-            Fadah.getConsole().severe("Plugin did not start correctly.");
-            Fadah.getConsole().severe("-------------------------------------");
+            CurrencyService.instance.logger.severe("-------------------------------------");
+            CurrencyService.instance.logger.severe("Cannot enable player points currency!");
+            CurrencyService.instance.logger.severe("Plugin did not start correctly.");
+            CurrencyService.instance.logger.severe("-------------------------------------");
             return false;
         }
         return true;

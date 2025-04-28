@@ -16,7 +16,7 @@ import info.preva1l.fadah.records.Category;
 import info.preva1l.fadah.records.listing.BinListing;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.Text;
-import info.preva1l.fadah.utils.guis.LayoutManager;
+import info.preva1l.fadah.utils.guis.LayoutService;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -140,7 +140,7 @@ public class AuctionHouseCommand extends BaseCommand
         new CollectionMenu(
                 player,
                 owner,
-                LayoutManager.MenuType.EXPIRED_LISTINGS
+                LayoutService.MenuType.EXPIRED_LISTINGS
         ).open(player);
     }
 
@@ -153,7 +153,7 @@ public class AuctionHouseCommand extends BaseCommand
         new CollectionMenu(
                 player,
                 owner,
-                LayoutManager.MenuType.COLLECTION_BOX
+                LayoutService.MenuType.COLLECTION_BOX
         ).open(player);
     }
 

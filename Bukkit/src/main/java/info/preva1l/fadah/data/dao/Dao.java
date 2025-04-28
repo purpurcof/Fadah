@@ -1,10 +1,12 @@
 package info.preva1l.fadah.data.dao;
 
+import info.preva1l.fadah.data.DataService;
 import org.apache.commons.lang.NotImplementedException;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 /**
  * Interface representing a Data Access Object, a design pattern that provides an abstract interface to the database,
@@ -51,5 +53,9 @@ public interface Dao<T> {
      */
     default void deleteSpecific(T t, Object o) {
         throw new NotImplementedException();
+    }
+
+    default Logger getLogger() {
+        return DataService.instance.logger;
     }
 }

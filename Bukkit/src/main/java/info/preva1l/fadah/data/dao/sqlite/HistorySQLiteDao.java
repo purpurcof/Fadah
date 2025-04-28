@@ -1,7 +1,6 @@
 package info.preva1l.fadah.data.dao.sqlite;
 
 import com.zaxxer.hikari.HikariDataSource;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.common_sql.CommonHistorySQLDao;
 import info.preva1l.fadah.records.history.History;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +35,7 @@ public class HistorySQLiteDao extends CommonHistorySQLDao {
                 e.printStackTrace();
             }
         } catch (SQLException e) {
-            Fadah.getConsole().log(Level.SEVERE, "Failed to add item to history!", e);
+            getLogger().log(Level.SEVERE, "Failed to add item to history!", e);
         }
     }
 

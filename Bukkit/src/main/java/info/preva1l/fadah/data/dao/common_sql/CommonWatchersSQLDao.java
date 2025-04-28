@@ -2,7 +2,6 @@ package info.preva1l.fadah.data.dao.common_sql;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.watcher.Watching;
 import org.apache.commons.lang.NotImplementedException;
@@ -47,7 +46,7 @@ public abstract class CommonWatchersSQLDao implements Dao<Watching> {
                 }
             }
         } catch (SQLException e) {
-            Fadah.getConsole().log(Level.SEVERE, "Failed to fetch all items from watchers!", e);
+            getLogger().log(Level.SEVERE, "Failed to fetch all items from watchers!", e);
         }
         return Optional.empty();
     }
@@ -71,7 +70,7 @@ public abstract class CommonWatchersSQLDao implements Dao<Watching> {
                 }
             }
         } catch (SQLException e) {
-            Fadah.getConsole().log(Level.SEVERE, "Failed to fetch all items from watchers!", e);
+            getLogger().log(Level.SEVERE, "Failed to fetch all items from watchers!", e);
         }
         return result;
     }

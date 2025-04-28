@@ -1,7 +1,6 @@
 package info.preva1l.fadah.data.dao.sql;
 
 import com.zaxxer.hikari.HikariDataSource;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.common_sql.CommonWatchersSQLDao;
 import info.preva1l.fadah.watcher.Watching;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +35,7 @@ public class WatchersSQLDao extends CommonWatchersSQLDao {
                 e.printStackTrace();
             }
         } catch (SQLException e) {
-            Fadah.getConsole().log(Level.SEVERE, "Failed to add item to watchers!", e);
+            getLogger().log(Level.SEVERE, "Failed to add item to watchers!", e);
         }
     }
 

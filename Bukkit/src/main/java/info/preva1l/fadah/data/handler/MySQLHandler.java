@@ -19,6 +19,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -30,7 +31,6 @@ import java.util.Properties;
 
 public class MySQLHandler implements DatabaseHandler {
     private final Map<Class<?>, Dao<?>> daos = new HashMap<>();
-
     @Getter private boolean connected = false;
 
     private final String driverClass;
@@ -40,15 +40,17 @@ public class MySQLHandler implements DatabaseHandler {
 
     private final Config.Database conf = Config.i().getDatabase();
 
-    public MySQLHandler() {
+    private final Fadah plugin;
+
+    public MySQLHandler(Fadah plugin) {
+        this.plugin = plugin;
         this.driverClass = conf.getType() == DatabaseType.MARIADB ? "org.mariadb.jdbc.Driver" : "com.mysql.cj.jdbc.Driver";
     }
 
-    @SuppressWarnings("SameParameterValue")
     @NotNull
-    private String[] getSchemaStatements(@NotNull String schemaFileName) throws IOException {
-        return new String(Objects.requireNonNull(Fadah.getInstance().getResource(schemaFileName))
-                .readAllBytes(), StandardCharsets.UTF_8).split(";");
+    private String[] getSchemaStatements() throws IOException {
+        InputStream stream = plugin.getResource(String.format("database/%s_schema.sql", conf.getType().getId()));
+        return new String(Objects.requireNonNull(stream).readAllBytes(), StandardCharsets.UTF_8).split(";");
     }
 
     private Connection getConnection() throws SQLException {
@@ -92,7 +94,7 @@ public class MySQLHandler implements DatabaseHandler {
         dataSource.setDataSourceProperties(properties);
 
         try (Connection connection = getConnection()) {
-            final String[] databaseSchema = getSchemaStatements(String.format("database/%s_schema.sql", conf.getType().getId()));
+            final String[] databaseSchema = getSchemaStatements();
             try (Statement statement = connection.createStatement()) {
                 for (String tableCreationStatement : databaseSchema) {
                     statement.execute(tableCreationStatement);
@@ -109,8 +111,8 @@ public class MySQLHandler implements DatabaseHandler {
                     "Please check the supplied database credentials in the config file", e);
         }
         registerDaos();
-        v2Fixer = new SQLFixerV2(dataSource);
-        v3Fixer = new MySQLFixerV3(dataSource);
+        v2Fixer = new SQLFixerV2(plugin, dataSource);
+        v3Fixer = new MySQLFixerV3(plugin, dataSource);
     }
 
     @Override

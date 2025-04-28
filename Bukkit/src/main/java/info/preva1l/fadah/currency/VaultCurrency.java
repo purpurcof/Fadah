@@ -1,6 +1,5 @@
 package info.preva1l.fadah.currency;
 
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
@@ -49,9 +48,9 @@ public class VaultCurrency implements Currency {
     public boolean preloadChecks() {
         RegisteredServiceProvider<Economy> rsp = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) {
-            Fadah.getConsole().severe("---------------------------------------------------------");
-            Fadah.getConsole().severe("Cannot enable vault currency! No Economy Plugin Installed");
-            Fadah.getConsole().severe("---------------------------------------------------------");
+            CurrencyService.instance.logger.severe("---------------------------------------------------------");
+            CurrencyService.instance.logger.severe("Cannot enable vault currency! No Economy Plugin Installed");
+            CurrencyService.instance.logger.severe("---------------------------------------------------------");
             return false;
         }
         economy = rsp.getProvider();

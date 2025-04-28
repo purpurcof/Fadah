@@ -4,7 +4,6 @@ import com.github.puregero.multilib.regionized.RegionizedTask;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.data.DataService;
-import info.preva1l.fadah.data.DatabaseManager;
 import info.preva1l.fadah.guis.NewListingMenu;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.Text;
@@ -26,7 +25,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void joinListener(AsyncPlayerPreLoginEvent e) {
-        if (!DatabaseManager.getInstance().isConnected()) {
+        if (!DataService.instance.isConnected()) {
             e.setLoginResult(AsyncPlayerPreLoginEvent.Result.KICK_OTHER);
             e.kickMessage(Text.text(Lang.i().getPrefix() + Lang.i().getErrors().getDatabaseLoading()));
             return;

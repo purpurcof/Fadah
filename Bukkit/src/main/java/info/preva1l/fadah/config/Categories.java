@@ -1,17 +1,13 @@
 package info.preva1l.fadah.config;
 
 import com.google.common.collect.Sets;
-import de.exlll.configlib.Configuration;
-import de.exlll.configlib.NameFormatters;
-import de.exlll.configlib.YamlConfigurationProperties;
-import de.exlll.configlib.YamlConfigurations;
+import de.exlll.configlib.*;
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.data.DatabaseManager;
-import info.preva1l.fadah.processor.JavaScriptProcessor;
+import info.preva1l.fadah.data.DataService;
+import info.preva1l.fadah.processor.JSProcessorService;
 import info.preva1l.fadah.records.Category;
 import info.preva1l.trashcan.plugin.annotations.PluginReload;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -19,9 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
-import java.util.SortedSet;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -29,7 +23,6 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Preva1l
  */
-@Getter
 @Configuration
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @SuppressWarnings("FieldMayBeFinal")
@@ -41,7 +34,7 @@ public class Categories {
             .setNameFormatter(NameFormatters.LOWER_KEBAB_CASE)
             .build();
 
-    private SortedSet<Category> categories = Sets.newTreeSet(List.of(
+    private Set<Category> categories = Sets.newHashSet(
             new Category(
                     "tools",
                     "&aTools",
@@ -88,9 +81,7 @@ public class Categories {
                     4,
                     0,
                     Material.TRIPWIRE_HOOK,
-                    List.of(
-                            "&fPickaxes, Axes, Hoes, etc"
-                    ),
+                    List.of(),
                     List.of(
                             "%material% == \"TRIPWIRE_HOOK\""
                     )
@@ -171,10 +162,19 @@ public class Categories {
                             "true"
                     )
             )
-    ));
+    );
+
+    @Ignore
+    private final SortedSet<Category> sortedCache = new TreeSet<>();
+    @Ignore
+    private final SortedSet<Category> customViaApi = new TreeSet<>();
+
+    public static SortedSet<Category> getCategories() {
+        return i().sortedCache;
+    }
 
     public static Optional<Category> getCategory(String id) {
-        return i().categories.stream().filter(category -> category.id().equals(id)).findFirst();
+        return i().sortedCache.stream().filter(category -> category.id().equals(id)).findFirst();
     }
 
     public static String getCatName(String id) {
@@ -189,33 +189,38 @@ public class Categories {
     }
 
     public static CompletableFuture<String> getCategoryForItem(ItemStack item) {
-        if (i().categories.isEmpty()) {
+        if (i().sortedCache.isEmpty()) {
             return CompletableFuture.completedFuture("_none_");
         }
         return CompletableFuture.supplyAsync(() -> {
-            for (Category category : i().categories) {
+            for (Category category : i().sortedCache) {
                 for (String matcher : category.matchers()) {
                     // default to false so we don't add it to a broken category
-                    if (JavaScriptProcessor.process(matcher, false, item)) {
+                    if (JSProcessorService.instance.process(matcher, false, item)) {
                         return category.id();
                     }
                 }
             }
             return "_none_";
-        }, DatabaseManager.getInstance().getThreadPool());
+        }, DataService.getInstance().getThreadPool());
     }
 
     public static boolean registerCategory(@NotNull Category category) {
-        return i().categories.add(category);
+        i().customViaApi.add(category);
+        return i().sortedCache.add(category);
     }
 
     public static boolean unregisterCategory(@NotNull String id) {
-        return i().categories.removeIf(category -> category.id().equals(id));
+        i().customViaApi.removeIf(category -> category.id().equals(id));
+        return i().sortedCache.removeIf(category -> category.id().equals(id));
     }
 
     @PluginReload
     public static void reload() {
         instance = YamlConfigurations.load(new File(Fadah.getInstance().getDataFolder(), "categories.yml").toPath(), Categories.class, PROPERTIES);
+        instance.sortedCache.clear();
+        instance.sortedCache.addAll(i().categories);
+        instance.sortedCache.addAll(i().customViaApi);
     }
 
     public static Categories i() {
@@ -223,6 +228,10 @@ public class Categories {
             return instance;
         }
 
-        return instance = YamlConfigurations.update(new File(Fadah.getInstance().getDataFolder(), "categories.yml").toPath(), Categories.class, PROPERTIES);
+        instance = YamlConfigurations.update(new File(Fadah.getInstance().getDataFolder(), "categories.yml").toPath(), Categories.class, PROPERTIES);
+        instance.sortedCache.clear();
+        instance.sortedCache.addAll(i().categories);
+        instance.sortedCache.addAll(i().customViaApi);
+        return instance;
     }
 }

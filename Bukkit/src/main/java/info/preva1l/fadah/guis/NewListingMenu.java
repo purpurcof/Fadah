@@ -18,7 +18,7 @@ import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.TimeUtil;
 import info.preva1l.fadah.utils.guis.FastInv;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
-import info.preva1l.fadah.utils.guis.LayoutManager;
+import info.preva1l.fadah.utils.guis.LayoutService;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -42,8 +42,8 @@ public class NewListingMenu extends FastInv {
     private volatile boolean giveItemBack = true;
 
     public NewListingMenu(Player player, double price) {
-        super(LayoutManager.MenuType.NEW_LISTING.getLayout().guiSize(),
-                LayoutManager.MenuType.NEW_LISTING.getLayout().guiTitle(), LayoutManager.MenuType.NEW_LISTING);
+        super(LayoutService.MenuType.NEW_LISTING.getLayout().guiSize(),
+                LayoutService.MenuType.NEW_LISTING.getLayout().formattedTitle(), LayoutService.MenuType.NEW_LISTING);
         this.player = player;
         var temp = player.getInventory().getItemInMainHand().clone();
         player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
@@ -53,7 +53,7 @@ public class NewListingMenu extends FastInv {
         if (currency == null) currency = CurrencyRegistry.getAll().getFirst();
 
         fillers();
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_START, -1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.LISTING_START, -1),
                 new ItemBuilder(getLang().getAsMaterial("create.icon", Material.EMERALD))
                         .name(getLang().getStringFormatted("create.name", "&aClick to create listing!"))
                         .modelData(getLang().getInt("create.model-data"))
@@ -73,7 +73,7 @@ public class NewListingMenu extends FastInv {
         setModeButton();
         addNavigationButtons();
 
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_ITEM, -1), itemToSell);
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.LISTING_ITEM, -1), itemToSell);
     }
 
     private void publishListing(double price) {
@@ -113,7 +113,7 @@ public class NewListingMenu extends FastInv {
                     player.closeInventory();
                 }))
                 .exceptionally(t -> {
-                    Fadah.getConsole().log(Level.SEVERE, t.getMessage(), t);
+                    Fadah.getInstance().getLogger().log(Level.SEVERE, t.getMessage(), t);
                     return null;
                 });
     }
@@ -129,8 +129,8 @@ public class NewListingMenu extends FastInv {
     }
 
     private void setClock() {
-        removeItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_TIME, -1));
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_TIME, -1),
+        removeItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.LISTING_TIME, -1));
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.LISTING_TIME, -1),
                 new ItemBuilder(getLang().getAsMaterial("time.icon", Material.CLOCK))
                         .name(getLang().getStringFormatted("time.name", "&aTime for listing to be active"))
                         .setAttributes(null)
@@ -174,11 +174,11 @@ public class NewListingMenu extends FastInv {
                         ? getLang().getStringFormatted("advert.options.selected", "&8> &e%option%", Tuple.of("%option%", Lang.i().getAdvertActions().getPost()))
                         : getLang().getStringFormatted("advert.options.not-selected", "&f%option%", Tuple.of("%option%", Lang.i().getAdvertActions().getPost()));
         Component dontPost = !advertise
-                        ? getLang().getStringFormatted("advert.options.selected", "&8> &e%option%", Tuple.of("%option%", Lang.i().getAdvertActions().getPost()))
-                        : getLang().getStringFormatted("advert.options.not-selected", "&f%option%", Tuple.of("%option%", Lang.i().getAdvertActions().getPost()));
+                        ? getLang().getStringFormatted("advert.options.selected", "&8> &e%option%", Tuple.of("%option%", Lang.i().getAdvertActions().getSilent()))
+                        : getLang().getStringFormatted("advert.options.not-selected", "&f%option%", Tuple.of("%option%", Lang.i().getAdvertActions().getSilent()));
 
-        removeItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_ADVERT, -1));
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_ADVERT, -1),
+        removeItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.LISTING_ADVERT, -1));
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.LISTING_ADVERT, -1),
                 new ItemBuilder(getLang().getAsMaterial("advert.icon", Material.OAK_SIGN))
                         .name(getLang().getStringFormatted("advert.name", "&eAdvertise Listing"))
                         .modelData(getLang().getInt("advert.model-data"))
@@ -206,7 +206,7 @@ public class NewListingMenu extends FastInv {
         String next = nextCurrency == null
                 ? Lang.i().getWords().getNone()
                 : nextCurrency.getName();
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.CURRENCY, -1),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.CURRENCY, -1),
                 new ItemBuilder(getLang().getAsMaterial("currency.icon", Material.GOLD_INGOT))
                         .name(getLang().getStringFormatted("currency.name", "&aCurrency"))
                         .modelData(getLang().getInt("currency.model-data"))
@@ -236,8 +236,8 @@ public class NewListingMenu extends FastInv {
                         ? getLang().getStringFormatted("mode.options.selected", "&8> &e%option%", Tuple.of("%option%", Lang.i().getWords().getModes().getBuyItNow()))
                         : getLang().getStringFormatted("mode.options.not-selected", "&f%option%", Tuple.of("%option%", Lang.i().getWords().getModes().getBuyItNow()));
 
-        removeItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_MODE, -1));
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.LISTING_MODE, -1),
+        removeItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.LISTING_MODE, -1));
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.LISTING_MODE, -1),
                 new ItemBuilder(getLang().getAsMaterial("mode.icon", Material.HOPPER))
                         .name(getLang().getStringFormatted("mode.name", "&bAuction Mode"))
                         .modelData(getLang().getInt("mode.model-data"))
@@ -253,7 +253,7 @@ public class NewListingMenu extends FastInv {
     }
 
     private void addNavigationButtons() {
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutManager.ButtonType.CLOSE, 49),
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.CLOSE, 49),
                 Menus.i().getCloseButton().itemStack(), e -> e.getWhoClicked().closeInventory());
     }
 }

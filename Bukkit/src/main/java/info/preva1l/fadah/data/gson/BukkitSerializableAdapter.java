@@ -1,6 +1,7 @@
 package info.preva1l.fadah.data.gson;
 
 import com.google.gson.*;
+import info.preva1l.fadah.Fadah;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
@@ -12,7 +13,11 @@ import java.lang.reflect.Type;
 import java.util.Base64;
 
 public class BukkitSerializableAdapter implements JsonSerializer<ConfigurationSerializable>, JsonDeserializer<ConfigurationSerializable> {
-    private final LegacyBukkitSerializableAdapter legacyAdapter = new LegacyBukkitSerializableAdapter();
+    private final LegacyBukkitSerializableAdapter legacyAdapter;
+
+    public BukkitSerializableAdapter() {
+        this.legacyAdapter = new LegacyBukkitSerializableAdapter(Fadah.getInstance());
+    }
 
     @Override
     public ConfigurationSerializable deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
@@ -26,8 +31,7 @@ public class BukkitSerializableAdapter implements JsonSerializer<ConfigurationSe
 
             return objs[0];
         } catch (Exception pass) {
-            ConfigurationSerializable obj = legacyAdapter.deserialize(json, typeOfT, context);
-            return obj;
+            return legacyAdapter.deserialize(json, typeOfT, context);
         }
     }
 

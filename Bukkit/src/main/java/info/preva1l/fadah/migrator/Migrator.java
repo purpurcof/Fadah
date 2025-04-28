@@ -1,8 +1,7 @@
 package info.preva1l.fadah.migrator;
 
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CacheAccess;
-import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
@@ -23,21 +22,21 @@ public interface Migrator {
 
             for (Listing listing : listings) {
                 CacheAccess.add(Listing.class, listing);
-                DatabaseManager.getInstance().save(Listing.class, listing);
+                DataService.getInstance().save(Listing.class, listing);
                 migratedListings++;
             }
-            Fadah.getConsole().info("Migrated %s listings!".formatted(migratedListings));
+            MigrationService.instance.logger.info("Migrated %s listings!".formatted(migratedListings));
 
             int migratedCollectionBoxes = 0;
             Map<UUID, List<CollectableItem>> collectionBoxes = migrateCollectionBoxes();
 
             for (UUID owner : collectionBoxes.keySet()) {
-                CollectionBox box = DatabaseManager.getInstance().get(CollectionBox.class, owner).join()
+                CollectionBox box = DataService.getInstance().get(CollectionBox.class, owner).join()
                         .orElse(new CollectionBox(owner, collectionBoxes.get(owner)));
-                DatabaseManager.getInstance().save(CollectionBox.class, box);
+                DataService.getInstance().save(CollectionBox.class, box);
                 migratedCollectionBoxes++;
             }
-            Fadah.getConsole().info("Migrated %s collection boxes!".formatted(migratedCollectionBoxes));
+            MigrationService.instance.logger.info("Migrated %s collection boxes!".formatted(migratedCollectionBoxes));
 
             int migratedExpiredItems = 0;
             Map<UUID, List<CollectableItem>> expiredItems = migrateExpiredListings();
@@ -48,7 +47,7 @@ public interface Migrator {
                 }
                 migratedExpiredItems++;
             }
-            Fadah.getConsole().info("Migrated %s players expired items!".formatted(migratedExpiredItems));
+            MigrationService.instance.logger.info("Migrated %s players expired items!".formatted(migratedExpiredItems));
             return null;
         });
     }

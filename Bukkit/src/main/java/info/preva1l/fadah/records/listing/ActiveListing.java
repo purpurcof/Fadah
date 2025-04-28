@@ -6,7 +6,7 @@ import info.preva1l.fadah.api.ListingEndReason;
 import info.preva1l.fadah.api.ListingPurchaseEvent;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Lang;
-import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
@@ -38,7 +38,7 @@ public abstract class ActiveListing extends BaseListing {
         }
         Lang.sendMessage(canceller, Lang.i().getPrefix() + Lang.i().getNotifications().getCancelled());
         CacheAccess.invalidate(Listing.class, this);
-        DatabaseManager.getInstance().delete(Listing.class, this);
+        DataService.getInstance().delete(Listing.class, this);
 
         CacheAccess.getNotNull(ExpiredItems.class, getOwner()).add(CollectableItem.of(itemStack));
 

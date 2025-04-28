@@ -3,7 +3,9 @@ package info.preva1l.fadah.utils.guis;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.utils.config.BasicConfig;
 import info.preva1l.fadah.utils.config.LanguageConfig;
-import info.preva1l.trashcan.plugin.annotations.PluginEnable;
+import info.preva1l.trashcan.flavor.annotations.Configure;
+import info.preva1l.trashcan.flavor.annotations.Service;
+import info.preva1l.trashcan.flavor.annotations.inject.Inject;
 import info.preva1l.trashcan.plugin.annotations.PluginReload;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
@@ -11,30 +13,34 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-public class LayoutManager {
-    public static final LayoutManager instance = new LayoutManager();
+@Service
+public final class LayoutService {
+    public static final LayoutService instance = new LayoutService();
 
+    @Inject private Fadah plugin;
+    @Inject private Logger logger;
+    
     private final List<GuiLayout> guiLayouts = new ArrayList<>();
 
     @PluginReload
     public void reload() {
         Stream.of(
-                LayoutManager.MenuType.MAIN,
-                LayoutManager.MenuType.NEW_LISTING,
-                LayoutManager.MenuType.PROFILE,
-                LayoutManager.MenuType.EXPIRED_LISTINGS,
-                LayoutManager.MenuType.COLLECTION_BOX,
-                LayoutManager.MenuType.CONFIRM_PURCHASE,
-                LayoutManager.MenuType.HISTORY,
-                LayoutManager.MenuType.WATCH
+                LayoutService.MenuType.MAIN,
+                LayoutService.MenuType.NEW_LISTING,
+                LayoutService.MenuType.PROFILE,
+                LayoutService.MenuType.EXPIRED_LISTINGS,
+                LayoutService.MenuType.COLLECTION_BOX,
+                LayoutService.MenuType.CONFIRM_PURCHASE,
+                LayoutService.MenuType.HISTORY,
+                LayoutService.MenuType.WATCH
         ).forEach(this::reloadLayout);
     }
 
-    @PluginEnable
+    @Configure
     public void load() {
-        var plugin = Fadah.getInstance();
         Stream.of(
                 new BasicConfig(plugin, "menus/main.yml"),
                 new BasicConfig(plugin, "menus/new-listing.yml"),
@@ -45,7 +51,7 @@ public class LayoutManager {
                 new BasicConfig(plugin, "menus/profile.yml"),
                 new BasicConfig(plugin, "menus/view-listings.yml"),
                 new BasicConfig(plugin, "menus/watch.yml")
-        ).forEach(LayoutManager.instance::loadLayout);
+        ).forEach(LayoutService.instance::loadLayout);
     }
 
     public void loadLayout(BasicConfig config) {
@@ -61,14 +67,14 @@ public class LayoutManager {
 
         final ConfigurationSection superSection = config.getConfiguration().getConfigurationSection("lang");
         if (superSection == null) {
-            Fadah.getConsole().severe("Gui Layout for the GUI %s is invalid! Missing the lang config section.".formatted(menuType.toString()));
+            logger.severe("Gui Layout for the GUI %s is invalid! Missing the lang config section.".formatted(menuType.toString()));
             return;
         }
         final LanguageConfig languageConfig = new LanguageConfig(superSection);
 
         final ConfigurationSection layoutSection = config.getConfiguration().getConfigurationSection("layout");
         if (layoutSection == null) {
-            Fadah.getConsole().severe("Gui Layout for the GUI %s is invalid! Missing the layout config section.".formatted(menuType.toString()));
+            logger.severe("Gui Layout for the GUI %s is invalid! Missing the layout config section.".formatted(menuType.toString()));
             return;
         }
 
@@ -77,21 +83,21 @@ public class LayoutManager {
         for (String key : layoutSection.getKeys(false)) {
             int slotNumber = Integer.parseInt(key);
             if (slotNumber > guiSize - 1) {
-                Fadah.getConsole().severe("Gui Layout for the GUI %s is invalid! Slot: %s is out of bounds for gui size %s (%s)".formatted(menuType.toString(), slotNumber, guiSize, guiSize/9));
+                logger.severe("Gui Layout for the GUI %s is invalid! Slot: %s is out of bounds for gui size %s (%s)".formatted(menuType.toString(), slotNumber, guiSize, guiSize/9));
                 return;
             }
 
             ButtonType buttonType;
             String temp2 = layoutSection.getString(key);
             if (temp2 == null || temp2.isBlank()) {
-                Fadah.getConsole().severe("Gui Layout for the GUI %s is invalid! Slot: %s is an empty string?".formatted(menuType.toString(), slotNumber));
+                logger.severe("Gui Layout for the GUI %s is invalid! Slot: %s is an empty string?".formatted(menuType.toString(), slotNumber));
                 return;
             }
 
             try {
                 buttonType = ButtonType.valueOf(temp2);
             } catch (IllegalArgumentException e) {
-                Fadah.getConsole().severe("Gui Layout for the GUI %s is invalid! Slot: %s Button Type %s does not exist!".formatted(menuType.toString(), slotNumber, temp2));
+                logger.severe("Gui Layout for the GUI %s is invalid! Slot: %s Button Type %s does not exist!".formatted(menuType.toString(), slotNumber, temp2));
                 return;
             }
 
@@ -141,7 +147,7 @@ public class LayoutManager {
     public void reloadLayout(MenuType menuType) {
         final String temp = menuType.getLayout().extraConfig().getFileName();
         guiLayouts.removeIf(mT -> mT.menuType().equals(menuType));
-        loadLayout(new BasicConfig(Fadah.getInstance(), temp));
+        loadLayout(new BasicConfig(plugin, temp));
     }
 
     public @NotNull GuiLayout getLayout(MenuType menuType) {
@@ -175,7 +181,7 @@ public class LayoutManager {
         ;
 
         public GuiLayout getLayout() {
-            return LayoutManager.instance.getLayout(this);
+            return LayoutService.instance.getLayout(this);
         }
     }
 

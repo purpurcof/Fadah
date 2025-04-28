@@ -7,7 +7,7 @@ import com.influxdb.client.domain.WritePrecision;
 import com.influxdb.client.write.Point;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
-import info.preva1l.fadah.data.DatabaseManager;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.hooker.annotation.*;
 
 import java.time.Instant;
@@ -33,7 +33,7 @@ public class InfluxDBHook {
             this.writeApi = client.getWriteApiBlocking();
             return true;
         } catch (Exception e) {
-            Fadah.getConsole().log(Level.SEVERE, e.getMessage(), e);
+            Fadah.getInstance().getLogger().log(Level.SEVERE, e.getMessage(), e);
             return false;
         }
     }
@@ -44,7 +44,7 @@ public class InfluxDBHook {
                     .time(Instant.now(), WritePrecision.MS)
                     .addField("message", message);
             writeApi.writePoint(point);
-        }, DatabaseManager.getInstance().getThreadPool());
+        }, DataService.getInstance().getThreadPool());
     }
 
     @OnStop

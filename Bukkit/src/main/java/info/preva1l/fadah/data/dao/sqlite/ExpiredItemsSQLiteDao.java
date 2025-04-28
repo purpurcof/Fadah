@@ -1,7 +1,6 @@
 package info.preva1l.fadah.data.dao.sqlite;
 
 import com.zaxxer.hikari.HikariDataSource;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.dao.common_sql.CommonSQLExpiredListingsDao;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,7 @@ public class ExpiredItemsSQLiteDao extends CommonSQLExpiredListingsDao {
                 e.printStackTrace();
             }
         } catch (SQLException e) {
-            Fadah.getConsole().severe("Failed to add item to expired items!");
+            getLogger().severe("Failed to add item to expired items!");
             throw new RuntimeException(e);
         }
     }

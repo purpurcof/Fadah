@@ -85,21 +85,21 @@ public abstract class Broker {
     public void load() {
         Config.Broker settings = Config.i().getBroker();
         if (settings.isEnabled()) {
-            Fadah.getConsole().info("Connecting to Broker...");
-            Fadah.getConsole().info("Broker Type: %s".formatted(settings.getType().getDisplayName()));
+            plugin.getLogger().info("Connecting to Broker...");
+            plugin.getLogger().info("Broker Type: %s".formatted(settings.getType().getDisplayName()));
             if (Config.i().getDatabase().getType() == DatabaseType.SQLITE) {
-                Fadah.getConsole().severe("------------------------------------------");
-                Fadah.getConsole().severe("Broker has not been enabled as the selected");
-                Fadah.getConsole().severe("       database is not compatible!");
-                Fadah.getConsole().severe("------------------------------------------");
+                plugin.getLogger().severe("------------------------------------------");
+                plugin.getLogger().severe("Broker has not been enabled as the selected");
+                plugin.getLogger().severe("       database is not compatible!");
+                plugin.getLogger().severe("------------------------------------------");
                 return;
             }
             connect();
             connected = true;
-            Fadah.getConsole().info("Successfully connected to broker!");
+            plugin.getLogger().info("Successfully connected to broker!");
             return;
         }
-        Fadah.getConsole().info("Not connecting to broker. (Not Enabled)");
+        plugin.getLogger().info("Not connecting to broker. (Not Enabled)");
     }
 
     public static Broker getInstance() {

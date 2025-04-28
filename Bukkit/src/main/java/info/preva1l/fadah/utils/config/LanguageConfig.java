@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class LanguageConfig {
+    private final Fadah plugin = Fadah.getInstance();
     private final ConfigurationSection superSection;
 
     public LanguageConfig(@NotNull ConfigurationSection superSection) {
@@ -38,12 +39,12 @@ public class LanguageConfig {
             material = Material.valueOf(s.toUpperCase());
         } catch (EnumConstantNotPresentException | IllegalArgumentException e) {
             material = Material.APPLE;
-            Fadah.getConsole().severe("-----------------------------");
-            Fadah.getConsole().severe("Config Incorrect!");
-            Fadah.getConsole().severe("Material: " + s);
-            Fadah.getConsole().severe("Does Not Exist!");
-            Fadah.getConsole().severe("Defaulting to APPLE");
-            Fadah.getConsole().severe("-----------------------------");
+            plugin.getLogger().severe("-----------------------------");
+            plugin.getLogger().severe("Config Incorrect!");
+            plugin.getLogger().severe("Material: " + s);
+            plugin.getLogger().severe("Does Not Exist!");
+            plugin.getLogger().severe("Defaulting to APPLE");
+            plugin.getLogger().severe("-----------------------------");
         }
         return material;
     }
@@ -58,12 +59,12 @@ public class LanguageConfig {
             material = Material.valueOf(s.toUpperCase());
         } catch (EnumConstantNotPresentException | IllegalArgumentException e) {
             material = def;
-            Fadah.getConsole().severe("-----------------------------");
-            Fadah.getConsole().severe("Config Incorrect!");
-            Fadah.getConsole().severe("Material: " + s);
-            Fadah.getConsole().severe("Does Not Exist!");
-            Fadah.getConsole().severe("Defaulting to " + def.toString());
-            Fadah.getConsole().severe("-----------------------------");
+            plugin.getLogger().severe("-----------------------------");
+            plugin.getLogger().severe("Config Incorrect!");
+            plugin.getLogger().severe("Material: " + s);
+            plugin.getLogger().severe("Does Not Exist!");
+            plugin.getLogger().severe("Defaulting to " + def.toString());
+            plugin.getLogger().severe("-----------------------------");
         }
         return material;
     }
