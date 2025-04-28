@@ -167,7 +167,8 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
         if (listing.isOwner(player))
             itemStack.addLore(getLang().getStringFormatted("listing.footer.own-listing"));
         else if (listing.getCurrency().canAfford(player, listing.getPrice()))
-            itemStack.addLore(getLang().getStringFormatted("listing.footer.buy"));
+            if (isBidListing) itemStack.addLore(getLang().getStringFormatted("listing.footer.bid"));
+            else itemStack.addLore(getLang().getStringFormatted("listing.footer.buy"));
         else
             itemStack.addLore(getLang().getStringFormatted("listing.footer.too-expensive"));
 
@@ -303,7 +304,6 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
         if (category != null) {
             this.listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
         }
-
 
         listings.sort(this.sortingMethod.getSorter(this.sortingDirection));
 

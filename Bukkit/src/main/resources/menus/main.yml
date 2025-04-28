@@ -17,6 +17,7 @@ lang:
       bidding: "Current Bid"
     footer:
       buy: '&aClick to buy now!'
+      bid: '&aClick to place a bid!'
       too-expensive: '&cYou cannot afford this item!'
       own-listing: '&cYou cannot buy your own listing! &8(Shift Click to Cancel)'
       shulker: '&fRight Click to Preview!'
