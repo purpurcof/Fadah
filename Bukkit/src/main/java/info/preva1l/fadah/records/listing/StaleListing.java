@@ -30,4 +30,9 @@ public final class StaleListing extends BaseListing {
     public boolean canBuy(@NotNull Player player) {
         return false;
     }
+
+    @Override
+    public void expire(boolean force) {
+        throw new IllegalStateException("Expiring a listing is not possible when the listing is in a stale state!");
+    }
 }
