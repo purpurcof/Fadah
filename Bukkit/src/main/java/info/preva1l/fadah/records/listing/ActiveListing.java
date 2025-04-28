@@ -68,7 +68,16 @@ public abstract class ActiveListing extends BaseListing {
         CacheAccess.invalidate(Listing.class, this);
         DataService.getInstance().delete(Listing.class, this);
 
-        CacheAccess.getNotNull(ExpiredItems.class, getOwner()).add(CollectableItem.of(itemStack));
+        CacheAccess.get(ExpiredItems.class, getOwner()).ifPresentOrElse(
+                items -> items.add(CollectableItem.of(itemStack)),
+                () -> DataService.getInstance()
+                        .get(ExpiredItems.class, owner)
+                        .thenAccept(expiredOpt -> {
+                            var expired = expiredOpt.orElseGet(() -> ExpiredItems.empty(owner));
+                            expired.add(CollectableItem.of(itemStack));
+                            DataService.getInstance().save(ExpiredItems.class, expired);
+                        })
+        );
 
         boolean isAdmin = !this.isOwner(canceller);
         TransactionLogger.listingRemoval(this, isAdmin);
