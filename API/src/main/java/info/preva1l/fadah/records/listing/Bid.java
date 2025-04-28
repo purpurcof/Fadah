@@ -12,6 +12,7 @@ import java.util.UUID;
  *
  * @author Preva1l
  * @param bidder the player who made the bid.
+ * @param bidderName the name of the player who made the bid.
  * @param bidAmount the amount of the bid.
  * @param timestamp the epoch time the bid was placed.
  */

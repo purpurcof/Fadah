@@ -19,6 +19,7 @@ import java.util.UUID;
  * @param itemStack  the item that had an action performed on it.
  * @param price      nullable, only used for {@link LoggedAction#LISTING_START}, {@link LoggedAction#LISTING_PURCHASED}, {@link LoggedAction#LISTING_SOLD}
  * @param playerUUID nullable, only used for {@link LoggedAction#LISTING_SOLD} and {@link LoggedAction#LISTING_PURCHASED}
+ * @param biddable if the item was bidding or bin
  * @author Preva1l
  */
 public record HistoricItem(

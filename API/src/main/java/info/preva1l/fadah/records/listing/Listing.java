@@ -16,16 +16,65 @@ import java.util.UUID;
  * @author Preva1l
  */
 public interface Listing {
+    /**
+     * A unique identifier to identify this listing.
+     * @return the uuid.
+     */
     @NotNull UUID getId();
+
+    /**
+     * The listing owners UUID.
+     * @return the listing owners uuid.
+     */
     @NotNull UUID getOwner();
+
+    /**
+     * The listing owners name.
+     * @return the owners name.
+     */
     @NotNull String getOwnerName();
+
+    /**
+     * The itemstack of the listing.
+     * @return the item.
+     */
     @NotNull ItemStack getItemStack();
+
+    /**
+     * The id of the category the listing falls into.
+     * @return the category id.
+     */
     @NotNull String getCategoryID();
+
+    /**
+     * The id of the currency used.
+     * @return the currency id.
+     */
     @NotNull String getCurrencyId();
+
+    /**
+     * The % of tax that will be charged on this listing.
+     * @return the tax.
+     */
     double getTax();
+
+    /**
+     * The epoch time stamp the listing was created.
+     * @return the creation date.
+     */
     long getCreationDate();
+
+    /**
+     * The epoch time stamp the listing will expire/complete.
+     * @return the deletion date.
+     */
     long getDeletionDate();
 
+    /**
+     * The price or the top bid of the listing
+     *
+     * @return the price.
+     */
     double getPrice();
 
     /**

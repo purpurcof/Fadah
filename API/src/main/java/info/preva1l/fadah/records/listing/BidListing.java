@@ -11,7 +11,16 @@ import java.util.concurrent.ConcurrentSkipListSet;
  * @author Preva1l
  */
 public interface BidListing extends Listing {
+    /**
+     * The starting bid amount.
+     * @return the amount of the starting bid.
+     */
     double getStartingBid();
+
+    /**
+     * All the bids.
+     * @return returns a sorted set of all bids.
+     */
     ConcurrentSkipListSet<Bid> getBids();
 
     /**
