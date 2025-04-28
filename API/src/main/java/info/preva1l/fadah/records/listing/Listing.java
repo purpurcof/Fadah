@@ -73,4 +73,18 @@ public interface Listing {
      * @return true if the player can purchase the listing, else false.
      */
     boolean canBuy(@NotNull Player player);
+
+    /**
+     * Expire the listing.
+     */
+     default void expire() {
+        expire(false);
+    }
+
+    /**
+     * Expire the listing.
+     *
+     * @param force if false, this method will only run if the listing is meant to be expired
+     */
+    void expire(boolean force);
 }

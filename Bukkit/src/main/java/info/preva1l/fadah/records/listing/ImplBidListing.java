@@ -133,7 +133,11 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
 
     @Override
     public void completeBidding() {
-        Bid winningBid = getCurrentBid();
+        if (bids.isEmpty()) {
+            expire();
+            return;
+        }
+        Bid winningBid = bids.first();
 
         // Money Transfer
         double taxed = (this.getTax()/100) * winningBid.bidAmount();

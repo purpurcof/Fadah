@@ -31,6 +31,34 @@ public abstract class ActiveListing extends BaseListing {
     }
 
     @Override
+    public void expire(boolean force) {
+        if (System.currentTimeMillis() < deletionDate && !force) return;
+
+        CacheAccess.invalidate(Listing.class, this);
+        DataService.instance.delete(Listing.class, this);
+
+        CollectableItem collectableItem = new CollectableItem(getItemStack(), System.currentTimeMillis());
+
+        CacheAccess.get(ExpiredItems.class, getOwner())
+                .ifPresentOrElse(
+                        cache -> cache.add(collectableItem),
+                        () -> DataService.instance.get(ExpiredItems.class, getOwner())
+                                .thenCompose(items -> {
+                                    var expiredItems = items.orElseGet(() -> ExpiredItems.empty(getOwner()));
+                                    return DataService.instance.save(ExpiredItems.class, expiredItems);
+                                })
+                );
+
+        TransactionLogger.listingExpired(this);
+
+        TaskManager.Sync.run(Fadah.getInstance(), () ->
+                Bukkit.getServer().getPluginManager().callEvent(
+                        new ListingEndEvent(this, ListingEndReason.EXPIRED)
+                )
+        );
+    }
+
+    @Override
     public boolean cancel(@NotNull Player canceller) {
         if (CacheAccess.get(Listing.class, this.getId()).isEmpty()) {
             Lang.sendMessage(canceller, Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist());

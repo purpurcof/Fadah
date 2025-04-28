@@ -1,8 +1,6 @@
 package info.preva1l.fadah.data;
 
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.api.ListingEndEvent;
-import info.preva1l.fadah.api.ListingEndReason;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.data.handler.DatabaseHandler;
@@ -10,14 +8,12 @@ import info.preva1l.fadah.data.handler.MongoHandler;
 import info.preva1l.fadah.data.handler.MySQLHandler;
 import info.preva1l.fadah.data.handler.SQLiteHandler;
 import info.preva1l.fadah.multiserver.Broker;
-import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.records.history.History;
 import info.preva1l.fadah.records.listing.BidListing;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.TaskManager;
-import info.preva1l.fadah.utils.logging.TransactionLogger;
 import info.preva1l.fadah.watcher.AuctionWatcher;
 import info.preva1l.fadah.watcher.Watching;
 import info.preva1l.trashcan.flavor.annotations.Close;
@@ -25,7 +21,6 @@ import info.preva1l.trashcan.flavor.annotations.Configure;
 import info.preva1l.trashcan.flavor.annotations.Service;
 import info.preva1l.trashcan.flavor.annotations.inject.Inject;
 import lombok.Getter;
-import org.bukkit.Bukkit;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -205,31 +200,9 @@ public final class DataService {
 
                 if (listing instanceof BidListing bidListing) {
                     bidListing.completeBidding();
-                    return;
+                } else {
+                    listing.expire();
                 }
-
-                CacheAccess.invalidate(Listing.class, listing);
-                delete(Listing.class, listing);
-
-                CollectableItem collectableItem = new CollectableItem(listing.getItemStack(), System.currentTimeMillis());
-
-                CacheAccess.get(ExpiredItems.class, listing.getOwner())
-                        .ifPresentOrElse(
-                                cache -> cache.add(collectableItem),
-                                () -> get(ExpiredItems.class, listing.getOwner())
-                                        .thenCompose(items -> {
-                                            var expiredItems = items.orElseGet(() -> ExpiredItems.empty(listing.getOwner()));
-                                            return save(ExpiredItems.class, expiredItems);
-                                        })
-                        );
-
-                TransactionLogger.listingExpired(listing);
-
-                TaskManager.Sync.run(plugin, () ->
-                        Bukkit.getServer().getPluginManager().callEvent(
-                                new ListingEndEvent(listing, ListingEndReason.EXPIRED)
-                        )
-                );
             }
         };
     }
