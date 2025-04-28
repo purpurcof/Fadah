@@ -34,6 +34,7 @@ public final class LayoutService {
                 LayoutService.MenuType.EXPIRED_LISTINGS,
                 LayoutService.MenuType.COLLECTION_BOX,
                 LayoutService.MenuType.CONFIRM_PURCHASE,
+                LayoutService.MenuType.PLACE_BID,
                 LayoutService.MenuType.HISTORY,
                 LayoutService.MenuType.WATCH
         ).forEach(this::reloadLayout);
@@ -47,6 +48,7 @@ public final class LayoutService {
                 new BasicConfig(plugin, "menus/expired-listings.yml"),
                 new BasicConfig(plugin, "menus/historic-items.yml"),
                 new BasicConfig(plugin, "menus/confirm.yml"),
+                new BasicConfig(plugin, "menus/place-bid.yml"),
                 new BasicConfig(plugin, "menus/collection-box.yml"),
                 new BasicConfig(plugin, "menus/profile.yml"),
                 new BasicConfig(plugin, "menus/view-listings.yml"),
@@ -135,6 +137,7 @@ public final class LayoutService {
             case "new-listing.yml": yield MenuType.NEW_LISTING;
             case "profile.yml": yield MenuType.PROFILE;
             case "confirm.yml": yield MenuType.CONFIRM_PURCHASE;
+            case "place-bid.yml": yield MenuType.PLACE_BID;
             case "collection-box.yml": yield MenuType.COLLECTION_BOX;
             case "expired-listings.yml": yield MenuType.EXPIRED_LISTINGS;
             case "historic-items.yml": yield MenuType.HISTORY;
@@ -171,6 +174,7 @@ public final class LayoutService {
         HISTORY,
         EXPIRED_LISTINGS,
         CONFIRM_PURCHASE,
+        PLACE_BID,
         COLLECTION_BOX,
         VIEW_LISTINGS,
         WATCH,
@@ -214,10 +218,11 @@ public final class LayoutService {
         LISTING_ADVERT,
         CURRENCY,
         /**
-         * Confirm Menu Specific Items
+         * Purchase Menu Specific Items
          */
         CONFIRM,
         CANCEL,
+        ADJUST_BID,
         ITEM_TO_PURCHASE,
         /**
          * Profile Menu Specific Items

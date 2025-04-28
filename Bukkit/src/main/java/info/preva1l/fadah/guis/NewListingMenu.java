@@ -68,6 +68,7 @@ public class NewListingMenu extends FastInv {
                 }
         );
         setClock();
+        setModeButton();
         setAdvertButton();
         setCurrencyButton();
         setModeButton();

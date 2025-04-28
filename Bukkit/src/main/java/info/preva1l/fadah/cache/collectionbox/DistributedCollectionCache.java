@@ -18,11 +18,12 @@ public final class DistributedCollectionCache implements Cache<CollectionBox> {
 
     public DistributedCollectionCache() {
         final LocalCachedMapOptions<UUID, CollectionBox> options = LocalCachedMapOptions.<UUID, CollectionBox>name("collection-boxes")
-                .cacheSize(100000)
+                .cacheSize(1000000)
                 .maxIdle(Duration.ofSeconds(60))
                 .timeToLive(Duration.ofSeconds(60))
-                .evictionPolicy(LocalCachedMapOptions.EvictionPolicy.WEAK)
-                .syncStrategy(LocalCachedMapOptions.SyncStrategy.INVALIDATE)
+                .evictionPolicy(LocalCachedMapOptions.EvictionPolicy.NONE)
+                .syncStrategy(LocalCachedMapOptions.SyncStrategy.UPDATE)
+                .storeMode(LocalCachedMapOptions.StoreMode.LOCALCACHE_REDIS)
                 .expirationEventPolicy(LocalCachedMapOptions.ExpirationEventPolicy.SUBSCRIBE_WITH_KEYSPACE_CHANNEL);
 
         collectionBoxes = RedisBroker.getRedisson().getLocalCachedMap(options);

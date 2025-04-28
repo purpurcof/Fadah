@@ -2,8 +2,8 @@ package info.preva1l.fadah.guis;
 
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
+import info.preva1l.fadah.config.Menus;
 import info.preva1l.fadah.config.misc.Tuple;
-import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.FastInv;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
 import info.preva1l.fadah.utils.guis.LayoutService;
@@ -42,7 +42,7 @@ public class WatchMenu extends FastInv {
                         .lore(getLang().getLore("search.lore",
                                 Tuple.of("%current%", watching.getSearch() == null ? Lang.i().getWords().getNone() : watching.getSearch()))
                         ).build(), e ->
-                        new SearchMenu(player, getLang().getString("search.placeholder", "Search Query..."), search -> {
+                        new InputMenu<>(player, Menus.i().getSearchTitle(), getLang().getString("search.placeholder", "Search Query..."), String.class, search -> {
                             watching.setSearch(search);
                             buttons();
                             open(player);
@@ -56,13 +56,9 @@ public class WatchMenu extends FastInv {
                         .modelData(getLang().getInt("min-price.model-data"))
                         .lore(getLang().getLore("min-price.lore",
                                 Tuple.of("%current%", Config.i().getFormatting().numbers().format(watching.getMinPrice())))).build(), e ->
-                        new SearchMenu(player, getLang().getString("min-price.placeholder", "Ex: 100"), search -> {
-                            if (search == null) search = "-1";
-                            try {
-                                watching.setMinPrice(Text.getAmountFromString(search));
-                            } catch (NumberFormatException ex) {
-                                player.sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMustBeNumber()));
-                            }
+                        new InputMenu<>(player, Menus.i().getSearchTitle(), getLang().getString("min-price.placeholder", "Ex: 100"), Double.class, search -> {
+                            if (search == null) search = -1D;
+                            watching.setMinPrice(search);
                             buttons();
                             open(player);
                         }));
@@ -75,13 +71,9 @@ public class WatchMenu extends FastInv {
                         .modelData(getLang().getInt("max-price.model-data"))
                         .lore(getLang().getLore("max-price.lore",
                                 Tuple.of("%current%", Config.i().getFormatting().numbers().format(watching.getMaxPrice())))).build(), e ->
-                        new SearchMenu(player, getLang().getString("max-price.placeholder", "Ex: 10k"), search -> {
-                            if (search == null) search = "-1";
-                            try {
-                                watching.setMaxPrice(Text.getAmountFromString(search));
-                            } catch (NumberFormatException ex) {
-                                player.sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMustBeNumber()));
-                            }
+                        new InputMenu<>(player, Menus.i().getSearchTitle(), getLang().getString("max-price.placeholder", "Ex: 10k"), Double.class, search -> {
+                            if (search == null) search = -1D;
+                            watching.setMaxPrice(search);
                             buttons();
                             open(player);
                         }));

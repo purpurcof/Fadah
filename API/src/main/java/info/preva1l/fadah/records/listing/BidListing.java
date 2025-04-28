@@ -28,9 +28,8 @@ public interface BidListing extends Listing {
      *
      * @param bidder the player placing the bid.
      * @param bidAmount the amount of the bid.
-     * @return true if the bid was successful, false if the bid is not high enough or the player is already the highest bidder.
      */
-    boolean newBid(@NotNull Player bidder, double bidAmount);
+    void newBid(@NotNull Player bidder, double bidAmount);
 
     /**
      * Finish the bidding on the listing and award the item to the highest bidder.

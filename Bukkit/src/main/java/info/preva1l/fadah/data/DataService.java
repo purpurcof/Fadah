@@ -14,6 +14,7 @@ import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.records.history.History;
+import info.preva1l.fadah.records.listing.BidListing;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
@@ -201,6 +202,11 @@ public final class DataService {
         return () -> {
             for (Listing listing : CacheAccess.getAll(Listing.class)) {
                 if (System.currentTimeMillis() <= listing.getDeletionDate()) continue;
+
+                if (listing instanceof BidListing bidListing) {
+                    bidListing.completeBidding();
+                    return;
+                }
 
                 CacheAccess.invalidate(Listing.class, listing);
                 delete(Listing.class, listing);

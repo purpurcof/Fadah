@@ -87,7 +87,7 @@ public class ListingMongoDao implements Dao<Listing> {
                     .append("price", listing.getPrice())
                     .append("tax", listing.getTax())
                     .append("itemStack", ItemSerializer.serialize(listing.getItemStack()))
-                    .append("biddable", false)
+                    .append("biddable", listing instanceof BidListing)
                     .append("bids", listing instanceof BidListing bid ? GSON.toJson(bid.getBids(), BIDS_TYPE) : "");
             database.getCollection("listings").insertOne(document);
         } catch (Exception e) {

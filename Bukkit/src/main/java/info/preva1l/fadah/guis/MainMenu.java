@@ -3,6 +3,7 @@ package info.preva1l.fadah.guis;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Categories;
 import info.preva1l.fadah.config.Lang;
+import info.preva1l.fadah.config.Menus;
 import info.preva1l.fadah.filters.SortingDirection;
 import info.preva1l.fadah.filters.SortingMethod;
 import info.preva1l.fadah.records.Category;
@@ -72,7 +73,7 @@ public class MainMenu extends BrowseMenu {
                         .name(getLang().getStringFormatted("filter.search.name", "&3&lSearch"))
                         .modelData(getLang().getInt("filter.search.model-data"))
                         .lore(getLang().getLore("filter.search.lore")).build(), e ->
-                        new SearchMenu(player, getLang().getString("filter.search.placeholder", "Search Query..."), search ->
+                        new InputMenu<>(player, Menus.i().getSearchTitle(), getLang().getString("filter.search.placeholder", "Search Query..."), String.class, search ->
                                 new MainMenu(category, player, search, sortingMethod, sortingDirection).open(player)));
     }
 

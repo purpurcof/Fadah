@@ -2,9 +2,12 @@ package info.preva1l.fadah.listeners;
 
 import com.github.puregero.multilib.regionized.RegionizedTask;
 import info.preva1l.fadah.Fadah;
+import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.guis.NewListingMenu;
+import info.preva1l.fadah.records.collection.CollectionBox;
+import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.UpdateService;
@@ -44,6 +47,19 @@ public class PlayerListener implements Listener {
         if (task != null) {
             task.cancel();
         }
+
+        CacheAccess.get(ExpiredItems.class, e.getPlayer().getUniqueId())
+                .ifPresent(items -> {
+                    if (items.expiredItems().isEmpty()) return;
+                    Lang.sendMessage(e.getPlayer(), String.join("\n", Lang.i().getNotifications().getExpiredItem()));
+                });
+
+        CacheAccess.get(CollectionBox.class, e.getPlayer().getUniqueId())
+                .ifPresent(items -> {
+                    if (items.collectableItems().isEmpty()) return;
+                    Lang.sendMessage(e.getPlayer(), String.join("\n", Lang.i().getNotifications().getNewItem()));
+                });
+
         UpdateService.instance.notifyUpdate(e.getPlayer());
     }
 

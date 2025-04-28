@@ -96,7 +96,7 @@ public class HistoryMenu extends PaginatedFastInv {
                         .name(getLang().getStringFormatted("search.name", "&eSearch Date"))
                         .modelData(getLang().getInt("search.model-data"))
                         .lore(getLang().getLore("search.lore")).build(), e ->
-                        new SearchMenu(viewer, getLang().getString("search.placeholder", "Ex: 21/04/2024 22:26"),
+                        new InputMenu<>(viewer, Menus.i().getSearchTitle(), getLang().getString("search.placeholder", "Ex: 21/04/2024 22:26"), String.class,
                                 search -> new HistoryMenu(viewer, owner, search).open(viewer)));
     }
 

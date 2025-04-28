@@ -111,7 +111,7 @@ public abstract class CommonSQLListingDao implements Dao<Listing> {
                 statement.setDouble(7, listing.getPrice());
                 statement.setDouble(8, listing.getTax());
                 statement.setString(9, ItemSerializer.serialize(listing.getItemStack()));
-                statement.setBoolean(10, false);
+                statement.setBoolean(10, listing instanceof BidListing);
                 statement.setString(11, listing instanceof BidListing bid ? GSON.toJson(bid.getBids(), BIDS_TYPE) : "");
                 statement.execute();
             }

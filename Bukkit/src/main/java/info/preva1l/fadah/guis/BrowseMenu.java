@@ -156,6 +156,8 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
 
                 if (listing instanceof BinListing bin) {
                     new ConfirmPurchaseMenu(bin, player, () -> open(player)).open(player);
+                } else if (listing instanceof BidListing bid) {
+                    new PlaceBidMenu(bid, player, () -> open(player)).open(player);
                 }
             }));
         }
@@ -176,8 +178,8 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
                         .name(getLang().getStringFormatted("filter.search.name", "&3&lSearch"))
                         .modelData(getLang().getInt("filter.search.model-data"))
                         .lore(getLang().getLore("filter.search.lore")).build(), e ->
-                        new SearchMenu(player, getLang().getString("filter.search.placeholder", "Search Query..."), search ->
-                                new ViewListingsMenu(player, owner, search, sortingMethod, sortingDirection).open(player)));
+                        new InputMenu<>(player, Menus.i().getSearchTitle(), getLang().getString("filter.search.placeholder", "Search Query..."), String.class, search ->
+                                new ViewListingsMenu(player, owner, search, sortingMethod, sortingDirection) .open(player)));
 
         // Filter Type Cycle
         SortingMethod prev = sortingMethod.previous();

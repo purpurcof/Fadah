@@ -44,10 +44,10 @@ lang:
       - '&8> &e%current%'
       - '&f%next%'
       - '&8-------------------------'
-  mode: # Future Feature
+  mode:
     icon: HOPPER
     model-data: 0
-    name: '&bAuction Mode'
+    name: '&bListing Mode'
     lore:
       - '&7Click To Toggle'
       - '&8-------------------------'
@@ -79,7 +79,7 @@ layout:
   '31': "LISTING_START"
   '35': "FILLER"
   '36': "FILLER"
-  #'38': "MODE"
+  '38': "LISTING_MODE"
   '39': "CURRENCY"
   '41': "LISTING_TIME"
   '42': "LISTING_ADVERT"

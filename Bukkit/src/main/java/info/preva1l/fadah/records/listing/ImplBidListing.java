@@ -19,6 +19,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -78,24 +80,55 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
      *
      * @param bidder    the person bidding
      * @param bidAmount the amount of the bid
-     * @return true if the bid was successful, false if the bid is not high enough
      */
     @Override
-    public boolean newBid(@NotNull Player bidder, double bidAmount) {
-        if (!canBuy(bidder)) return false;
+    public void newBid(@NotNull Player bidder, double bidAmount) {
+        if (!canBuy(bidder)) return;
 
-        Bid mostRecentBid = bids.first();
+        Bid mostRecentBid = getCurrentBid();
         if (mostRecentBid.bidAmount() >= bidAmount) {
             Lang.sendMessage(bidder, Lang.i().getPrefix() + Lang.i().getErrors().getBidTooLow());
-            return false;
-        }
-        if (mostRecentBid.bidder().equals(bidder.getUniqueId())) {
-            Lang.sendMessage(bidder, Lang.i().getPrefix() + Lang.i().getErrors().getAlreadyHighestBidder());
-            return false;
+            return;
         }
 
+        double previous = bids.stream()
+                .filter(b -> b.bidder().equals(bidder.getUniqueId()))
+                .findFirst()
+                .map(Bid::bidAmount)
+                .orElse(0D);
+
+        getCurrency().withdraw(bidder, bidAmount - previous); // take amount minus previous bid
+
         bids.add(new Bid(bidder.getUniqueId(), bidder.getName(), bidAmount, System.currentTimeMillis()));
-        return true;
+
+        String itemName = Text.extractItemName(itemStack);
+        String formattedPrice = Config.i().getFormatting().numbers().format(bidAmount);
+        Component message = Text.text(Lang.i().getNotifications().getBidPlaced(),
+                Tuple.of("%item%", itemName),
+                Tuple.of("%price%", formattedPrice)
+        );
+
+        bidder.sendMessage(message);
+
+        // notify other bidders
+        Set<UUID> notified = new HashSet<>();
+        for (Bid bid : bids) {
+            if (notified.contains(bid.bidder()) || bid.bidder() == bidder.getUniqueId()) continue;
+            Player player = Bukkit.getPlayer(bid.bidder());
+            if (player != null) {
+                player.sendMessage(Text.text(Lang.i().getNotifications().getOutBid()));
+            } else {
+                if (Broker.getInstance().isConnected()) {
+                    Message.builder()
+                            .type(Message.Type.NOTIFICATION)
+                            .payload(Payload.withNotification(bid.bidder(), Text.text(Lang.i().getNotifications().getOutBid())))
+                            .build().send(Broker.getInstance());
+                }
+            }
+            notified.add(bid.bidder());
+        }
+
+        CacheAccess.add(Listing.class, this);
     }
 
     @Override
@@ -107,10 +140,12 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
         getCurrency().add(Bukkit.getOfflinePlayer(this.getOwner()), winningBid.bidAmount() - taxed);
 
         // refund
+        Set<UUID> refunded = new HashSet<>();
         for (Bid bid : bids) {
-            if (bid.equals(winningBid)) continue;
+            if (refunded.contains(bid.bidder()) || bid.equals(winningBid)) continue; // only refund their latest bid
 
             getCurrency().add(Bukkit.getOfflinePlayer(bid.bidder()), bid.bidAmount());
+            refunded.add(bid.bidder());
         }
 
         // Remove Listing

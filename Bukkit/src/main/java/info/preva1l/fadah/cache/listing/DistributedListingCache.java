@@ -20,8 +20,9 @@ public final class DistributedListingCache implements Cache<Listing> {
                 .cacheSize(1000000)
                 .maxIdle(Duration.ofSeconds(60))
                 .timeToLive(Duration.ofSeconds(60))
-                .evictionPolicy(LocalCachedMapOptions.EvictionPolicy.WEAK)
-                .syncStrategy(LocalCachedMapOptions.SyncStrategy.INVALIDATE)
+                .evictionPolicy(LocalCachedMapOptions.EvictionPolicy.NONE)
+                .syncStrategy(LocalCachedMapOptions.SyncStrategy.UPDATE)
+                .storeMode(LocalCachedMapOptions.StoreMode.LOCALCACHE_REDIS)
                 .expirationEventPolicy(LocalCachedMapOptions.ExpirationEventPolicy.SUBSCRIBE_WITH_KEYSPACE_CHANNEL);
 
         listings = RedisBroker.getRedisson().getLocalCachedMap(options);

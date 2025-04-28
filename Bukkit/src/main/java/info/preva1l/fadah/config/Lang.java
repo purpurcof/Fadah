@@ -59,16 +59,36 @@ public class Lang {
                 "&eYou have a successfully listed an item for sale!",
                 "&fItem: &e%item%",
                 "&fPrice: &a$%price%",
-                "&fExpires in: &6%time%",
+                "&fCompletes in: &6%time%",
                 "&fActive Listings: &d%current_listings%&f/&5%max_listings%",
                 "&fYou have been taxed: &9%tax%% &7(&a$%price_after_tax%&7)",
                 "&f------------------------------------------------"
         );
         private List<String> newItem = List.of(
-                "&f------------------------------------------",
+                "&f-------------------------------------------",
                 "&eYou have a new item in your collection box!",
                 "&f             /ah redeem!",
-                "&f------------------------------------------"
+                "&f-------------------------------------------"
+        );
+        private List<String> expiredItem = List.of(
+                "&f-----------------------------------",
+                "&eYou have expired items to collect!",
+                "&f          /ah expired!",
+                "&f-----------------------------------"
+        );
+        private List<String> bidPlaced = List.of(
+                "&f-------------------------",
+                "&eYou have placed a bid!",
+                "&fItem: &e%item%",
+                "&fBid Amount: &a$%price%",
+                "&f-------------------------"
+        );
+        private List<String> outBid = List.of(
+                "&f-------------------------",
+                "&eYou have been out-bid!",
+                "&fItem: &e%item%",
+                "&fBid Amount: &a$%price%",
+                "&f-------------------------"
         );
         private List<String> sale = List.of(
                 "&f----------------------------------------------",

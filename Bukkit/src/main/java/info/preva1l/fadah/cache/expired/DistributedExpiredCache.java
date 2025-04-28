@@ -18,11 +18,12 @@ public final class DistributedExpiredCache implements Cache<ExpiredItems> {
 
     public DistributedExpiredCache() {
         final LocalCachedMapOptions<UUID, ExpiredItems> options = LocalCachedMapOptions.<UUID, ExpiredItems>name("expired-listings")
-                .cacheSize(100000)
+                .cacheSize(1000000)
                 .maxIdle(Duration.ofSeconds(60))
                 .timeToLive(Duration.ofSeconds(60))
-                .evictionPolicy(LocalCachedMapOptions.EvictionPolicy.WEAK)
-                .syncStrategy(LocalCachedMapOptions.SyncStrategy.INVALIDATE)
+                .evictionPolicy(LocalCachedMapOptions.EvictionPolicy.NONE)
+                .syncStrategy(LocalCachedMapOptions.SyncStrategy.UPDATE)
+                .storeMode(LocalCachedMapOptions.StoreMode.LOCALCACHE_REDIS)
                 .expirationEventPolicy(LocalCachedMapOptions.ExpirationEventPolicy.SUBSCRIBE_WITH_KEYSPACE_CHANNEL);
 
         expiredItems = RedisBroker.getRedisson().getLocalCachedMap(options);
