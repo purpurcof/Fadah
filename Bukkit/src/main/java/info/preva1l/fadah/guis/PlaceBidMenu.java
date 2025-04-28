@@ -4,7 +4,6 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.records.listing.BidListing;
-import info.preva1l.fadah.utils.guis.FastInv;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
 import info.preva1l.fadah.utils.guis.LayoutService;
 import org.bukkit.Material;
@@ -15,9 +14,7 @@ import org.bukkit.entity.Player;
  *
  * @author Preva1l
  */
-public class PlaceBidMenu extends FastInv {
-    private final double amount;
-
+public class PlaceBidMenu extends PurchaseMenu {
     public PlaceBidMenu(BidListing listing,
                         Player player,
                         Runnable returnFunction) {
@@ -27,24 +24,17 @@ public class PlaceBidMenu extends FastInv {
     public PlaceBidMenu(BidListing listing,
                         Player player,
                         double amount,
-                        Runnable returnFunction) {
-        super(LayoutService.MenuType.PLACE_BID.getLayout().guiSize(),
-                LayoutService.MenuType.PLACE_BID.getLayout().formattedTitle(),
-                LayoutService.MenuType.PLACE_BID);
-
-        this.amount = amount;
-
-        fillers();
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.CONFIRM, -1),
-                new ItemBuilder(getLang().getAsMaterial("confirm.icon", Material.LIME_CONCRETE))
-                        .name(getLang().getStringFormatted("confirm.name", "&a&lCONFIRM"))
-                        .modelData(getLang().getInt("confirm.model-data"))
-                        .lore(getLang().getLore("confirm.lore",
-                                Tuple.of("%price%", Config.i().getFormatting().numbers().format(amount))))
-                        .build(), e -> {
+                        Runnable returnFunction
+    ) {
+        super(listing,
+                amount,
+                returnFunction,
+                () -> {
                     player.closeInventory();
-                    listing.newBid(player, this.amount);
-                });
+                    listing.newBid(player, amount);
+                },
+                LayoutService.MenuType.PLACE_BID
+        );
 
         setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.ADJUST_BID, -1),
                 new ItemBuilder(getLang().getAsMaterial("adjust-bid.icon", Material.ANVIL))
@@ -68,16 +58,5 @@ public class PlaceBidMenu extends FastInv {
                             }
                     )
                 );
-
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.CANCEL, -1),
-                new ItemBuilder(getLang().getAsMaterial("cancel.icon", Material.RED_CONCRETE))
-                        .name(getLang().getStringFormatted("cancel.name", "&c&lCANCEL"))
-                        .modelData(getLang().getInt("cancel.model-data"))
-                        .lore(getLang().getLore("cancel.lore")).build(), e -> {
-                    returnFunction.run();
-                });
-
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.ITEM_TO_PURCHASE, -1),
-                listing.getItemStack().clone());
     }
 }

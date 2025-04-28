@@ -113,12 +113,22 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
     protected void fillPaginationItems() {
         for (Listing listing : listings) {
             if (listing.getCurrency() == null) {
-                Fadah.getInstance().getLogger().severe("Cannot load listing %s because currency %s is not on this server!".formatted(listing.getId(), listing.getCurrencyId()));
+                Fadah.getInstance().getLogger().severe(
+                        "Cannot load listing %s because currency %s is not on this server!"
+                                .formatted(listing.getId(), listing.getCurrencyId())
+                );
                 continue;
             }
-            Component buyMode = listing instanceof BidListing
-                    ? getLang().getStringFormatted("listing.mode.bidding")
-                    : getLang().getStringFormatted("listing.mode.buy-it-now");
+
+            boolean isOwner = player.getUniqueId().equals(listing.getOwner());
+            boolean canAfford = listing.getCurrency().canAfford(player, listing.getPrice());
+            boolean isShulkerBox = listing.getItemStack().getType().name().toUpperCase().endsWith("SHULKER_BOX");
+            boolean isBinListing = listing instanceof BinListing;
+            boolean isBidListing = listing instanceof BidListing;
+
+            Component buyMode = getLang().getStringFormatted(
+                    isBidListing ? "listing.mode.bidding" : "listing.mode.buy-it-now"
+            );
 
             ItemBuilder itemStack = new ItemBuilder(listing.getItemStack().clone())
                     .addLore(getLang().getLore(player, "listing.lore-body",
@@ -127,37 +137,34 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
                             Tuple.of("%mode%", buyMode),
                             Tuple.of("%price%", Config.i().getFormatting().numbers().format(listing.getPrice())),
                             Tuple.of("%expiry%", TimeUtil.formatTimeUntil(listing.getDeletionDate())),
-                            Tuple.of("%currency%", listing.getCurrency().getName())));
+                            Tuple.of("%currency%", listing.getCurrency().getName())
+                    ));
 
-            if (player.getUniqueId().equals(listing.getOwner())) {
-                itemStack.addLore(getLang().getStringFormatted("listing.footer.own-listing"));
-            } else if (listing.getCurrency().canAfford(player, listing.getPrice())) {
-                itemStack.addLore(getLang().getStringFormatted("listing.footer.buy"));
-            } else {
-                itemStack.addLore(getLang().getStringFormatted("listing.footer.too-expensive"));
-            }
-            if (listing.getItemStack().getType().name().toUpperCase().endsWith("SHULKER_BOX")) {
-                itemStack.addLore(getLang().getStringFormatted("listing.footer.shulker"));
-            }
+            if (isOwner) itemStack.addLore(getLang().getStringFormatted("listing.footer.own-listing"));
+            else if (canAfford) itemStack.addLore(getLang().getStringFormatted("listing.footer.buy"));
+            else itemStack.addLore(getLang().getStringFormatted("listing.footer.too-expensive"));
 
-            addPaginationItem(new PaginatedItem(itemStack.build(), e -> {
-                if (e.isShiftClick() && (e.getWhoClicked().hasPermission("fadah.manage.active-listings")
-                        || listing.isOwner(((Player) e.getWhoClicked())))) {
-                    if (listing.cancel(((Player) e.getWhoClicked()))) updatePagination();
+            if (isShulkerBox) itemStack.addLore(getLang().getStringFormatted("listing.footer.shulker"));
+
+            addPaginationItem(new PaginatedItem(itemStack.build(), event -> {
+                Player clicker = (Player) event.getWhoClicked();
+
+                if (event.isShiftClick() && (clicker.hasPermission("fadah.manage.active-listings") || listing.isOwner(clicker))) {
+                    if (listing.cancel(clicker)) updatePagination();
                     return;
                 }
 
-                if (e.isRightClick() && listing.getItemStack().getType().name().toUpperCase().endsWith("SHULKER_BOX")) {
+                if (event.isRightClick() && isShulkerBox) {
                     new ShulkerBoxPreviewMenu(listing, () -> open(player)).open(player);
                     return;
                 }
 
                 if (!listing.canBuy(player)) return;
 
-                if (listing instanceof BinListing bin) {
-                    new ConfirmPurchaseMenu(bin, player, () -> open(player)).open(player);
-                } else if (listing instanceof BidListing bid) {
-                    new PlaceBidMenu(bid, player, () -> open(player)).open(player);
+                if (isBinListing) {
+                    new ConfirmPurchaseMenu((BinListing) listing, player, () -> open(player)).open(player);
+                } else if (isBidListing) {
+                    new PlaceBidMenu((BidListing) listing, player, () -> open(player)).open(player);
                 }
             }));
         }
