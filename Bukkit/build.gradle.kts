@@ -52,7 +52,9 @@ dependencies {
     compileOnly("com.willfp:EcoItems:5.43.1")
     compileOnly("com.influxdb:influxdb-client-java:7.2.0") // InfluxDB logging
     compileOnly("net.luckperms:api:5.4") // Permissions enhancement
-    compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.2.004")
+    compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.2.004") {
+        isTransitive = false
+    }
 
     // Migrators
     compileOnly("com.github.Maxlego08:zAuctionHouseV3-API:3.2.1.9") // zAuctionHouse
