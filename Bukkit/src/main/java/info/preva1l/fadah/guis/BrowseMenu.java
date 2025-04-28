@@ -120,33 +120,12 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
                 continue;
             }
 
-            boolean isOwner = player.getUniqueId().equals(listing.getOwner());
-            boolean canAfford = listing.getCurrency().canAfford(player, listing.getPrice());
             boolean isShulkerBox = listing.getItemStack().getType().name().toUpperCase().endsWith("SHULKER_BOX");
-            boolean isBinListing = listing instanceof BinListing;
             boolean isBidListing = listing instanceof BidListing;
 
-            Component buyMode = getLang().getStringFormatted(
-                    isBidListing ? "listing.mode.bidding" : "listing.mode.buy-it-now"
-            );
+            ItemStack item = buildItem(listing, isBidListing, isShulkerBox);
 
-            ItemBuilder itemStack = new ItemBuilder(listing.getItemStack().clone())
-                    .addLore(getLang().getLore(player, "listing.lore-body",
-                            Tuple.of("%seller%", listing.getOwnerName()),
-                            Tuple.of("%category%", Text.removeColorCodes(Categories.getCatName(listing.getCategoryID()))),
-                            Tuple.of("%mode%", buyMode),
-                            Tuple.of("%price%", Config.i().getFormatting().numbers().format(listing.getPrice())),
-                            Tuple.of("%expiry%", TimeUtil.formatTimeUntil(listing.getDeletionDate())),
-                            Tuple.of("%currency%", listing.getCurrency().getName())
-                    ));
-
-            if (isOwner) itemStack.addLore(getLang().getStringFormatted("listing.footer.own-listing"));
-            else if (canAfford) itemStack.addLore(getLang().getStringFormatted("listing.footer.buy"));
-            else itemStack.addLore(getLang().getStringFormatted("listing.footer.too-expensive"));
-
-            if (isShulkerBox) itemStack.addLore(getLang().getStringFormatted("listing.footer.shulker"));
-
-            addPaginationItem(new PaginatedItem(itemStack.build(), event -> {
+            addPaginationItem(new PaginatedItem(item, event -> {
                 Player clicker = (Player) event.getWhoClicked();
 
                 if (event.isShiftClick() && (clicker.hasPermission("fadah.manage.active-listings") || listing.isOwner(clicker))) {
@@ -161,13 +140,40 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
 
                 if (!listing.canBuy(player)) return;
 
-                if (isBinListing) {
-                    new ConfirmPurchaseMenu((BinListing) listing, player, () -> open(player)).open(player);
-                } else if (isBidListing) {
+                if (isBidListing) {
                     new PlaceBidMenu((BidListing) listing, player, () -> open(player)).open(player);
+                } else {
+                    new ConfirmPurchaseMenu((BinListing) listing, player, () -> open(player)).open(player);
                 }
             }));
         }
+    }
+
+    private ItemStack buildItem(Listing listing, boolean isBidListing, boolean isShulkerBox) {
+        Component buyMode = getLang().getStringFormatted(
+                isBidListing ? "listing.mode.bidding" : "listing.mode.buy-it-now"
+        );
+
+        ItemBuilder itemStack = new ItemBuilder(listing.getItemStack().clone())
+                .addLore(getLang().getLore(player, "listing.lore-body",
+                        Tuple.of("%seller%", listing.getOwnerName()),
+                        Tuple.of("%category%", Text.removeColorCodes(Categories.getCatName(listing.getCategoryID()))),
+                        Tuple.of("%mode%", buyMode),
+                        Tuple.of("%price%", Config.i().getFormatting().numbers().format(listing.getPrice())),
+                        Tuple.of("%expiry%", TimeUtil.formatTimeUntil(listing.getDeletionDate())),
+                        Tuple.of("%currency%", listing.getCurrency().getName())
+                ));
+
+        if (listing.isOwner(player))
+            itemStack.addLore(getLang().getStringFormatted("listing.footer.own-listing"));
+        else if (listing.getCurrency().canAfford(player, listing.getPrice()))
+            itemStack.addLore(getLang().getStringFormatted("listing.footer.buy"));
+        else
+            itemStack.addLore(getLang().getStringFormatted("listing.footer.too-expensive"));
+
+        if (isShulkerBox) itemStack.addLore(getLang().getStringFormatted("listing.footer.shulker"));
+
+        return itemStack.build();
     }
 
     protected void addNavigationButtons() {
