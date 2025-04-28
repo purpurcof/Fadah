@@ -91,7 +91,8 @@ paper {
             "AuctionHouse",
             "RedisEconomy",
             "CoinsEngine",
-            "Vault"
+            "Vault",
+            "mcMMO"
         ).forEach {
             register(it) {
                 load = PaperPluginDescription.RelativeLoadOrder.AFTER
