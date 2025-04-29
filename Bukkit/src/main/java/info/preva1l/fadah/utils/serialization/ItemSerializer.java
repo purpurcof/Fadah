@@ -1,4 +1,4 @@
-package info.preva1l.fadah.utils;
+package info.preva1l.fadah.utils.serialization;
 
 import lombok.experimental.UtilityClass;
 import org.bukkit.inventory.ItemStack;

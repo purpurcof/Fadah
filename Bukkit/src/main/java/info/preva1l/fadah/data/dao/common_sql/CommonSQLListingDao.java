@@ -7,7 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import com.zaxxer.hikari.HikariDataSource;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.records.listing.*;
-import info.preva1l.fadah.utils.ItemSerializer;
+import info.preva1l.fadah.utils.serialization.ItemSerializer;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.inventory.ItemStack;

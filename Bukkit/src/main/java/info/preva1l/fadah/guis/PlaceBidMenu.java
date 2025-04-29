@@ -50,7 +50,7 @@ public class PlaceBidMenu extends PurchaseMenu {
                             getLang().getString("input.placeholder", ""),
                             Double.class,
                             a -> {
-                                if (a <= listing.getPrice()) {
+                                if (a == null || a <= listing.getPrice()) {
                                     Lang.sendMessage(player, Lang.i().getErrors().getBidTooLow());
                                     return;
                                 }

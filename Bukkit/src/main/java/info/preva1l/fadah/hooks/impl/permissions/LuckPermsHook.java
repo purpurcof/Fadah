@@ -43,7 +43,6 @@ public class LuckPermsHook extends PermissionsHook {
 
         setRetriever((perm, player) -> {
             String nodePrefix = perm.nodePrefix;
-            System.out.println("using luckperms permission retriever");
             QueryOptions queryOptions = QueryOptions.defaultContextualOptions()
                     .toBuilder()
                     .context(ImmutableContextSet.of("world", player.getWorld().getName()))

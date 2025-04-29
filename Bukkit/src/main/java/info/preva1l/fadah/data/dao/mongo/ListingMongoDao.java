@@ -8,7 +8,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.records.listing.*;
-import info.preva1l.fadah.utils.ItemSerializer;
+import info.preva1l.fadah.utils.serialization.ItemSerializer;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.NotImplementedException;
 import org.bson.Document;

@@ -6,7 +6,7 @@ import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
-import info.preva1l.fadah.utils.ItemSerializer;
+import info.preva1l.fadah.utils.serialization.ItemSerializer;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.inventory.ItemStack;
 

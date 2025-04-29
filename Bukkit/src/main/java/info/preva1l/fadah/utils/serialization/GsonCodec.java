@@ -1,10 +1,13 @@
-package info.preva1l.fadah.utils;
+package info.preva1l.fadah.utils.serialization;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.ByteBufOutputStream;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import org.bukkit.inventory.ItemStack;
 import org.redisson.client.codec.BaseCodec;
 import org.redisson.client.protocol.Decoder;
 import org.redisson.client.protocol.Encoder;
@@ -22,8 +25,12 @@ public class GsonCodec extends BaseCodec {
     private Gson gson;
     private final Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
 
-    public GsonCodec(Gson gson) {
-        this.gson = gson;
+    public GsonCodec() {
+        this.gson =
+                GsonComponentSerializer.gson()
+                        .populator()
+                        .apply(new GsonBuilder().registerTypeAdapter(ItemStack.class, new ItemStackTypeAdapter()))
+                        .create();
     }
 
     private final Encoder encoder = in -> {
