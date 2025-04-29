@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
     implementation(project(":API"))
-    compileOnly("io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.19.3-R0.1-SNAPSHOT")
 
     // Trashcan
     annotationProcessor("info.preva1l.trashcan:paper:1.0.0")
@@ -34,7 +34,7 @@ dependencies {
     library("org.mariadb.jdbc:mariadb-java-client:3.5.3")
     library("org.mongodb:mongodb-driver-sync:5.4.0")
 
-    library("net.wesjd:anvilgui:1.10.4-SNAPSHOT") // Search Menu
+    library("net.wesjd:anvilgui:1.10.5-SNAPSHOT") // Search Menu
 
     library("net.kyori:adventure-text-serializer-gson:4.20.0")
 
@@ -66,6 +66,10 @@ tasks.withType<ShadowJar> {
     relocate("com.github.puregero.multilib", "info.preva1l.fadah.libs.multilib")
     relocate("info.preva1l.hooker", "info.preva1l.fadah.hooks.lib")
     relocate("info.preva1l.trashcan", "info.preva1l.fadah.trashcan")
+
+    manifest {
+        attributes["paperweight-mappings-namespace"] = "spigot"
+    }
 }
 
 paper {
@@ -75,7 +79,7 @@ paper {
     website = "https://docs.preva1l.info/"
     author = "Preva1l"
     main = rootProject.group.toString() + ".Fadah"
-    loader = "info.preva1l.fadah.trashcan.plugin.libloader.BaseLibraryLoader"
+    loader = "info.preva1l.fadah.FadahLibraryloader"
     generateLibrariesJson = true
     foliaSupported = true
     apiVersion = "1.19"
@@ -92,6 +96,7 @@ paper {
             "RedisEconomy",
             "CoinsEngine",
             "Vault",
+            "PlayerPoints",
             "mcMMO"
         ).forEach {
             register(it) {

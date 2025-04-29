@@ -8,6 +8,7 @@ import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.guis.NewListingMenu;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
+import info.preva1l.fadah.utils.Reflections;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.UpdateService;
@@ -70,9 +71,14 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void pickupItem(EntityPickupItemEvent event) {
-        if (!(event.getEntity() instanceof Player player)) return;
-        if (player.getOpenInventory().getTopInventory().getHolder(false) instanceof NewListingMenu) {
-            event.setCancelled(true);
+        try {
+            if (!(event.getEntity() instanceof Player player)) return;
+
+            if (Reflections.getHolder(player) instanceof NewListingMenu) {
+                event.setCancelled(true);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

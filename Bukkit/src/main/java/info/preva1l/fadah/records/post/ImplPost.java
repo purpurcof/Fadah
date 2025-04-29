@@ -109,7 +109,7 @@ public final class ImplPost extends Post {
                 Tuple.of("%price%", df.format(listing.getPrice())),
                 Tuple.of("%time%", TimeUtil.formatTimeUntil(listing.getDeletionDate())),
                 Tuple.of("%current_listings%", CacheAccess.amountByPlayer(Listing.class, player.getUniqueId())),
-                Tuple.of("%max_listings%", PermissionsHook.getValue(String.class, Permission.MAX_LISTINGS, player)),
+                Tuple.of("%max_listings%", PermissionsHook.getValue(Integer.class, Permission.MAX_LISTINGS, player)),
                 Tuple.of("%tax%", taxAmount + ""),
                 Tuple.of("%price_after_tax%", df.format((taxAmount / 100) * listing.getPrice()))
         );

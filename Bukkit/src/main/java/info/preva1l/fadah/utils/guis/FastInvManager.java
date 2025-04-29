@@ -1,6 +1,7 @@
 package info.preva1l.fadah.utils.guis;
 
 import com.github.puregero.multilib.MultiLib;
+import info.preva1l.fadah.utils.Reflections;
 import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.trashcan.plugin.annotations.PluginDisable;
 import info.preva1l.trashcan.plugin.annotations.PluginReload;
@@ -11,11 +12,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.Plugin;
 
-import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -55,20 +53,8 @@ public final class FastInvManager {
     public static void closeAll() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             MultiLib.getEntityScheduler(player).execute(PLUGIN.get(), () -> {
-                try {
-                    Method getOpenInventory = Player.class.getMethod("getOpenInventory");
-                    Object inventoryView = getOpenInventory.invoke(player);
-
-                    Method getTopInventory = inventoryView.getClass().getMethod("getTopInventory");
-                    Inventory topInventory = (Inventory) getTopInventory.invoke(inventoryView);
-
-                    InventoryHolder holder = topInventory.getHolder();
-
-                    if (holder instanceof FastInv) {
-                        player.closeInventory();
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
+                if (Reflections.getHolder(player) instanceof FastInv) {
+                    player.closeInventory();
                 }
             }, null, 0L);
         }
