@@ -17,7 +17,7 @@ public final class DistributedHistoryCache implements Cache<History> {
     private final RLocalCachedMap<UUID, History> historicItems;
 
     public DistributedHistoryCache() {
-        final LocalCachedMapOptions<UUID, History> options = LocalCachedMapOptions.<UUID, History>name("expired-listings")
+        final LocalCachedMapOptions<UUID, History> options = LocalCachedMapOptions.<UUID, History>name("history")
                 .cacheSize(1000000)
                 .maxIdle(Duration.ofSeconds(60))
                 .timeToLive(Duration.ofSeconds(60))
