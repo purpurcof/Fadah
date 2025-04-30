@@ -38,6 +38,11 @@ public record ProcessorArg(
         return parser.apply(item);
     }
 
+    /**
+     * The arg to get replaced.
+     *
+     * @return the placeholder.
+     */
     @Override
     public String placeholder() {
         return placeholder;
