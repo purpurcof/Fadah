@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Scriptable;
 
 import java.util.ArrayList;
@@ -68,7 +69,16 @@ public final class JSProcessorService {
             Scriptable scope = cx.initSafeStandardObjects();
             result = (Boolean) cx.evaluateString(scope, expression, "Fadah", 1, null);
             return result;
-        } catch (ClassCastException e) {
+        } catch (EvaluatorException | ClassCastException e) {
+            if (!e.getMessage().contains("syntax error")) {
+                logger.log(Level.SEVERE,
+                        """
+                        Unable to process expression: '%s'
+                        (Report this to Fadah support)
+                        """.stripIndent().formatted(expression),
+                        e);
+                return def;
+            }
             logger.severe(
                     """
                     Unable to process expression: '%s'
@@ -94,7 +104,8 @@ public final class JSProcessorService {
                 .replace("'", "\\'")
                 .replace("\n", "\\n")
                 .replace("\r", "\\r")
-                .replace("`", "\\`");
+                .replace("`", "\\`")
+                .replaceAll("%[^%]+%", "\"UNKNOWN_VALUE\"");
         return input;
     }
 }

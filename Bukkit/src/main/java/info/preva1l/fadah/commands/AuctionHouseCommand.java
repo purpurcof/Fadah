@@ -13,8 +13,10 @@ import info.preva1l.fadah.filters.SortingDirection;
 import info.preva1l.fadah.filters.SortingMethod;
 import info.preva1l.fadah.guis.*;
 import info.preva1l.fadah.records.Category;
+import info.preva1l.fadah.records.listing.BidListing;
 import info.preva1l.fadah.records.listing.BinListing;
 import info.preva1l.fadah.records.listing.Listing;
+import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.LayoutService;
 import org.bukkit.OfflinePlayer;
@@ -39,13 +41,8 @@ public class AuctionHouseCommand extends BaseCommand
     @Default
     @Requirement("enabled")
     public void execute(Player player) {
-        new MainMenu(
-                null,
-                player,
-                null,
-                null,
-                null
-        ).open(player);
+        TaskManager.Async.run(Fadah.getInstance(), () ->
+                new MainMenu(null, player, null, null, null).open(player));
     }
 
     @SubCommand("sell")
@@ -78,7 +75,8 @@ public class AuctionHouseCommand extends BaseCommand
             return;
         }
 
-        new MainMenu(category, player, search, sort, direction).open(player);
+        TaskManager.Async.run(Fadah.getInstance(),
+                () -> new MainMenu(category, player, search, sort, direction).open(player));
     }
 
     @SubCommand("active-listings")
@@ -109,9 +107,13 @@ public class AuctionHouseCommand extends BaseCommand
                 return;
             }
 
-            if (listing instanceof BinListing bin) {
-                new ConfirmPurchaseMenu(bin, player, player::closeInventory).open(player);
-            }
+            TaskManager.Async.run(Fadah.getInstance(), () -> {
+                if (listing instanceof BinListing bin) {
+                    new ConfirmPurchaseMenu(bin, player, player::closeInventory).open(player);
+                } else if (listing instanceof BidListing bid) {
+                    new PlaceBidMenu(bid, player, player::closeInventory).open(player);
+                }
+            });
         }, () -> player.sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist())));
     }
 
@@ -119,7 +121,7 @@ public class AuctionHouseCommand extends BaseCommand
     @Permission("fadah.watch")
     @Requirement("enabled")
     public void watch(Player player) {
-        new WatchMenu(player).open(player);
+        TaskManager.Async.run(Fadah.getInstance(), () -> new WatchMenu(player).open(player));
     }
 
     @SubCommand("profile")
@@ -128,7 +130,8 @@ public class AuctionHouseCommand extends BaseCommand
     public void profile(Player player, @Optional OfflinePlayer owner) {
         if (owner == null || !player.hasPermission("fadah.manage.profile")) owner = player;
 
-        new ProfileMenu(player, owner).open(player);
+        var finalOwner = owner;
+        TaskManager.Async.run(Fadah.getInstance(), () -> new ProfileMenu(player, finalOwner).open(player));
     }
 
     @SubCommand("expired-items")
@@ -137,11 +140,9 @@ public class AuctionHouseCommand extends BaseCommand
     public void expired(Player player, @Optional OfflinePlayer owner) {
         if (owner == null || !player.hasPermission("fadah.manage.expired-items")) owner = player;
 
-        new CollectionMenu(
-                player,
-                owner,
-                LayoutService.MenuType.EXPIRED_LISTINGS
-        ).open(player);
+        var finalOwner = owner;
+        TaskManager.Async.run(Fadah.getInstance(),
+                () -> new CollectionMenu(player, finalOwner, LayoutService.MenuType.EXPIRED_LISTINGS).open(player));
     }
 
     @SubCommand("collection-box")
@@ -150,11 +151,9 @@ public class AuctionHouseCommand extends BaseCommand
     public void collection(Player player, @Optional OfflinePlayer owner) {
         if (owner == null || !player.hasPermission("fadah.manage.collection-box")) owner = player;
 
-        new CollectionMenu(
-                player,
-                owner,
-                LayoutService.MenuType.COLLECTION_BOX
-        ).open(player);
+        var finalOwner = owner;
+        TaskManager.Async.run(Fadah.getInstance(),
+                () -> new CollectionMenu(player, finalOwner, LayoutService.MenuType.COLLECTION_BOX).open(player));
     }
 
     @SubCommand("history")
@@ -163,7 +162,9 @@ public class AuctionHouseCommand extends BaseCommand
     public void history(Player player, @Optional OfflinePlayer owner) {
         if (owner == null || !player.hasPermission("fadah.manage.history")) owner = player;
 
-        new HistoryMenu(player, owner, null).open(player);
+        var finalOwner = owner;
+        TaskManager.Async.run(Fadah.getInstance(),
+                () -> new HistoryMenu(player, finalOwner, null).open(player));
     }
 
     @SubCommand("about")

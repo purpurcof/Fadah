@@ -37,4 +37,9 @@ public record ProcessorArg(
     public String parse(ItemStack item) {
         return parser.apply(item);
     }
+
+    @Override
+    public String placeholder() {
+        return placeholder;
+    }
 }

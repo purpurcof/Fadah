@@ -76,7 +76,7 @@ public final class SellSubCommand {
         if (Config.i().isMinimalMode()) {
             handleSell(player, price);
         } else {
-            new NewListingMenu(player, price).open(player);
+            TaskManager.Async.run(Fadah.getInstance(), () -> new NewListingMenu(player, price).open(player));
         }
     }
 
