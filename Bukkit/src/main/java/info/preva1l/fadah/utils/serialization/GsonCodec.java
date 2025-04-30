@@ -13,6 +13,7 @@ import org.redisson.client.protocol.Decoder;
 import org.redisson.client.protocol.Encoder;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,15 +30,22 @@ public class GsonCodec extends BaseCodec {
         this.gson =
                 GsonComponentSerializer.gson()
                         .populator()
-                        .apply(new GsonBuilder().registerTypeAdapter(ItemStack.class, new ItemStackTypeAdapter()))
+                        .apply(new GsonBuilder().registerTypeHierarchyAdapter(ItemStack.class, new ItemStackTypeAdapter()))
                         .create();
     }
 
     private final Encoder encoder = in -> {
         ByteBuf out = ByteBufAllocator.DEFAULT.buffer();
         try (ByteBufOutputStream os = new ByteBufOutputStream(out)) {
-            os.writeUTF(gson.toJson(in));
-            os.writeUTF(in.getClass().getName());
+            byte[] jsonBytes = gson.toJson(in).getBytes(StandardCharsets.UTF_8);
+            byte[] typeBytes = in.getClass().getName().getBytes(StandardCharsets.UTF_8);
+
+            os.writeInt(jsonBytes.length);
+            os.write(jsonBytes);
+
+            os.writeInt(typeBytes.length);
+            os.write(typeBytes);
+
             return os.buffer();
         } catch (IOException e) {
             out.release();
@@ -50,9 +58,17 @@ public class GsonCodec extends BaseCodec {
 
     private final Decoder<Object> decoder = (buf, state) -> {
         try (ByteBufInputStream is = new ByteBufInputStream(buf)) {
-            String string = is.readUTF();
-            String type = is.readUTF();
-            return gson.fromJson(string, getClassFromType(type));
+            int jsonLen = is.readInt();
+            byte[] jsonBytes = new byte[jsonLen];
+            is.readFully(jsonBytes);
+            String json = new String(jsonBytes, StandardCharsets.UTF_8);
+
+            int typeLen = is.readInt();
+            byte[] typeBytes = new byte[typeLen];
+            is.readFully(typeBytes);
+            String type = new String(typeBytes, StandardCharsets.UTF_8);
+
+            return gson.fromJson(json, getClassFromType(type));
         }
     };
 

@@ -1,31 +1,18 @@
 package info.preva1l.fadah.utils.serialization;
 
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
+import com.google.gson.*;
 import org.bukkit.inventory.ItemStack;
 
-import java.io.IOException;
+import java.lang.reflect.Type;
 
-public class ItemStackTypeAdapter extends TypeAdapter<ItemStack> {
+public class ItemStackTypeAdapter implements JsonSerializer<ItemStack>, JsonDeserializer<ItemStack> {
     @Override
-    public void write(JsonWriter out, ItemStack item) throws IOException {
-        if (item == null) {
-            out.nullValue();
-            return;
-        }
-        String serialized = ItemSerializer.serialize(item);
-        out.value(serialized);
+    public ItemStack deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+        return ItemSerializer.deserialize(json.getAsJsonPrimitive().getAsString())[0];
     }
 
     @Override
-    public ItemStack read(JsonReader in) throws IOException {
-        if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
-            in.nextNull();
-            return null;
-        }
-        String data = in.nextString();
-        ItemStack[] deserialized = ItemSerializer.deserialize(data);
-        return deserialized.length > 0 ? deserialized[0] : null;
+    public JsonElement serialize(ItemStack src, Type typeOfSrc, JsonSerializationContext context) {
+        return new JsonPrimitive(ItemSerializer.serialize(src));
     }
 }
