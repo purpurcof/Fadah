@@ -37,7 +37,7 @@ public final class ProcessorArgsRegistry {
      */
     public static void register(@NotNull ProcessorArgType argType, @NotNull String placeholder, Function<@NotNull ItemStack, @NotNull String> parser) {
         Preconditions.checkNotNull(parser);
-        Logger.getLogger("Fadah").info("Category Matcher Provider Registered: " + placeholder);
+        Logger.getLogger("Fadah").info("[Services] [JSProcessorService] Matcher Registered: " + placeholder);
         values.add(
                 new ProcessorArg(
                         argType,

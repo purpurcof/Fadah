@@ -31,6 +31,8 @@ public final class JSProcessorService {
 
     @Configure
     public void configure() {
+        logger.warning("this is to test warning");
+        logger.severe("this is to test severe");
         ProcessorArgsRegistry.register(STRING, "material", item -> item.getType().toString());
 
         ProcessorArgsRegistry.register(STRING, "name", Text::extractItemName);

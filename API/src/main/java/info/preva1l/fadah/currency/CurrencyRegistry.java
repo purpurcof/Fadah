@@ -64,7 +64,7 @@ public final class CurrencyRegistry {
 
         if (!currencyBase.preloadChecks()) {
             Logger.getLogger("Fadah")
-                    .severe("[CurrencyService] Tried enabling %s but the preload checks failed!"
+                    .severe("[Services] [CurrencyService] Tried enabling %s but the preload checks failed!"
                             .formatted(currencyBase.getId().toLowerCase()));
             return;
         }
@@ -82,7 +82,7 @@ public final class CurrencyRegistry {
         values.put(currency.getId().toLowerCase(), currency);
         enumerator.put(enumerator.size(), currency.getId().toLowerCase());
 
-        Logger.getLogger("Fadah").info("[CurrencyService] Registered: " + currency.getId());
+        Logger.getLogger("Fadah").info("[Services] [CurrencyService] Registered: " + currency.getId());
     }
 
     /**
