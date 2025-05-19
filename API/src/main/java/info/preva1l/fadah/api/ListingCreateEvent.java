@@ -35,7 +35,7 @@ public final class ListingCreateEvent extends Event implements Cancellable {
      * @param listing the listing.
      */
     public ListingCreateEvent(@Nullable Player who, @NotNull Listing listing) {
-        super();
+        super(true);
         this.player = who;
         this.listing = listing;
     }

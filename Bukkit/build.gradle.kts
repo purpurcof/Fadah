@@ -22,8 +22,8 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.19.3-R0.1-SNAPSHOT")
 
     // Trashcan
-    annotationProcessor("info.preva1l.trashcan:paper:1.0.1")
-    implementation("info.preva1l.trashcan:paper:1.0.1")
+    annotationProcessor("info.preva1l.trashcan:paper:1.0.3")
+    implementation("info.preva1l.trashcan:paper:1.0.3")
 
     compileOnly("me.clip:placeholderapi:2.11.6") // Placeholder support
 

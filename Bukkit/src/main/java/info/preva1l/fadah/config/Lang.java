@@ -121,6 +121,7 @@ public class Lang {
         @Configuration
         @NoArgsConstructor(access = AccessLevel.PRIVATE)
         public static class Main {
+            private String description = "Opens the listing browser";
             private List<String> aliases = List.of("auctionhouse", "ah", "auctions", "auction");
         }
 
@@ -131,7 +132,6 @@ public class Lang {
         @NoArgsConstructor(access = AccessLevel.PRIVATE)
         public static class Sell {
             private String description = "Create a new listing on the auction house";
-            private String usage = "ah sell <price>";
             private List<String> aliases = List.of("new-listing", "create-listing");
 
             private String mustHoldItem = "&cYou must have an item in your hand to sell!";
@@ -155,7 +155,6 @@ public class Lang {
         @NoArgsConstructor(access = AccessLevel.PRIVATE)
         public static class View {
             private String description = "View another players active listings";
-            private String usage = "ah view <player>";
             private List<String> aliases = List.of("visit");
         }
 
@@ -228,8 +227,11 @@ public class Lang {
             private String description = "This command!";
             private List<String> aliases = List.of();
 
-            private String header = "&#9555FF&lAuctionHouse &eHelp";
-            private String format = "&b/ah %command% &8&l| &f%description%";
+            private String primaryColor = "#9555FF";
+            private String highlightColor = "#9be0af";
+            private String alternativeHighlightColor = "#bba4e0";
+            private String textColor = "#7c7a80";
+            private String accentColor = "#525254";
         }
 
         private Reload reload = new Reload();
@@ -278,7 +280,6 @@ public class Lang {
         @NoArgsConstructor(access = AccessLevel.PRIVATE)
         public static class ViewListing {
             private String description = "View a specific listing";
-            private String usage = "ah view-listing <uuid>";
             private List<String> aliases = List.of();
         }
 
@@ -289,8 +290,7 @@ public class Lang {
         @NoArgsConstructor(access = AccessLevel.PRIVATE)
         public static class Search {
             private String description = "Search active listings";
-            private String usage = "ah search <query...> [(-cat|--category)=tools, (-p|--player)=player_name, (-sort|--sorting-method)=price, (-direction|--sorting-direction)=ascending)]";
-            private List<String> aliases = List.of("s");
+             private List<String> aliases = List.of("s");
         }
     }
 
@@ -374,8 +374,8 @@ public class Lang {
         private String restricted = "&cYou cannot sell this item!";
         private String noPermission = "&cYou do not have permission to execute this command!";
         private String playerNotFound = "&c%player% was not found!";
-        private String invalidUsage = "&cUsage: /%command%";
-        private String invalidArgument = "&cArgument %arg% is not the required type of %type%!";
+        private String invalidUsage = "&cUsage: /%syntax%";
+        private String invalidArgument = "&cInvalid argument: %cause%";
         private String doesNotExist = "&cThis listing does not exist!";
         private String ownListings = "&cYou cannot buy your own listing!";
         private String tooExpensive = "&cYou cannot afford this item!";

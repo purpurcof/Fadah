@@ -72,6 +72,8 @@ public class CollectionMenu extends PaginatedFastInv {
 
             addPaginationItem(new PaginatedItem(itemStack.build(), e -> {
                 TaskManager.Sync.run(Fadah.getInstance(), player, () -> {
+                    if (!stillExists(expiredItem)) return;
+
                     int slot = player.getInventory().firstEmpty();
                     if (slot == -1) {
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getInventoryFull());
@@ -98,6 +100,14 @@ public class CollectionMenu extends PaginatedFastInv {
                 });
             }));
 
+        }
+    }
+
+    private boolean stillExists(CollectableItem item) {
+        if (expired) {
+            return CacheAccess.getNotNull(ExpiredItems.class, owner.getUniqueId()).expiredItems().contains(item);
+        } else {
+            return CacheAccess.getNotNull(CollectionBox.class, owner.getUniqueId()).collectableItems().contains(item);
         }
     }
 

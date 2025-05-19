@@ -1,13 +1,14 @@
 package info.preva1l.fadah.commands.subcommands;
 
-import info.preva1l.fadah.Fadah;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.filters.SortingDirection;
 import info.preva1l.fadah.filters.SortingMethod;
 import info.preva1l.fadah.guis.ViewListingsMenu;
-import info.preva1l.fadah.utils.TaskManager;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Created on 31/03/2025
@@ -15,20 +16,20 @@ import org.jetbrains.annotations.Nullable;
  * @author Preva1l
  */
 public interface InspectSubCommand {
-    default void inspect(
+    default CompletableFuture<Void> inspect(
             Player player,
             OfflinePlayer owner,
             @Nullable String search,
             @Nullable SortingMethod sort,
             @Nullable SortingDirection direction) {
-        TaskManager.Async.run(Fadah.getInstance(), () ->
+        return CompletableFuture.runAsync(() ->
                 new ViewListingsMenu(
                         player,
                         owner,
                         search,
                         sort,
                         direction
-                ).open(player)
+                ).open(player), DataService.instance.getThreadPool()
         );
     }
 }

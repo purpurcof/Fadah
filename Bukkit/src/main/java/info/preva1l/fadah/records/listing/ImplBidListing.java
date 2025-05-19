@@ -113,15 +113,19 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
         // notify other bidders
         Set<UUID> notified = new HashSet<>();
         for (Bid bid : bids) {
+            Component outbidMessage = Text.text(Lang.i().getNotifications().getOutBid(),
+                    Tuple.of("%item%", itemName),
+                    Tuple.of("%price%", formattedPrice)
+            );
             if (notified.contains(bid.bidder()) || bid.bidder() == bidder.getUniqueId()) continue;
             Player player = Bukkit.getPlayer(bid.bidder());
             if (player != null) {
-                player.sendMessage(Text.text(Lang.i().getNotifications().getOutBid()));
+                player.sendMessage(outbidMessage);
             } else {
                 if (Broker.getInstance().isConnected()) {
                     Message.builder()
                             .type(Message.Type.NOTIFICATION)
-                            .payload(Payload.withNotification(bid.bidder(), Text.text(Lang.i().getNotifications().getOutBid())))
+                            .payload(Payload.withNotification(bid.bidder(), outbidMessage))
                             .build().send(Broker.getInstance());
                 }
             }

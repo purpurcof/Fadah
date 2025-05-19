@@ -111,41 +111,43 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
 
     @Override
     protected void fillPaginationItems() {
-        for (Listing listing : listings) {
-            if (listing.getCurrency() == null) {
-                Fadah.getInstance().getLogger().severe(
-                        "Cannot load listing %s because currency %s is not on this server!"
-                                .formatted(listing.getId(), listing.getCurrencyId())
-                );
-                continue;
+        synchronized (listings) {
+            for (Listing listing : listings) {
+                if (listing.getCurrency() == null) {
+                    Fadah.getInstance().getLogger().severe(
+                            "Cannot load listing %s because currency %s is not on this server!"
+                                    .formatted(listing.getId(), listing.getCurrencyId())
+                    );
+                    continue;
+                }
+
+                boolean isShulkerBox = listing.getItemStack().getType().name().toUpperCase().endsWith("SHULKER_BOX");
+                boolean isBidListing = listing instanceof BidListing;
+
+                ItemStack item = buildItem(listing, isBidListing, isShulkerBox);
+
+                addPaginationItem(new PaginatedItem(item, event -> {
+                    Player clicker = (Player) event.getWhoClicked();
+
+                    if (event.isShiftClick() && (clicker.hasPermission("fadah.manage.active-listings") || listing.isOwner(clicker))) {
+                        if (listing.cancel(clicker)) updatePagination();
+                        return;
+                    }
+
+                    if (event.isRightClick() && isShulkerBox) {
+                        new ShulkerBoxPreviewMenu(listing, () -> open(player)).open(player);
+                        return;
+                    }
+
+                    if (!listing.canBuy(player)) return;
+
+                    if (isBidListing) {
+                        new PlaceBidMenu((BidListing) listing, player, () -> open(player)).open(player);
+                    } else {
+                        new ConfirmPurchaseMenu((BinListing) listing, player, () -> open(player)).open(player);
+                    }
+                }));
             }
-
-            boolean isShulkerBox = listing.getItemStack().getType().name().toUpperCase().endsWith("SHULKER_BOX");
-            boolean isBidListing = listing instanceof BidListing;
-
-            ItemStack item = buildItem(listing, isBidListing, isShulkerBox);
-
-            addPaginationItem(new PaginatedItem(item, event -> {
-                Player clicker = (Player) event.getWhoClicked();
-
-                if (event.isShiftClick() && (clicker.hasPermission("fadah.manage.active-listings") || listing.isOwner(clicker))) {
-                    if (listing.cancel(clicker)) updatePagination();
-                    return;
-                }
-
-                if (event.isRightClick() && isShulkerBox) {
-                    new ShulkerBoxPreviewMenu(listing, () -> open(player)).open(player);
-                    return;
-                }
-
-                if (!listing.canBuy(player)) return;
-
-                if (isBidListing) {
-                    new PlaceBidMenu((BidListing) listing, player, () -> open(player)).open(player);
-                } else {
-                    new ConfirmPurchaseMenu((BinListing) listing, player, () -> open(player)).open(player);
-                }
-            }));
         }
     }
 
@@ -293,20 +295,22 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
 
     @Override
     protected void updatePagination() {
-        this.listings.clear();
-        this.listings.addAll(listingSupplier.get());
+        synchronized (listings) {
+            this.listings.clear();
+            this.listings.addAll(listingSupplier.get());
 
-        if (search != null) {
-            listings.removeIf(listing -> !(Text.doesItemHaveString(search, listing.getItemStack())
-                    || doesBookHaveEnchant(search, listing.getItemStack())));
+            if (search != null) {
+                listings.removeIf(listing -> !(Text.doesItemHaveString(search, listing.getItemStack())
+                        || doesBookHaveEnchant(search, listing.getItemStack())));
+            }
+
+            if (category != null) {
+                this.listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
+            }
+
+            listings.sort(this.sortingMethod.getSorter(this.sortingDirection));
+
+            super.updatePagination();
         }
-
-        if (category != null) {
-            this.listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
-        }
-
-        listings.sort(this.sortingMethod.getSorter(this.sortingDirection));
-
-        super.updatePagination();
     }
 }

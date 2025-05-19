@@ -60,6 +60,10 @@ public class Text {
         return list.stream().map(string -> Text.text(player, string, args)).collect(Collectors.toList());
     }
 
+    public Component cloudify(String message) {
+        return text("<!italic>" + message.replaceAll("%([^%]+)%", "<$1>"));
+    }
+
     /**
      * Unescapes minimessage tags.
      * <p>

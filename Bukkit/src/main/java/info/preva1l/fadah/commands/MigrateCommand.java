@@ -1,28 +1,20 @@
 package info.preva1l.fadah.commands;
 
-import dev.triumphteam.cmd.bukkit.annotation.Permission;
-import dev.triumphteam.cmd.core.BaseCommand;
-import dev.triumphteam.cmd.core.annotation.Command;
-import dev.triumphteam.cmd.core.annotation.Default;
-import dev.triumphteam.cmd.core.annotation.Requirement;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.migrator.MigrationService;
 import info.preva1l.fadah.utils.Text;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.Default;
+import org.incendo.cloud.annotations.Permission;
 
 import java.time.Instant;
-import java.util.List;
 
 @Command("fadah-migrate")
 @Permission("fadah.migrate")
-public class MigrateCommand extends BaseCommand {
-    public MigrateCommand() {
-        super(List.of("ah-migrate"));
-    }
-
+public class MigrateCommand {
     @Default
-    @Requirement("enabled")
     public void execute(Player player, Plugin plugin) {
         MigrationService.instance.getMigrator(plugin.getName())
                 .ifPresentOrElse(migrator -> {

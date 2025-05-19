@@ -1,6 +1,5 @@
 package info.preva1l.fadah.records.post;
 
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.api.ListingCreateEvent;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Config;
@@ -16,7 +15,6 @@ import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.records.listing.ListingBuilder;
-import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.TimeUtil;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
@@ -66,7 +64,7 @@ public final class ImplPost extends Post {
 
             if (callEvent) {
                 ListingCreateEvent event = new ListingCreateEvent(player, listing);
-                TaskManager.Sync.run(Fadah.getInstance(), () -> Bukkit.getServer().getPluginManager().callEvent(event));
+                Bukkit.getServer().getPluginManager().callEvent(event);
                 if (event.isCancelled()) return CompletableFuture.completedFuture(PostResult.custom(event.getCancelReason()));
             }
 
@@ -102,10 +100,9 @@ public final class ImplPost extends Post {
         if (player == null) return;
 
         double taxAmount = listing.getTax();
-        String itemName = Text.extractItemName(listing.getItemStack());
         Component message = Text.text(
                 Lang.i().getNotifications().getNewListing(),
-                Tuple.of("%item%", itemName),
+                Tuple.of("%item%", Text.extractItemName(listing.getItemStack())),
                 Tuple.of("%price%", df.format(listing.getPrice())),
                 Tuple.of("%time%", TimeUtil.formatTimeUntil(listing.getDeletionDate())),
                 Tuple.of("%current_listings%", CacheAccess.amountByPlayer(Listing.class, player.getUniqueId())),
