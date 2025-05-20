@@ -30,7 +30,9 @@ public record Category(
 ) implements Comparable<Category> {
     @Override
     public int compareTo(@NotNull Category o) {
-        return Integer.compare(o.priority, this.priority);
+        int cmp = Integer.compare(o.priority, this.priority);
+        if (cmp != 0) return cmp;
+        return this.id.compareTo(o.id);
     }
 
     @Override

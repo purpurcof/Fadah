@@ -78,8 +78,6 @@ public class MainMenu extends BrowseMenu {
     }
 
     protected void addNavigationButtons() {
-        super.addNavigationButtons();
-
         setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.PROFILE,-1),
                 new ItemBuilder(getLang().getAsMaterial("profile-button.icon", Material.PLAYER_HEAD)).skullOwner(player)
                         .name(getLang().getStringFormatted("profile-button.name", "&e&lYour Profile"))

@@ -1,6 +1,6 @@
 package info.preva1l.fadah;
 
-import info.preva1l.trashcan.plugin.libloader.BaseLibraryLoader;
+import info.preva1l.trashcan.extension.libloader.BaseLibraryLoader;
 
 import java.nio.file.Path;
 import java.util.function.Predicate;

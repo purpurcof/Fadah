@@ -27,12 +27,13 @@ import org.bukkit.entity.Player;
 import org.incendo.cloud.Command;
 import org.incendo.cloud.component.DefaultValue;
 import org.incendo.cloud.description.Description;
+import org.incendo.cloud.key.CloudKey;
 import org.incendo.cloud.minecraft.extras.AudienceProvider;
 import org.incendo.cloud.minecraft.extras.MinecraftHelp;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 import static org.incendo.cloud.bukkit.parser.OfflinePlayerParser.offlinePlayerParser;
 import static org.incendo.cloud.parser.standard.EnumParser.enumParser;
@@ -40,16 +41,52 @@ import static org.incendo.cloud.parser.standard.StringParser.greedyStringParser;
 import static org.incendo.cloud.parser.standard.StringParser.stringParser;
 import static org.incendo.cloud.parser.standard.UUIDParser.uuidParser;
 
-public class AuctionHouseCommand
-        implements InspectSubCommand, AboutSubCommand, AdminSubCommands {
-    private final SellSubCommand sellCommand;
+public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, AdminSubCommands {
+    private static final CloudKey<Boolean> aliasMeta = CloudKey.of("alias", Boolean.class);
 
-    public AuctionHouseCommand(Fadah plugin, LegacyPaperCommandManager<CommandSender> manager) {
+    private final Fadah plugin;
+    private final LegacyPaperCommandManager<CommandSender> manager;
+
+    private SellSubCommand sellCommand;
+    private Lang.Commands conf;
+    private Command.Builder<CommandSender> builder;
+    private MinecraftHelp<CommandSender> help;
+
+    AuctionHouseCommand(Fadah plugin, LegacyPaperCommandManager<CommandSender> manager) {
+        this.plugin = plugin;
+        this.manager = manager;
+        configure();
+    }
+
+    private void configure() {
         this.sellCommand = new SellSubCommand(plugin);
+        this.conf = Lang.i().getCommands();
+        this.builder = manager.commandBuilder(
+                "fadah",
+                Description.of(conf.getMain().getDescription()),
+                conf.getMain().getAliases().toArray(String[]::new)
+        );
 
-        Lang.Commands conf = Lang.i().getCommands();
+        setHelp();
 
-        MinecraftHelp<CommandSender> help = MinecraftHelp.<CommandSender>builder()
+        manager.command(
+                builder.senderType(Player.class)
+                        .permission("fadah.use")
+                        .futureHandler(cmd ->
+                                CompletableFuture.runAsync(() ->
+                                        new MainMenu(null, cmd.sender(), null, null, null)
+                                                .open(cmd.sender()), DataService.instance.getThreadPool()))
+        );
+
+        registerSubCommands();
+    }
+
+    void reload() {
+        setHelp();
+    }
+
+    private void setHelp() {
+        this.help = MinecraftHelp.<CommandSender>builder()
                 .commandManager(manager)
                 .audienceProvider(AudienceProvider.nativeAudience())
                 .commandPrefix("/fadah help")
@@ -61,40 +98,79 @@ public class AuctionHouseCommand
                         TextColor.fromHexString(conf.getHelp().getTextColor()),
                         TextColor.fromHexString(conf.getHelp().getAccentColor())
                 ))
+                .commandFilter(predicate -> !predicate.commandMeta().getOrDefault(aliasMeta, false))
                 .build();
+    }
 
-        Command.Builder<CommandSender> builder = manager.commandBuilder(
-                "fadah",
-                Description.of(conf.getMain().getDescription()),
-                conf.getMain().getAliases().toArray(String[]::new)
-        );
+    private void registerSubCommands() {
+        sellCommand(null);
+        conf.getSell().getAliases().forEach(this::sellCommand);
 
-        Stream.of(
-                builder.senderType(Player.class)
-                        .permission("fadah.use")
-                        .futureHandler(cmd ->
-                                CompletableFuture.runAsync(() ->
-                                        new MainMenu(null, cmd.sender(), null, null, null)
-                                                .open(cmd.sender()), DataService.instance.getThreadPool())),
+        searchCommand(null);
+        conf.getSearch().getAliases().forEach(this::searchCommand);
 
-                builder.literal("help",
-                                Description.of(conf.getHelp().getDescription()),
-                                conf.getHelp().getAliases().toArray(String[]::new))
-                        .optional("query", greedyStringParser(), DefaultValue.constant(""))
-                        .handler(context ->
-                                help.queryCommands(context.get("query"), context.sender())),
+        profileCommand(null);
+        conf.getProfile().getAliases().forEach(this::profileCommand);
 
-                builder.literal("sell",
-                                Description.of(conf.getSell().getDescription()),
-                                conf.getSell().getAliases().toArray(String[]::new))
+        activeListingsCommand(null);
+        conf.getActiveListings().getAliases().forEach(this::activeListingsCommand);
+
+        collectionBoxCommand(null);
+        conf.getCollectionBox().getAliases().forEach(this::collectionBoxCommand);
+
+        expiredItemsCommand(null);
+        conf.getExpiredItems().getAliases().forEach(this::expiredItemsCommand);
+
+        historyCommand(null);
+        conf.getHistory().getAliases().forEach(this::historyCommand);
+
+        viewCommand(null);
+        conf.getViewListing().getAliases().forEach(this::viewCommand);
+
+        watchCommand(null);
+        conf.getWatch().getAliases().forEach(this::watchCommand);
+
+        aboutCommand(null);
+        conf.getAbout().getAliases().forEach(this::aboutCommand);
+
+        helpCommand(null);
+        conf.getHelp().getAliases().forEach(this::helpCommand);
+
+        toggleCommand(null);
+        conf.getToggle().getAliases().forEach(this::toggleCommand);
+
+        reloadCommand(null);
+        conf.getReload().getAliases().forEach(this::reloadCommand);
+
+        viewListingCommand(null);
+        conf.getViewListing().getAliases().forEach(this::viewListingCommand);
+    }
+
+    private void sellCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "sell";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getSell().getDescription()))
+                        .meta(aliasMeta, alias)
                         .senderType(Player.class)
                         .permission("fadah.use")
                         .required("price", PriceParser.create())
-                        .handler(cmd -> sellCommand.execute(cmd.sender(), cmd.<Double>get("price"))),
+                        .handler(cmd -> sellCommand.execute(cmd.sender(), cmd.<Double>get("price")))
+        );
+    }
 
-                builder.literal("search",
-                                Description.of(conf.getSearch().getDescription()),
-                                conf.getSearch().getAliases().toArray(String[]::new))
+    private void searchCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "search";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getSearch().getDescription()))
+                        .meta(aliasMeta, alias)
                         .senderType(Player.class)
                         .permission("fadah.search")
                         .required("search", stringParser())
@@ -116,65 +192,19 @@ public class AuctionHouseCommand
 
                             return CompletableFuture.runAsync(
                                     () -> new MainMenu(category, cmd.sender(), cmd.get("search"), sort, direction).open(cmd.sender()));
-                        }),
+                        })
+        );
+    }
 
-                builder.literal("view",
-                                Description.of(conf.getView().getDescription()),
-                                conf.getView().getAliases().toArray(String[]::new))
-                        .senderType(Player.class)
-                        .permission("fadah.view")
-                        .required("owner", offlinePlayerParser())
-                        .futureHandler(cmd -> inspect(cmd.sender(), cmd.get("owner"), null, null, null)),
-
-                builder.literal("view-listing",
-                                Description.of(conf.getViewListing().getDescription()),
-                                conf.getViewListing().getAliases().toArray(String[]::new))
-                        .senderType(Player.class)
-                        .permission("fadah.use")
-                        .required("listingId", uuidParser())
-                        .handler(cmd -> CacheAccess.get(Listing.class, cmd.get("listingId")).ifPresentOrElse(listing -> {
-                                Player player = cmd.sender();
-                                if (listing.isOwner(player)) {
-                                    player.sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getErrors().getOwnListings()));
-                                    return;
-                                }
-
-                                TaskManager.Async.run(Fadah.getInstance(), () -> {
-                                    if (listing instanceof BinListing bin) {
-                                        new ConfirmPurchaseMenu(bin, player, player::closeInventory).open(player);
-                                    } else if (listing instanceof BidListing bid) {
-                                        new PlaceBidMenu(bid, player, player::closeInventory).open(player);
-                                    }
-                                });
-                            }, () -> cmd.sender().sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist())))
-                        ),
-
-                builder.literal("watch",
-                                Description.of(conf.getWatch().getDescription()),
-                                conf.getWatch().getAliases().toArray(String[]::new))
-                        .senderType(Player.class)
-                        .permission("fadah.watch")
-                        .futureHandler(cmd -> CompletableFuture.runAsync(
-                                () -> new WatchMenu(cmd.sender()).open(cmd.sender()))),
-
-                builder.literal("active-listings",
-                                Description.of(conf.getActiveListings().getDescription()),
-                                conf.getActiveListings().getAliases().toArray(String[]::new))
-                        .senderType(Player.class)
-                        .permission("fadah.active-listings")
-                        .optional("owner", offlinePlayerParser())
-                        .futureHandler(cmd -> {
-                            OfflinePlayer owner = cmd.getOrDefault("owner", null);
-                            if (owner == null || !cmd.sender().hasPermission("fadah.manage.active-listings")) {
-                                owner = cmd.sender();
-                            }
-
-                            return inspect(cmd.sender(), owner, null, null, null);
-                        }),
-
-                builder.literal("profile",
-                                Description.of(conf.getProfile().getDescription()),
-                                conf.getProfile().getAliases().toArray(String[]::new))
+    private void profileCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "profile";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getProfile().getDescription()))
+                        .meta(aliasMeta, alias)
                         .senderType(Player.class)
                         .permission("fadah.profile")
                         .optional("owner", offlinePlayerParser())
@@ -185,26 +215,42 @@ public class AuctionHouseCommand
                             }
 
                             new ProfileMenu(cmd.sender(), owner).open(cmd.sender());
-                        })),
+                        }))
+        );
+    }
 
-                builder.literal("expired-items",
-                                Description.of(conf.getExpiredItems().getDescription()),
-                                conf.getExpiredItems().getAliases().toArray(String[]::new))
+    private void activeListingsCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "active-listings";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getActiveListings().getDescription()))
+                        .meta(aliasMeta, alias)
                         .senderType(Player.class)
-                        .permission("fadah.expired-items")
+                        .permission("fadah.active-listings")
                         .optional("owner", offlinePlayerParser())
-                        .futureHandler(cmd -> CompletableFuture.runAsync(() -> {
+                        .futureHandler(cmd -> {
                             OfflinePlayer owner = cmd.getOrDefault("owner", null);
-                            if (owner == null || !cmd.sender().hasPermission("fadah.manage.expired-items")) {
+                            if (owner == null || !cmd.sender().hasPermission("fadah.manage.active-listings")) {
                                 owner = cmd.sender();
                             }
 
-                            new CollectionMenu(cmd.sender(), owner, LayoutService.MenuType.EXPIRED_LISTINGS).open(cmd.sender());
-                        })),
+                            return inspect(cmd.sender(), owner, null, null, null);
+                        })
+        );
+    }
 
-                builder.literal("collection-box",
-                                Description.of(conf.getCollectionBox().getDescription()),
-                                conf.getCollectionBox().getAliases().toArray(String[]::new))
+    private void collectionBoxCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "collection-box";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getCollectionBox().getDescription()))
+                        .meta(aliasMeta, alias)
                         .senderType(Player.class)
                         .permission("fadah.collection-box")
                         .optional("owner", offlinePlayerParser())
@@ -215,12 +261,42 @@ public class AuctionHouseCommand
                             }
 
                             new CollectionMenu(cmd.sender(), owner, LayoutService.MenuType.COLLECTION_BOX).open(cmd.sender());
-                        })),
+                        }))
+        );
+    }
 
+    private void expiredItemsCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "expired-items";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getExpiredItems().getDescription()))
+                        .meta(aliasMeta, alias)
+                        .senderType(Player.class)
+                        .permission("fadah.expired-items")
+                        .optional("owner", offlinePlayerParser())
+                        .futureHandler(cmd -> CompletableFuture.runAsync(() -> {
+                            OfflinePlayer owner = cmd.getOrDefault("owner", null);
+                            if (owner == null || !cmd.sender().hasPermission("fadah.manage.expired-items")) {
+                                owner = cmd.sender();
+                            }
 
-                builder.literal("history",
-                                Description.of(conf.getHistory().getDescription()),
-                                conf.getHistory().getAliases().toArray(String[]::new))
+                            new CollectionMenu(cmd.sender(), owner, LayoutService.MenuType.EXPIRED_LISTINGS).open(cmd.sender());
+                        }))
+        );
+    }
+
+    private void historyCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "history";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getHistory().getDescription()))
+                        .meta(aliasMeta, alias)
                         .senderType(Player.class)
                         .permission("fadah.use")
                         .optional("owner", offlinePlayerParser())
@@ -231,25 +307,127 @@ public class AuctionHouseCommand
                             }
 
                             new HistoryMenu(cmd.sender(), owner, null).open(cmd.sender());
-                        })),
+                        }))
+        );
+    }
 
-                builder.literal("about",
-                                Description.of(conf.getAbout().getDescription()),
-                                conf.getAbout().getAliases().toArray(String[]::new))
-                        .handler(cmd -> about(cmd.sender(), plugin)),
+    private void viewCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "view";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getView().getDescription()))
+                        .meta(aliasMeta, alias)
+                        .senderType(Player.class)
+                        .permission("fadah.view")
+                        .required("owner", offlinePlayerParser())
+                        .futureHandler(cmd -> inspect(cmd.sender(), cmd.get("owner"), null, null, null))
+        );
+    }
 
-                builder.literal("toggle",
-                                Description.of(conf.getToggle().getDescription()),
-                                conf.getToggle().getAliases().toArray(String[]::new))
+    private void watchCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "watch";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getWatch().getDescription()))
+                        .meta(aliasMeta, alias)
+                        .senderType(Player.class)
+                        .permission("fadah.watch")
+                        .futureHandler(cmd -> CompletableFuture.runAsync(
+                                () -> new WatchMenu(cmd.sender()).open(cmd.sender())))
+        );
+    }
+
+    private void aboutCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "about";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getAbout().getDescription()))
+                        .meta(aliasMeta, alias)
+                        .handler(this::about)
+        );
+    }
+
+    private void helpCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "help";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getHelp().getDescription()))
+                        .meta(aliasMeta, alias)
+                        .optional("query", greedyStringParser(), DefaultValue.constant(""))
+                        .handler(context ->
+                                help.queryCommands(context.get("query"), context.sender()))
+        );
+    }
+
+    private void toggleCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "toggle";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getToggle().getDescription()))
+                        .meta(aliasMeta, alias)
                         .permission("fadah.toggle-status")
-                        .handler(cmd -> toggle(cmd.sender(), plugin)),
+                        .handler(this::toggle)
+        );
+    }
 
-                builder.literal("reload",
-                                Description.of(conf.getReload().getDescription()),
-                                conf.getReload().getAliases().toArray(String[]::new))
+    private void reloadCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "reload";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getReload().getDescription()))
+                        .meta(aliasMeta, alias)
                         .permission("fadah.reload")
-                        .handler(cmd -> reload(cmd.sender(), plugin))
+                        .handler(this::reload)
+        );
+    }
 
-                ).forEach(manager::command);
+
+    private void viewListingCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "view-listing";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getViewListing().getDescription()))
+                        .meta(aliasMeta, alias)
+                        .senderType(Player.class)
+                        .permission("fadah.use")
+                        .required("listingId", uuidParser())
+                        .handler(cmd -> CacheAccess.get(Listing.class, cmd.get("listingId")).ifPresentOrElse(listing -> {
+                                    Player player = cmd.sender();
+                                    if (listing.isOwner(player)) {
+                                        player.sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getErrors().getOwnListings()));
+                                        return;
+                                    }
+
+                                    TaskManager.Async.run(Fadah.getInstance(), () -> {
+                                        if (listing instanceof BinListing bin) {
+                                            new ConfirmPurchaseMenu(bin, player, player::closeInventory).open(player);
+                                        } else if (listing instanceof BidListing bid) {
+                                            new PlaceBidMenu(bid, player, player::closeInventory).open(player);
+                                        }
+                                    });
+                                }, () -> cmd.sender().sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist())))
+                        )
+        );
     }
 }

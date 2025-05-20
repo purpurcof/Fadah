@@ -3,8 +3,8 @@ package info.preva1l.fadah.utils.guis;
 import com.github.puregero.multilib.MultiLib;
 import info.preva1l.fadah.utils.Reflections;
 import info.preva1l.fadah.utils.TaskManager;
-import info.preva1l.trashcan.plugin.annotations.PluginDisable;
-import info.preva1l.trashcan.plugin.annotations.PluginReload;
+import info.preva1l.trashcan.extension.annotations.ExtensionReload;
+import info.preva1l.trashcan.extension.annotations.PluginDisable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -49,7 +49,7 @@ public final class FastInvManager {
     /**
      * Close all open FastInv inventories.
      */
-    @PluginReload
+    @ExtensionReload
     public static void closeAll() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             MultiLib.getEntityScheduler(player).execute(PLUGIN.get(), () -> {

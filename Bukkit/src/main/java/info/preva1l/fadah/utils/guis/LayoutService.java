@@ -3,10 +3,10 @@ package info.preva1l.fadah.utils.guis;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.utils.config.BasicConfig;
 import info.preva1l.fadah.utils.config.LanguageConfig;
+import info.preva1l.trashcan.extension.annotations.ExtensionReload;
 import info.preva1l.trashcan.flavor.annotations.Configure;
 import info.preva1l.trashcan.flavor.annotations.Service;
 import info.preva1l.trashcan.flavor.annotations.inject.Inject;
-import info.preva1l.trashcan.plugin.annotations.PluginReload;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,7 +25,7 @@ public final class LayoutService {
     
     private final List<GuiLayout> guiLayouts = new ArrayList<>();
 
-    @PluginReload
+    @ExtensionReload
     public void reload() {
         Stream.of(
                 LayoutService.MenuType.MAIN,

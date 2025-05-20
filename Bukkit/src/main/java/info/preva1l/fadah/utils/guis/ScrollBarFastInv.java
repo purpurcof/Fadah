@@ -1,6 +1,7 @@
 package info.preva1l.fadah.utils.guis;
 
 import info.preva1l.fadah.config.Categories;
+import info.preva1l.fadah.config.Menus;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +32,7 @@ public abstract class ScrollBarFastInv extends PaginatedFastInv {
     }
 
     protected void setScrollbarSlots(List<Integer> integers) {
+        this.scrollbarSlots.clear();
         int i = 0;
         for (Integer num : integers) {
             this.scrollbarSlots.put(i, num);
@@ -45,6 +47,13 @@ public abstract class ScrollBarFastInv extends PaginatedFastInv {
     }
 
     protected abstract void fillScrollbarItems();
+
+    protected void addScrollbarControls() {
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SCROLLBAR_CONTROL_ONE,-1),
+                Menus.i().getScrollPreviousButton().itemStack(), e -> scrollUp());
+        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SCROLLBAR_CONTROL_TWO,-1),
+                Menus.i().getScrollNextButton().itemStack(),e -> scrollDown());
+    }
 
     protected void addScrollbarItem(PaginatedItem item) {
         scrollbarItems.add(item);

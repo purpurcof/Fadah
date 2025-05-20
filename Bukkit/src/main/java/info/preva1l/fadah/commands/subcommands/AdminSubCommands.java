@@ -1,13 +1,14 @@
 package info.preva1l.fadah.commands.subcommands;
 
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.FastInvManager;
+import info.preva1l.trashcan.extension.BaseExtension;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.context.CommandContext;
 
 /**
  * Created on 31/03/2025
@@ -15,7 +16,7 @@ import org.bukkit.command.CommandSender;
  * @author Preva1l
  */
 public interface AdminSubCommands {
-    default void toggle(CommandSender sender, Fadah plugin) {
+    default void toggle(CommandContext<CommandSender> ctx) {
         if (Broker.getInstance().isConnected()) {
             Message.builder()
                     .type(Message.Type.TOGGLE)
@@ -28,10 +29,10 @@ public interface AdminSubCommands {
 
         Lang.Commands.Toggle conf = Lang.i().getCommands().getToggle();
         String toggle = enabled ? conf.getEnabled() : conf.getDisabled();
-        sender.sendMessage(Text.text(Lang.i().getPrefix() + conf.getMessage().replace("%status%", toggle)));
+        ctx.sender().sendMessage(Text.text(Lang.i().getPrefix() + conf.getMessage().replace("%status%", toggle)));
     }
 
-    default void reload(CommandSender sender, Fadah plugin) {
+    default void reload(CommandContext<CommandSender> ctx) {
         if (Broker.getInstance().isConnected()) {
             Message.builder()
                     .type(Message.Type.RELOAD)
@@ -39,10 +40,10 @@ public interface AdminSubCommands {
         }
 
         try {
-            plugin.reload();
-            sender.sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getCommands().getReload().getSuccess()));
+            BaseExtension.instance().reload();
+            ctx.sender().sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getCommands().getReload().getSuccess()));
         } catch (Exception e) {
-            sender.sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getCommands().getReload().getFail()));
+            ctx.sender().sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getCommands().getReload().getFail()));
             throw new RuntimeException(e);
         }
     }

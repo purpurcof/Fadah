@@ -34,6 +34,7 @@ public abstract class Broker {
     }
 
     protected void handle(@NotNull Message message) {
+        if (message.getId() != null && cachedIds.getIfPresent(message.getId()) != null) return;
         switch (message.getType()) {
             case NOTIFICATION -> message.getPayload()
                     .getNotification().ifPresentOrElse(notification -> {

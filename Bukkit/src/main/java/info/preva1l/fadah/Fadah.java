@@ -5,8 +5,8 @@ import info.preva1l.fadah.api.BukkitAuctionHouseAPI;
 import info.preva1l.fadah.listeners.PlayerListener;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.FastInvManager;
-import info.preva1l.trashcan.plugin.BasePlugin;
-import info.preva1l.trashcan.plugin.annotations.PluginEnable;
+import info.preva1l.trashcan.extension.BasePlugin;
+import info.preva1l.trashcan.extension.annotations.PluginEnable;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 

@@ -2,6 +2,7 @@ package info.preva1l.fadah.commands;
 
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.commands.parsers.ColoringFormatter;
+import info.preva1l.trashcan.extension.annotations.ExtensionReload;
 import info.preva1l.trashcan.flavor.annotations.Configure;
 import info.preva1l.trashcan.flavor.annotations.Service;
 import info.preva1l.trashcan.flavor.annotations.inject.Inject;
@@ -13,7 +14,7 @@ import org.incendo.cloud.paper.LegacyPaperCommandManager;
 
 import java.util.logging.Logger;
 
-@Service
+@Service(priority = 2)
 public final class CommandService {
     public static final CommandService instance = new CommandService();
 
@@ -23,15 +24,21 @@ public final class CommandService {
     private LegacyPaperCommandManager<CommandSender> commandManager;
     private AnnotationParser<CommandSender> parser;
 
+    private AuctionHouseCommand mainCommand;
+
     @Configure
     public void configure() {
         loadCommandManager();
         registerCommands();
     }
 
-    private void registerCommands() {
-        new AuctionHouseCommand(plugin, commandManager);
+    @ExtensionReload
+    public void reload() {
+        mainCommand.reload();
+    }
 
+    private void registerCommands() {
+        mainCommand = new AuctionHouseCommand(plugin, commandManager);
         parser.parse(new MigrateCommand());
     }
 

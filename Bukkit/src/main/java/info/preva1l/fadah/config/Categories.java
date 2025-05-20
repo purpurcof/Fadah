@@ -6,7 +6,7 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.processor.JSProcessorService;
 import info.preva1l.fadah.records.Category;
-import info.preva1l.trashcan.plugin.annotations.PluginReload;
+import info.preva1l.trashcan.extension.annotations.ExtensionReload;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.bukkit.Material;
@@ -179,11 +179,11 @@ public class Categories {
 
     public static String getCatName(String id) {
         if (id.equals("_none_")) {
-            return "N/A";
+            return Lang.i().getWords().getNone();
         }
         Category category = getCategory(id).orElse(null);
         if (category == null) {
-            return "N/A";
+            return Lang.i().getWords().getNone();
         }
         return category.name();
     }
@@ -215,12 +215,12 @@ public class Categories {
         return i().sortedCache.removeIf(category -> category.id().equals(id));
     }
 
-    @PluginReload
+    @ExtensionReload
     public static void reload() {
         instance = YamlConfigurations.load(new File(Fadah.getInstance().getDataFolder(), "categories.yml").toPath(), Categories.class, PROPERTIES);
         instance.sortedCache.clear();
-        instance.sortedCache.addAll(i().categories);
-        instance.sortedCache.addAll(i().customViaApi);
+        instance.sortedCache.addAll(instance.categories);
+        instance.sortedCache.addAll(instance.customViaApi);
     }
 
     public static Categories i() {
@@ -230,8 +230,8 @@ public class Categories {
 
         instance = YamlConfigurations.update(new File(Fadah.getInstance().getDataFolder(), "categories.yml").toPath(), Categories.class, PROPERTIES);
         instance.sortedCache.clear();
-        instance.sortedCache.addAll(i().categories);
-        instance.sortedCache.addAll(i().customViaApi);
+        instance.sortedCache.addAll(instance.categories);
+        instance.sortedCache.addAll(instance.customViaApi);
         return instance;
     }
 }

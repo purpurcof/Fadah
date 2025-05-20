@@ -37,8 +37,6 @@ public class ViewListingsMenu extends BrowseMenu {
     }
 
     protected void addNavigationButtons() {
-        super.addNavigationButtons();
-
         setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.BACK, -1),
                 Menus.i().getBackButton().itemStack(), e -> new ProfileMenu(player, owner).open(player));
     }

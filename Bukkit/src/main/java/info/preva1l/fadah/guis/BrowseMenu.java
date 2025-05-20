@@ -103,6 +103,7 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
         fillPaginationItems();
 
         populateScrollbar();
+        addScrollbarControls();
 
         // Populate Listings must always be before addPaginationControls!
         populatePage();
@@ -177,13 +178,6 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
         if (isShulkerBox) itemStack.addLore(getLang().getStringFormatted("listing.footer.shulker"));
 
         return itemStack.build();
-    }
-
-    protected void addNavigationButtons() {
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SCROLLBAR_CONTROL_ONE,-1),
-                Menus.i().getScrollPreviousButton().itemStack(), e -> scrollUp());
-        setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SCROLLBAR_CONTROL_TWO,-1),
-                Menus.i().getScrollNextButton().itemStack(),e -> scrollDown());
     }
 
     protected void addFilterButtons() {
@@ -292,6 +286,8 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
         }
         return false;
     }
+
+    protected abstract void addNavigationButtons();
 
     @Override
     protected void updatePagination() {

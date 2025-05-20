@@ -3,7 +3,7 @@ package info.preva1l.fadah.hooks;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.hooker.Hooker;
-import info.preva1l.trashcan.plugin.annotations.PluginLoad;
+import info.preva1l.trashcan.extension.annotations.PluginLoad;
 
 public final class HookService {
     public static final HookService instance = new HookService();

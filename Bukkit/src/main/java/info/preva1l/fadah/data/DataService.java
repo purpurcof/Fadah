@@ -35,7 +35,7 @@ import java.util.logging.Logger;
  * There should be no case where this is modified.
  * Access this class via {@link DataService#instance)}
  */
-@Service
+@Service(priority = 3)
 public final class DataService {
     @Getter public static final DataService instance = new DataService();
 
