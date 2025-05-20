@@ -16,7 +16,7 @@ if (devMode) {
 
 allprojects {
     group = "info.preva1l.fadah"
-    version = "3.1.0-HOTFIX"
+    version = "3.1.1"
 
     repositories {
         mavenCentral()
