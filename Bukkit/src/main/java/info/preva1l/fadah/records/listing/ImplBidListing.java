@@ -84,6 +84,10 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
     @Override
     public void newBid(@NotNull Player bidder, double bidAmount) {
         if (!canBuy(bidder)) return;
+        if (bidAmount > getCurrency().getBalance(bidder)) {
+            Lang.sendMessage(bidder, Lang.i().getPrefix() + Lang.i().getErrors().getTooExpensive());
+            return;
+        }
 
         Bid mostRecentBid = getCurrentBid();
         if (mostRecentBid.bidAmount() >= bidAmount) {

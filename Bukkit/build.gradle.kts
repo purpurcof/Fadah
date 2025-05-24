@@ -60,6 +60,10 @@ dependencies {
     compileOnly("com.github.Maxlego08:zAuctionHouseV3-API:3.2.1.9") // zAuctionHouse
     compileOnly(files("../libs/AuctionHouse-1.20.4-3.7.1.jar")) // AuctionHouse
     compileOnly(files("../libs/AkarianAuctionHouse-1.3.1-b6.jar")) // AkarianAuctionHouse
+
+    // I hate IntelliJ
+    //implementation("su.nightexpress:nightcore:2.5.1")
+    //implementation("io.lettuce:lettuce-core:6.6.0.RELEASE")
 }
 
 tasks.withType<ShadowJar> {
