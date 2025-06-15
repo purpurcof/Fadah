@@ -10,7 +10,7 @@ import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.records.listing.*;
 import info.preva1l.fadah.utils.serialization.ItemSerializer;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bson.Document;
 import org.bukkit.inventory.ItemStack;
 
@@ -103,7 +103,7 @@ public class ListingMongoDao implements Dao<Listing> {
      */
     @Override
     public void update(Listing listing, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("update");
     }
 
     /**

@@ -11,7 +11,7 @@ import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bson.Document;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -59,7 +59,7 @@ public class CollectionBoxMongoDao implements Dao<CollectionBox> {
      */
     @Override
     public List<CollectionBox> getAll() {
-        throw new NotImplementedException();
+        throw new NotImplementedException("getAll()");
     }
 
     /**
@@ -86,7 +86,7 @@ public class CollectionBoxMongoDao implements Dao<CollectionBox> {
      */
     @Override
     public void update(CollectionBox expiredItems, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("update()");
     }
 
     /**
@@ -96,6 +96,6 @@ public class CollectionBoxMongoDao implements Dao<CollectionBox> {
      */
     @Override
     public void delete(CollectionBox expiredItems) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("delete()");
     }
 }

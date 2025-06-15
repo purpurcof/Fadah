@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import info.preva1l.trashcan.trashcan
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
 plugins {
@@ -6,6 +7,8 @@ plugins {
     `maven-publish`
     id("org.ajoberstar.grgit") version "5.3.0"
     id("com.gradleup.shadow") version "8.3.6"
+
+    id("info.preva1l.trashcan") version "1.0.0"
 }
 
 var currentBranch: String = grgit.branch.current().name
@@ -30,8 +33,10 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "maven-publish")
     apply(plugin = "com.gradleup.shadow")
+    apply(plugin = "info.preva1l.trashcan")
 
     dependencies {
+        trashcan()
         compileOnly("org.projectlombok:lombok:1.18.38")
         annotationProcessor("org.projectlombok:lombok:1.18.38")
 

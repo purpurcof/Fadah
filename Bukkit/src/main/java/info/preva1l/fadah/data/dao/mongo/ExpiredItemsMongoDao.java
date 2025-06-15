@@ -11,7 +11,7 @@ import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bson.Document;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -59,7 +59,7 @@ public class ExpiredItemsMongoDao implements Dao<ExpiredItems> {
      */
     @Override
     public List<ExpiredItems> getAll() {
-        throw new NotImplementedException();
+        throw new NotImplementedException("getAll()");
     }
 
     /**
@@ -86,7 +86,7 @@ public class ExpiredItemsMongoDao implements Dao<ExpiredItems> {
      */
     @Override
     public void update(ExpiredItems expiredItems, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("update");
     }
 
     /**
@@ -96,6 +96,6 @@ public class ExpiredItemsMongoDao implements Dao<ExpiredItems> {
      */
     @Override
     public void delete(ExpiredItems expiredItems) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("delete");
     }
 }

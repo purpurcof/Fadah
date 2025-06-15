@@ -11,7 +11,7 @@ import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bson.Document;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -61,7 +61,7 @@ public class HistoryMongoDao implements Dao<History> {
      */
     @Override
     public List<History> getAll() {
-        throw new NotImplementedException();
+        throw new NotImplementedException("getAll");
     }
 
     /**
@@ -88,7 +88,7 @@ public class HistoryMongoDao implements Dao<History> {
      */
     @Override
     public void update(History expiredItems, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("update");
     }
 
     /**
@@ -98,6 +98,6 @@ public class HistoryMongoDao implements Dao<History> {
      */
     @Override
     public void delete(History expiredItems) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("delete");
     }
 }

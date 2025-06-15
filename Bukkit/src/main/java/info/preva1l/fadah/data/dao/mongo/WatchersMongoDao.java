@@ -10,7 +10,7 @@ import com.mongodb.client.model.ReplaceOptions;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.watcher.Watching;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -93,7 +93,7 @@ public class WatchersMongoDao implements Dao<Watching> {
      */
     @Override
     public void update(Watching watching, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("update");
     }
 
     /**
@@ -103,6 +103,6 @@ public class WatchersMongoDao implements Dao<Watching> {
      */
     @Override
     public void delete(Watching watching) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("delete");
     }
 }

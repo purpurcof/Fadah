@@ -7,7 +7,7 @@ import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.lang.reflect.Type;
@@ -65,7 +65,7 @@ public abstract class CommonHistorySQLDao implements Dao<History> {
      */
     @Override
     public List<History> getAll() {
-        throw new NotImplementedException();
+        throw new NotImplementedException("getAll");
     }
 
     /**
@@ -76,7 +76,7 @@ public abstract class CommonHistorySQLDao implements Dao<History> {
      */
     @Override
     public void update(History history, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("update");
     }
 
     /**
@@ -86,7 +86,7 @@ public abstract class CommonHistorySQLDao implements Dao<History> {
      */
     @Override
     public void delete(History collectableItem) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("delete");
     }
 
     protected abstract Connection getConnection() throws SQLException;

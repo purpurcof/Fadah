@@ -7,7 +7,7 @@ import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.lang.reflect.Type;
@@ -66,7 +66,7 @@ public abstract class CommonCollectionBoxSQLDao implements Dao<CollectionBox> {
      */
     @Override
     public void update(CollectionBox collectableItem, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("cannot update on collection box dao");
     }
 
     /**
@@ -96,7 +96,7 @@ public abstract class CommonCollectionBoxSQLDao implements Dao<CollectionBox> {
      */
     @Override
     public List<CollectionBox> getAll() {
-        throw new NotImplementedException();
+        throw new NotImplementedException("cannot get all on collection box dao");
     }
 
     protected abstract Connection getConnection() throws SQLException;

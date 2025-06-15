@@ -7,7 +7,7 @@ import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.ExpiredItems;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.lang.reflect.Type;
@@ -66,7 +66,7 @@ public abstract class CommonSQLExpiredListingsDao implements Dao<ExpiredItems> {
      */
     @Override
     public void update(ExpiredItems collectableItem, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("update");
     }
 
     /**
@@ -76,7 +76,7 @@ public abstract class CommonSQLExpiredListingsDao implements Dao<ExpiredItems> {
      */
     @Override
     public void delete(ExpiredItems collectableItem) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("delete");
     }
 
     /**
@@ -86,7 +86,7 @@ public abstract class CommonSQLExpiredListingsDao implements Dao<ExpiredItems> {
      */
     @Override
     public List<ExpiredItems> getAll() {
-        throw new NotImplementedException();
+        throw new NotImplementedException("getAll");
     }
 
     protected abstract Connection getConnection() throws SQLException;
