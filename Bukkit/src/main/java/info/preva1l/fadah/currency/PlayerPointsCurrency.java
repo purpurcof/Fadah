@@ -1,6 +1,6 @@
 package info.preva1l.fadah.currency;
 
-import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.config.CurrencySettings;
 import lombok.Getter;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
@@ -20,7 +20,17 @@ public class PlayerPointsCurrency implements Currency {
 
     @Override
     public String getName() {
-        return Config.i().getCurrency().getPlayerPoints().getName();
+        return CurrencySettings.i().getPlayerPoints().getName();
+    }
+
+    @Override
+    public char getSymbol() {
+        return CurrencySettings.i().getPlayerPoints().getSymbol();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return CurrencySettings.i().getVault().isEnabled();
     }
 
     @Override

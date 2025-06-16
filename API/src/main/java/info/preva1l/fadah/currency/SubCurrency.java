@@ -24,6 +24,7 @@ import java.util.function.Predicate;
 public record SubCurrency(
         String id,
         String name,
+        char symbol,
         String requiredPlugin,
         BiConsumer<OfflinePlayer, Double> withdraw,
         BiConsumer<OfflinePlayer, Double> add,
@@ -44,6 +45,11 @@ public record SubCurrency(
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public char getSymbol() {
+        return symbol;
     }
 
     /**

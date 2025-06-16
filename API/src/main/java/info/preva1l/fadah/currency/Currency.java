@@ -18,6 +18,13 @@ public interface Currency extends CurrencyBase {
     String getName();
 
     /**
+     * The symbol for the currency. (Example: $)
+     *
+     * @return the currencies display symbol.
+     */
+    char getSymbol();
+
+    /**
      * Withdraw money from a player balance on this currency.
      *
      * @param player the player to withdraw from.

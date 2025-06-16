@@ -1,6 +1,6 @@
 package info.preva1l.fadah.currency;
 
-import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.config.CurrencySettings;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -16,7 +16,17 @@ public class VaultCurrency implements Currency {
 
     @Override
     public String getName() {
-        return Config.i().getCurrency().getVault().getName();
+        return CurrencySettings.i().getVault().getName();
+    }
+
+    @Override
+    public char getSymbol() {
+        return CurrencySettings.i().getPlayerPoints().getSymbol();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return CurrencySettings.i().getVault().isEnabled();
     }
 
     @Override
