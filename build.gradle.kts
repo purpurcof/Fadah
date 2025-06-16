@@ -1,5 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import info.preva1l.trashcan.trashcan
+import info.preva1l.trashcan.finallyADecent
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
 plugins {
@@ -23,9 +23,7 @@ allprojects {
 
     repositories {
         mavenCentral()
-        maven(url = "https://repo.papermc.io/repository/maven-public/")
-        if (devMode) configureFinallyADecentRepository(dev = true)
-        configureFinallyADecentRepository()
+        finallyADecent(dev = true)
     }
 }
 
@@ -36,7 +34,6 @@ subprojects {
     apply(plugin = "info.preva1l.trashcan")
 
     dependencies {
-        trashcan()
         compileOnly("org.projectlombok:lombok:1.18.38")
         annotationProcessor("org.projectlombok:lombok:1.18.38")
 
@@ -88,7 +85,7 @@ subprojects {
     }
 
     publishing {
-        repositories.configureFinallyADecentRepository(dev = devMode)
+        repositories.finallyADecent(dev = devMode, authenticated = true)
 
         publications {
             register(
@@ -108,26 +105,6 @@ subprojects {
         .dependsOn(
             "shadowJar"
         )
-}
-
-fun RepositoryHandler.configureFinallyADecentRepository(dev: Boolean = false) {
-    val user: String? = properties["fad_username"]?.toString() ?: System.getenv("fad_username")
-    val pass: String? = properties["fad_password"]?.toString() ?: System.getenv("fad_password")
-
-    if (user != null && pass != null) {
-        maven("https://repo.preva1l.info/${if (dev) "development" else "releases"}/") {
-            name = "FinallyADecent"
-            credentials {
-                username = user
-                password = pass
-            }
-        }
-        return
-    }
-
-    maven("https://repo.preva1l.info/${if (dev) "development" else "releases"}/") {
-        name = "FinallyADecent"
-    }
 }
 
 project.delete("$rootDir/target")

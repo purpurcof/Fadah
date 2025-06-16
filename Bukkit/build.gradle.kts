@@ -71,7 +71,7 @@ paper {
     website = "https://docs.preva1l.info/fadah/"
     author = "Preva1l"
     main = rootProject.group.toString() + ".Fadah"
-    loader = "info.preva1l.fadah.FadahLibraryloader"
+    loader = "info.preva1l.fadah.trashcan.extension.libloader.BaseLibraryLoader"
     foliaSupported = true
     apiVersion = "1.19"
 
