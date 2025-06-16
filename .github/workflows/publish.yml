@@ -30,6 +30,6 @@ jobs:
 
       - name: Publish with Gradle Wrapper
         env:
-          finallyADecentUsername: ${{ secrets.REPO_USERNAME }}
-          finallyADecentPassword: ${{ secrets.REPO_PASSWORD }}
+          FinallyADecentUsername: ${{ secrets.REPO_USERNAME }}
+          FinallyADecentPassword: ${{ secrets.REPO_PASSWORD }}
         run: ./gradlew publishApi
