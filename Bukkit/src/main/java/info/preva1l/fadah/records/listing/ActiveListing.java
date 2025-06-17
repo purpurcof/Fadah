@@ -298,16 +298,18 @@ public abstract class ActiveListing extends BaseListing {
     }
 
     private void firePurchaseEvent(OfflinePlayer buyer) {
-        try {
-            StaleListing staleListing = getAsStale();
-            if (staleListing != null) {
-                Bukkit.getServer().getPluginManager().callEvent(new ListingPurchaseEvent(staleListing, buyer));
-            } else {
-                LOGGER.log(Level.WARNING, "Failed to create stale listing for purchase event");
+        TaskManager.Sync.run(Fadah.instance, () -> {
+            try {
+                StaleListing staleListing = getAsStale();
+                if (staleListing != null) {
+                    Bukkit.getServer().getPluginManager().callEvent(new ListingPurchaseEvent(staleListing, buyer));
+                } else {
+                    LOGGER.log(Level.WARNING, "Failed to create stale listing for purchase event");
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Failed to fire purchase event", e);
             }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to fire purchase event", e);
-        }
+        });
     }
 
     public abstract StaleListing getAsStale();
