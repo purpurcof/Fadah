@@ -72,7 +72,7 @@ public class CollectionBoxMongoDao implements Dao<CollectionBox> {
         try {
             Document document = new Document("playerUUID", expiredItems.owner())
                     .append("items", GSON.toJson(expiredItems.collectableItems(), COLLECTION_LIST_TYPE));
-            database.getCollection("collection_box").insertOne(document);
+            database.getCollection("collection_box").replaceOne(Filters.eq("playerUUID", expiredItems.owner()), document);
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, e.getMessage(), e);
         }

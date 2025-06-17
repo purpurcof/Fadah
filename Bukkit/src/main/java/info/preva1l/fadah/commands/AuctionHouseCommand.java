@@ -214,6 +214,8 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                                 owner = cmd.sender();
                             }
 
+                            DataService.instance.loadPlayerData(owner.getUniqueId()).join();
+
                             new ProfileMenu(cmd.sender(), owner).open(cmd.sender());
                         }))
         );
@@ -260,6 +262,8 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                                 owner = cmd.sender();
                             }
 
+                            DataService.instance.loadPlayerData(owner.getUniqueId()).join();
+
                             new CollectionMenu(cmd.sender(), owner, LayoutService.MenuType.COLLECTION_BOX).open(cmd.sender());
                         }))
         );
@@ -283,6 +287,8 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                                 owner = cmd.sender();
                             }
 
+                            DataService.instance.loadPlayerData(owner.getUniqueId()).join();
+
                             new CollectionMenu(cmd.sender(), owner, LayoutService.MenuType.EXPIRED_LISTINGS).open(cmd.sender());
                         }))
         );
@@ -305,6 +311,8 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                             if (owner == null || !cmd.sender().hasPermission("fadah.manage.history")) {
                                 owner = cmd.sender();
                             }
+
+                            DataService.instance.loadPlayerData(owner.getUniqueId()).join();
 
                             new HistoryMenu(cmd.sender(), owner, null).open(cmd.sender());
                         }))

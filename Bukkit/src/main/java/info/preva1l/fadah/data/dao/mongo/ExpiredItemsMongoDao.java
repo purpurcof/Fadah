@@ -72,7 +72,7 @@ public class ExpiredItemsMongoDao implements Dao<ExpiredItems> {
         try {
             Document document = new Document("playerUUID", expiredItems.owner())
                     .append("items", GSON.toJson(expiredItems.expiredItems(), EXPIRED_LIST_TYPE));
-            database.getCollection("expired_items").insertOne(document);
+            database.getCollection("expired_items").replaceOne(Filters.eq("playerUUID", expiredItems.owner()), document);
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, e.getMessage(), e);
         }

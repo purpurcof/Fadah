@@ -37,8 +37,8 @@ public class RedisEconomyCurrency implements MultiCurrency {
                     eco.displayName(),
                     eco.symbol(),
                     requiredPlugin,
-                    (p, a) -> getCurrency(eco).withdrawPlayer(p, a),
-                    (p, a) -> getCurrency(eco).depositPlayer(p, a),
+                    (p, a) -> getCurrency(eco).withdrawPlayer(p, a).transactionSuccess(),
+                    (p, a) -> getCurrency(eco).depositPlayer(p, a).transactionSuccess(),
                     p -> getCurrency(eco).getBalance(p),
                     v -> {
                         if (getCurrency(eco) == null) {

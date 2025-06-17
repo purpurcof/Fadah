@@ -4,6 +4,7 @@ import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.commands.subcommands.SellSubCommand;
 import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.config.CurrencySettings;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.Menus;
 import info.preva1l.fadah.config.misc.Tuple;
@@ -49,7 +50,7 @@ public class NewListingMenu extends FastInv {
         player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
         this.itemToSell = temp;
         this.timeOffsetMillis = Config.i().getDefaultListingLength().toMillis();
-        this.currency = CurrencyRegistry.get(Config.i().getCurrency().getDefaultCurrency());
+        this.currency = CurrencyRegistry.get(CurrencySettings.i().getDefaultCurrency());
         if (currency == null) currency = CurrencyRegistry.getAll().getFirst();
 
         fillers();

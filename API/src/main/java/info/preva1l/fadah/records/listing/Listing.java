@@ -111,9 +111,8 @@ public interface Listing {
      * Cancels the listing if it is active.
      *
      * @param canceller the player attempting to cancel the listing.
-     * @return true if it was cancelled, false if the player does not own the listing or have management permissions.
      */
-    boolean cancel(@NotNull Player canceller);
+    void cancel(@NotNull Player canceller);
 
     /**
      * Check if a player can buy the listing, or place a bid.

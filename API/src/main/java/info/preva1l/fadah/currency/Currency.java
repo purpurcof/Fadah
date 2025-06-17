@@ -30,7 +30,7 @@ public interface Currency extends CurrencyBase {
      * @param player the player to withdraw from.
      * @param amountToTake the amount to withdraw.
      */
-    void withdraw(OfflinePlayer player, double amountToTake);
+    boolean withdraw(OfflinePlayer player, double amountToTake);
 
     /**
      * Give money to a player.
@@ -38,7 +38,7 @@ public interface Currency extends CurrencyBase {
      * @param player the player to give money to.
      * @param amountToAdd the amount to give.
      */
-    void add(OfflinePlayer player, double amountToAdd);
+    boolean add(OfflinePlayer player, double amountToAdd);
 
     /**
      * Get a player's balance.

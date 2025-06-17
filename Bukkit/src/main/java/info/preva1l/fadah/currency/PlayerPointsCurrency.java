@@ -47,13 +47,13 @@ public class PlayerPointsCurrency implements Currency {
     }
 
     @Override
-    public void withdraw(OfflinePlayer player, double amountToTake) {
-        this.api.take(player.getUniqueId(), (int) amountToTake);
+    public boolean withdraw(OfflinePlayer player, double amountToTake) {
+        return this.api.take(player.getUniqueId(), (int) amountToTake);
     }
 
     @Override
-    public void add(OfflinePlayer player, double amountToAdd) {
-        this.api.give(player.getUniqueId(), (int) amountToAdd);
+    public boolean add(OfflinePlayer player, double amountToAdd) {
+        return this.api.give(player.getUniqueId(), (int) amountToAdd);
     }
 
     @Override

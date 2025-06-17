@@ -22,7 +22,7 @@ public final class StaleListing extends BaseListing {
     }
 
     @Override
-    public boolean cancel(@NotNull Player canceller) {
+    public void cancel(@NotNull Player canceller) {
         throw new IllegalStateException("Cancelling a listing is not possible when the listing is in a stale state!");
     }
 

@@ -22,13 +22,16 @@ import info.preva1l.fadah.utils.guis.ScrollBarFastInv;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Created on 19/03/2025
@@ -37,8 +40,6 @@ import java.util.function.Supplier;
  */
 public abstract class BrowseMenu extends ScrollBarFastInv {
     protected final Supplier<List<Listing>> listingSupplier;
-    protected final List<Listing> listings;
-
     protected final OfflinePlayer owner;
 
     // Filters
@@ -46,6 +47,8 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
     protected SortingMethod sortingMethod;
     protected SortingDirection sortingDirection;
     protected Category category;
+
+    private final ConcurrentMap<Listing, Boolean> processingListings = new ConcurrentHashMap<>();
 
     protected BrowseMenu(
             Player player,
@@ -70,27 +73,11 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
         );
 
         this.listingSupplier = listings;
-        this.listings = listingSupplier.get();
-
         this.owner = owner;
-
         this.search = search;
         this.sortingMethod = (sortingMethod == null ? SortingMethod.AGE : sortingMethod);
         this.sortingDirection = (sortingDirection == null ? SortingDirection.ASCENDING : sortingDirection);
         this.category = category;
-
-        this.listings.sort(this.sortingMethod.getSorter(this.sortingDirection));
-
-        if (search != null) {
-            this.listings.removeIf(
-                    listing -> !(Text.doesItemHaveString(search, listing.getItemStack())
-                            || doesBookHaveEnchant(search, listing.getItemStack()))
-            );
-        }
-
-        if (category != null) {
-            this.listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
-        }
 
         fillers();
         setScrollbarSlots(getLayout().scrollbarSlots());
@@ -105,51 +92,84 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
         populateScrollbar();
         addScrollbarControls();
 
-        // Populate Listings must always be before addPaginationControls!
         populatePage();
         addPaginationControls();
     }
 
+    private List<Listing> getFilteredListings() {
+        List<Listing> listings = listingSupplier.get();
+
+        return listings.stream()
+                .filter(this::passesSearchFilter)
+                .filter(this::passesCategoryFilter)
+                .sorted(sortingMethod.getSorter(sortingDirection))
+                .collect(Collectors.toList());
+    }
+
+    private boolean passesSearchFilter(Listing listing) {
+        if (search == null) return true;
+        return Text.doesItemHaveString(search, listing.getItemStack())
+                || doesBookHaveEnchant(search, listing.getItemStack());
+    }
+
+    private boolean passesCategoryFilter(Listing listing) {
+        if (category == null) return true;
+        return listing.getCategoryID().equals(category.id());
+    }
+
     @Override
     protected void fillPaginationItems() {
-        synchronized (listings) {
-            for (Listing listing : listings) {
-                if (listing.getCurrency() == null) {
-                    Fadah.getInstance().getLogger().severe(
-                            "Cannot load listing %s because currency %s is not on this server!"
-                                    .formatted(listing.getId(), listing.getCurrencyId())
-                    );
-                    continue;
-                }
+        List<Listing> filteredListings = getFilteredListings();
 
-                boolean isShulkerBox = listing.getItemStack().getType().name().toUpperCase().endsWith("SHULKER_BOX");
-                boolean isBidListing = listing instanceof BidListing;
-
-                ItemStack item = buildItem(listing, isBidListing, isShulkerBox);
-
-                addPaginationItem(new PaginatedItem(item, event -> {
-                    Player clicker = (Player) event.getWhoClicked();
-
-                    if (event.isShiftClick() && (clicker.hasPermission("fadah.manage.active-listings") || listing.isOwner(clicker))) {
-                        if (listing.cancel(clicker)) updatePagination();
-                        return;
-                    }
-
-                    if (event.isRightClick() && isShulkerBox) {
-                        new ShulkerBoxPreviewMenu(listing, () -> open(player)).open(player);
-                        return;
-                    }
-
-                    if (!listing.canBuy(player)) return;
-
-                    if (isBidListing) {
-                        new PlaceBidMenu((BidListing) listing, player, () -> open(player)).open(player);
-                    } else {
-                        new ConfirmPurchaseMenu((BinListing) listing, player, () -> open(player)).open(player);
-                    }
-                }));
+        for (Listing listing : filteredListings) {
+            if (listing.getCurrency() == null) {
+                Fadah.getInstance().getLogger().severe(
+                        "Cannot load listing %s because currency %s is not on this server!"
+                                .formatted(listing.getId(), listing.getCurrencyId())
+                );
+                continue;
             }
+
+            boolean isShulkerBox = listing.getItemStack().getType().name().toUpperCase().endsWith("SHULKER_BOX");
+            boolean isBidListing = listing instanceof BidListing;
+
+            ItemStack item = buildItem(listing, isBidListing, isShulkerBox);
+
+            addPaginationItem(new PaginatedItem(item, event -> handleListingClick(event, listing, isShulkerBox, isBidListing)));
         }
+    }
+
+    private void handleListingClick(InventoryClickEvent event, Listing listing, boolean isShulkerBox, boolean isBidListing) {
+        if (processingListings.putIfAbsent(listing, true) != null) return;
+
+        try {
+            Player clicker = (Player) event.getWhoClicked();
+
+            if (event.isShiftClick() && canCancelListing(clicker, listing)) {
+                listing.cancel(clicker);
+                updatePagination();
+                return;
+            }
+
+            if (event.isRightClick() && isShulkerBox) {
+                new ShulkerBoxPreviewMenu(listing, () -> open(player)).open(player);
+                return;
+            }
+
+            if (!listing.canBuy(player)) return;
+
+            if (isBidListing) {
+                new PlaceBidMenu((BidListing) listing, player, () -> open(player)).open(player);
+            } else {
+                new ConfirmPurchaseMenu((BinListing) listing, player, () -> open(player)).open(player);
+            }
+        } finally {
+            processingListings.remove(listing);
+        }
+    }
+
+    private boolean canCancelListing(Player player, Listing listing) {
+        return player.hasPermission("fadah.manage.active-listings") || listing.isOwner(player);
     }
 
     private ItemStack buildItem(Listing listing, boolean isBidListing, boolean isShulkerBox) {
@@ -162,26 +182,41 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
                         Tuple.of("%seller%", listing.getOwnerName()),
                         Tuple.of("%category%", Text.removeColorCodes(Categories.getCatName(listing.getCategoryID()))),
                         Tuple.of("%mode%", buyMode),
+                        Tuple.of("%symbol%", listing.getCurrency().getSymbol()),
                         Tuple.of("%price%", Config.i().getFormatting().numbers().format(listing.getPrice())),
                         Tuple.of("%expiry%", TimeUtil.formatTimeUntil(listing.getDeletionDate())),
                         Tuple.of("%currency%", listing.getCurrency().getName())
                 ));
 
-        if (listing.isOwner(player))
-            itemStack.addLore(getLang().getStringFormatted("listing.footer.own-listing"));
-        else if (listing.getCurrency().canAfford(player, listing.getPrice()))
-            if (isBidListing) itemStack.addLore(getLang().getStringFormatted("listing.footer.bid"));
-            else itemStack.addLore(getLang().getStringFormatted("listing.footer.buy"));
-        else
-            itemStack.addLore(getLang().getStringFormatted("listing.footer.too-expensive"));
-
-        if (isShulkerBox) itemStack.addLore(getLang().getStringFormatted("listing.footer.shulker"));
-
+        addFooterLore(itemStack, listing, isBidListing, isShulkerBox);
         return itemStack.build();
     }
 
+    private void addFooterLore(ItemBuilder itemStack, Listing listing, boolean isBidListing, boolean isShulkerBox) {
+        if (listing.isOwner(player)) {
+            itemStack.addLore(getLang().getStringFormatted("listing.footer.own-listing"));
+        } else if (listing.getCurrency().canAfford(player, listing.getPrice())) {
+            if (isBidListing) {
+                itemStack.addLore(getLang().getStringFormatted("listing.footer.bid"));
+            } else {
+                itemStack.addLore(getLang().getStringFormatted("listing.footer.buy"));
+            }
+        } else {
+            itemStack.addLore(getLang().getStringFormatted("listing.footer.too-expensive"));
+        }
+
+        if (isShulkerBox) {
+            itemStack.addLore(getLang().getStringFormatted("listing.footer.shulker"));
+        }
+    }
+
     protected void addFilterButtons() {
-        // Search
+        addSearchButton();
+        addFilterTypeButton();
+        addFilterDirectionButton();
+    }
+
+    private void addSearchButton() {
         removeItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SEARCH,-1));
         setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.SEARCH,-1),
                 new ItemBuilder(getLang().getAsMaterial("filter.search.icon", Material.OAK_SIGN))
@@ -190,10 +225,12 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
                         .lore(getLang().getLore("filter.search.lore")).build(), e ->
                         new InputMenu<>(player, Menus.i().getSearchTitle(), getLang().getString("filter.search.placeholder", "Search Query..."), String.class, search ->
                                 new ViewListingsMenu(player, owner, search, sortingMethod, sortingDirection) .open(player)));
+    }
 
-        // Filter Type Cycle
+    private void addFilterTypeButton() {
         SortingMethod prev = sortingMethod.previous();
         SortingMethod next = sortingMethod.next();
+
         removeItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.FILTER,-1));
         setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.FILTER,-1),
                 new ItemBuilder(getLang().getAsMaterial("filter.change-type.icon", Material.PUFFERFISH))
@@ -203,52 +240,32 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
                                 Tuple.of("%previous%", (prev == null ? Lang.i().getWords().getNone() : prev.getFriendlyName())),
                                 Tuple.of("%current%", sortingMethod.getFriendlyName()),
                                 Tuple.of("%next%", (next == null ? Lang.i().getWords().getNone() : next.getFriendlyName()))))
-                        .build(), e -> {
-                    if (CooldownManager.hasCooldown(CooldownManager.Cooldown.SORT, player)) {
-                        Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getCooldown()
-                                .replace("%time%", CooldownManager.getCooldownString(CooldownManager.Cooldown.SORT, player)));
-                        return;
-                    }
-                    CooldownManager.startCooldown(CooldownManager.Cooldown.SORT, player);
-                    if (e.isLeftClick()) {
-                        if (sortingMethod.previous() == null) return;
-                        this.sortingMethod = sortingMethod.previous();
-                        updatePagination();
-                        addFilterButtons();
-                    }
-                    if (e.isRightClick()) {
-                        if (sortingMethod.next() == null) return;
-                        this.sortingMethod = sortingMethod.next();
-                        updatePagination();
-                        addFilterButtons();
-                    }
-                });
+                        .build(), this::handleFilterTypeClick);
+    }
 
-        // Filter Direction Toggle
-        Component asc =
-                sortingDirection == SortingDirection.ASCENDING
-                        ? getLang().getStringFormatted(
-                        "filter.change-direction.options.selected",
-                        "&8> &e%option%",
-                        Tuple.of("%option%", sortingMethod.getLang(SortingDirection.ASCENDING))
-                )
-                        : getLang().getStringFormatted(
-                        "filter.change-direction.options.not-selected",
-                        "&f%option%",
-                        Tuple.of("%option%", sortingMethod.getLang(SortingDirection.ASCENDING))
-                );
-        Component desc =
-                sortingDirection == SortingDirection.DESCENDING
-                        ? getLang().getStringFormatted(
-                        "filter.change-direction.options.selected",
-                        "&8> &e%option%",
-                        Tuple.of("%option%", sortingMethod.getLang(SortingDirection.DESCENDING))
-                )
-                        : getLang().getStringFormatted(
-                        "filter.change-direction.options.not-selected",
-                        "&f%option%",
-                        Tuple.of("%option%", sortingMethod.getLang(SortingDirection.DESCENDING))
-                );
+    private void handleFilterTypeClick(InventoryClickEvent e) {
+        if (CooldownManager.hasCooldown(CooldownManager.Cooldown.SORT, player)) {
+            Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getCooldown()
+                    .replace("%time%", CooldownManager.getCooldownString(CooldownManager.Cooldown.SORT, player)));
+            return;
+        }
+
+        CooldownManager.startCooldown(CooldownManager.Cooldown.SORT, player);
+
+        if (e.isLeftClick() && sortingMethod.previous() != null) {
+            this.sortingMethod = sortingMethod.previous();
+            updatePagination();
+            addFilterButtons();
+        } else if (e.isRightClick() && sortingMethod.next() != null) {
+            this.sortingMethod = sortingMethod.next();
+            updatePagination();
+            addFilterButtons();
+        }
+    }
+
+    private void addFilterDirectionButton() {
+        Component asc = formatDirectionOption(SortingDirection.ASCENDING);
+        Component desc = formatDirectionOption(SortingDirection.DESCENDING);
 
         removeItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.FILTER_DIRECTION,-1));
         setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.FILTER_DIRECTION,-1),
@@ -258,55 +275,46 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
                         .lore(getLang().getLore("filter.change-direction.lore",
                                 Tuple.of("%first%", asc),
                                 Tuple.of("%second%", desc))
-                        ).build(), e -> {
-                    if (CooldownManager.hasCooldown(CooldownManager.Cooldown.SORT, player)) {
-                        Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getCooldown()
-                                .replace("%time%", CooldownManager.getCooldownString(CooldownManager.Cooldown.SORT, player)));
-                        return;
-                    }
-                    CooldownManager.startCooldown(CooldownManager.Cooldown.SORT, player);
-                    this.sortingDirection = sortingDirection == SortingDirection.ASCENDING
-                            ? SortingDirection.DESCENDING
-                            : SortingDirection.ASCENDING;
-                    updatePagination();
-                    addFilterButtons();
-                }
-        );
+                        ).build(), this::handleDirectionToggle);
     }
 
-    /**
-     * @return true if the item contains the search
-     */
+    private Component formatDirectionOption(SortingDirection direction) {
+        String template = sortingDirection == direction
+                ? "filter.change-direction.options.selected"
+                : "filter.change-direction.options.not-selected";
+        String format = sortingDirection == direction ? "&8> &e%option%" : "&f%option%";
+
+        return getLang().getStringFormatted(template, format,
+                Tuple.of("%option%", sortingMethod.getLang(direction)));
+    }
+
+    private void handleDirectionToggle(InventoryClickEvent e) {
+        if (CooldownManager.hasCooldown(CooldownManager.Cooldown.SORT, player)) {
+            Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getCooldown()
+                    .replace("%time%", CooldownManager.getCooldownString(CooldownManager.Cooldown.SORT, player)));
+            return;
+        }
+
+        CooldownManager.startCooldown(CooldownManager.Cooldown.SORT, player);
+        this.sortingDirection = sortingDirection == SortingDirection.ASCENDING
+                ? SortingDirection.DESCENDING
+                : SortingDirection.ASCENDING;
+        updatePagination();
+        addFilterButtons();
+    }
+
     private boolean doesBookHaveEnchant(String enchant, ItemStack enchantedBook) {
         if (!Config.i().getSearch().isEnchantedBooks()) return false;
-        if (enchantedBook.getType() == Material.ENCHANTED_BOOK) {
-            for (Enchantment enchantment : enchantedBook.getEnchantments().keySet()) {
-                if (enchantment.getKey().getKey().toUpperCase().contains(enchant.toUpperCase())) return true;
-            }
-        }
-        return false;
+        if (enchantedBook.getType() != Material.ENCHANTED_BOOK) return false;
+
+        return enchantedBook.getEnchantments().keySet().stream()
+                .anyMatch(enchantment -> enchantment.getKey().getKey().toUpperCase().contains(enchant.toUpperCase()));
     }
 
     protected abstract void addNavigationButtons();
 
     @Override
     protected void updatePagination() {
-        synchronized (listings) {
-            this.listings.clear();
-            this.listings.addAll(listingSupplier.get());
-
-            if (search != null) {
-                listings.removeIf(listing -> !(Text.doesItemHaveString(search, listing.getItemStack())
-                        || doesBookHaveEnchant(search, listing.getItemStack())));
-            }
-
-            if (category != null) {
-                this.listings.removeIf(listing -> !listing.getCategoryID().equals(category.id()));
-            }
-
-            listings.sort(this.sortingMethod.getSorter(this.sortingDirection));
-
-            super.updatePagination();
-        }
+        super.updatePagination();
     }
 }

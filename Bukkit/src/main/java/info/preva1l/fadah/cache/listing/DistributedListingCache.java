@@ -17,13 +17,16 @@ public final class DistributedListingCache implements Cache<Listing> {
 
     public DistributedListingCache() {
         final LocalCachedMapOptions<UUID, Listing> options = LocalCachedMapOptions.<UUID, Listing>name("listings")
-                .cacheSize(1000000)
-                .maxIdle(Duration.ofSeconds(60))
-                .timeToLive(Duration.ofSeconds(60))
+                .cacheSize(0)
+                .timeToLive(Duration.ZERO)
+                .maxIdle(Duration.ZERO)
                 .evictionPolicy(LocalCachedMapOptions.EvictionPolicy.NONE)
                 .syncStrategy(LocalCachedMapOptions.SyncStrategy.UPDATE)
                 .storeMode(LocalCachedMapOptions.StoreMode.LOCALCACHE_REDIS)
-                .expirationEventPolicy(LocalCachedMapOptions.ExpirationEventPolicy.SUBSCRIBE_WITH_KEYSPACE_CHANNEL);
+                .reconnectionStrategy(LocalCachedMapOptions.ReconnectionStrategy.LOAD)
+                .expirationEventPolicy(LocalCachedMapOptions.ExpirationEventPolicy.SUBSCRIBE_WITH_KEYSPACE_CHANNEL)
+                .cacheProvider(LocalCachedMapOptions.CacheProvider.REDISSON)
+                .storeCacheMiss(false);
 
         listings = RedisBroker.getRedisson().getLocalCachedMap(options);
     }
@@ -51,7 +54,7 @@ public final class DistributedListingCache implements Cache<Listing> {
 
     @Override
     public @NotNull List<Listing> getAll() {
-        return new ArrayList<>(listings.values());
+        return new ArrayList<>(listings.readAllValues());
     }
 
     @Override
@@ -61,6 +64,8 @@ public final class DistributedListingCache implements Cache<Listing> {
 
     @Override
     public int amountByPlayer(@NotNull UUID player) {
-        return (int) listings.values().stream().filter(listing -> listing.isOwner(player)).count();
+        return (int) listings.values().stream()
+                .filter(listing -> listing.isOwner(player))
+                .count();
     }
 }

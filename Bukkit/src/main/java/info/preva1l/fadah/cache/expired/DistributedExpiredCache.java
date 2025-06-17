@@ -18,13 +18,16 @@ public final class DistributedExpiredCache implements Cache<ExpiredItems> {
 
     public DistributedExpiredCache() {
         final LocalCachedMapOptions<UUID, ExpiredItems> options = LocalCachedMapOptions.<UUID, ExpiredItems>name("expired-listings")
-                .cacheSize(1000000)
-                .maxIdle(Duration.ofSeconds(60))
-                .timeToLive(Duration.ofSeconds(60))
+                .cacheSize(0)
+                .timeToLive(Duration.ZERO)
+                .maxIdle(Duration.ZERO)
                 .evictionPolicy(LocalCachedMapOptions.EvictionPolicy.NONE)
                 .syncStrategy(LocalCachedMapOptions.SyncStrategy.UPDATE)
                 .storeMode(LocalCachedMapOptions.StoreMode.LOCALCACHE_REDIS)
-                .expirationEventPolicy(LocalCachedMapOptions.ExpirationEventPolicy.SUBSCRIBE_WITH_KEYSPACE_CHANNEL);
+                .reconnectionStrategy(LocalCachedMapOptions.ReconnectionStrategy.LOAD)
+                .expirationEventPolicy(LocalCachedMapOptions.ExpirationEventPolicy.SUBSCRIBE_WITH_KEYSPACE_CHANNEL)
+                .cacheProvider(LocalCachedMapOptions.CacheProvider.REDISSON)
+                .storeCacheMiss(false);
 
         expiredItems = RedisBroker.getRedisson().getLocalCachedMap(options);
     }
@@ -52,7 +55,7 @@ public final class DistributedExpiredCache implements Cache<ExpiredItems> {
 
     @Override
     public @NotNull List<ExpiredItems> getAll() {
-        return new ArrayList<>(expiredItems.values());
+        return new ArrayList<>(expiredItems.readAllValues());
     }
 
     @Override

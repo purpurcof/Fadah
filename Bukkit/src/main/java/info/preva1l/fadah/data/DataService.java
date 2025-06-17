@@ -128,6 +128,7 @@ public final class DataService {
     }
 
     public CompletableFuture<Void> loadPlayerData(UUID uuid) {
+        if (CacheAccess.get(History.class, uuid).isPresent()) return CompletableFuture.completedFuture(null);
         return fixPlayerData(uuid)
                 .thenCompose(ignored -> CompletableFuture.allOf(
                         loadAndCache(CollectionBox.class, uuid, () -> CollectionBox.empty(uuid)),

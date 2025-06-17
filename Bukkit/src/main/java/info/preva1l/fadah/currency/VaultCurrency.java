@@ -30,19 +30,19 @@ public class VaultCurrency implements Currency {
     }
 
     @Override
-    public void withdraw(OfflinePlayer player, double amountToTake) {
+    public boolean withdraw(OfflinePlayer player, double amountToTake) {
         if (economy == null) {
             throw new RuntimeException("Vault has no compatible economy plugin.");
         }
-        economy.withdrawPlayer(player, amountToTake);
+        return economy.withdrawPlayer(player, amountToTake).transactionSuccess();
     }
 
     @Override
-    public void add(OfflinePlayer player, double amountToAdd) {
+    public boolean add(OfflinePlayer player, double amountToAdd) {
         if (economy == null) {
             throw new RuntimeException("Vault has no compatible economy plugin.");
         }
-        economy.depositPlayer(player, amountToAdd);
+        return economy.depositPlayer(player, amountToAdd).transactionSuccess();
     }
 
 
