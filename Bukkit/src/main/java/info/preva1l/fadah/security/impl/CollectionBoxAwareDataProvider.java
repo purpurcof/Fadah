@@ -22,7 +22,7 @@ public final class CollectionBoxAwareDataProvider implements AwareCollectableDat
     public void execute(CollectionBox box, CollectableItem item, Runnable action) {
         CacheAccess.get(CollectionBox.class, box.owner())
                 .ifPresent(b -> {
-                    if (!b.collectableItems().contains(item)) return;
+                    if (!b.contains(item)) return;
                     checkDatabase(b, item, action);
                 });
     }
@@ -30,8 +30,8 @@ public final class CollectionBoxAwareDataProvider implements AwareCollectableDat
     private void checkDatabase(CollectionBox box, CollectableItem item, Runnable action) {
         DataService.instance.get(CollectionBox.class, box.owner())
                 .thenAcceptAsync(it -> it.ifPresent(b -> {
-                    if (!b.collectableItems().contains(item)) {
-                        box.collectableItems().remove(item);
+                    if (!b.contains(item)) {
+                        box.remove(item);
                         return;
                     }
                     action.run();

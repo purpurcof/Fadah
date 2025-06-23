@@ -22,7 +22,7 @@ public final class ExpiredListingsAwareDataProvider implements AwareCollectableD
     public void execute(ExpiredItems box, CollectableItem item, Runnable action) {
         CacheAccess.get(ExpiredItems.class, box.owner())
                 .ifPresent(b -> {
-                    if (!b.expiredItems().contains(item)) return;
+                    if (!b.contains(item)) return;
                     checkDatabase(b, item, action);
                 });
     }
@@ -30,8 +30,8 @@ public final class ExpiredListingsAwareDataProvider implements AwareCollectableD
     private void checkDatabase(ExpiredItems box, CollectableItem item, Runnable action) {
         DataService.instance.get(ExpiredItems.class, box.owner())
                 .thenAcceptAsync(it -> it.ifPresent(b -> {
-                    if (!b.expiredItems().contains(item)) {
-                        box.expiredItems().remove(item);
+                    if (!b.contains(item)) {
+                        box.remove(item);
                         return;
                     }
                     action.run();

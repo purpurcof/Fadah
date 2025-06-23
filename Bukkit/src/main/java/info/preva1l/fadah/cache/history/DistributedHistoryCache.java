@@ -65,6 +65,6 @@ public final class DistributedHistoryCache implements Cache<History> {
 
     @Override
     public int amountByPlayer(@NotNull UUID player) {
-        return historicItems.get(player).historicItems().size();
+        return historicItems.get(player).items().size();
     }
 }

@@ -7,6 +7,7 @@ import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.ExpiredItems;
+import info.preva1l.fadah.records.collection.ImplExpiredItems;
 import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -48,7 +49,7 @@ public abstract class CommonSQLExpiredListingsDao implements Dao<ExpiredItems> {
                 final ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
                     List<CollectableItem> items = GSON.fromJson(resultSet.getString("items"), EXPIRED_LIST_TYPE);
-                    return Optional.of(new ExpiredItems(id, items));
+                    return Optional.of(new ImplExpiredItems(id, items));
                 }
             }
         } catch (SQLException e) {

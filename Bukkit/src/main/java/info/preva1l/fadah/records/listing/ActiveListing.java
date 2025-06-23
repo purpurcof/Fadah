@@ -12,6 +12,7 @@ import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.ExpiredItems;
+import info.preva1l.fadah.records.collection.ImplExpiredItems;
 import info.preva1l.fadah.security.AwareDataService;
 import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
@@ -87,7 +88,7 @@ public abstract class ActiveListing extends BaseListing {
         try {
             DataService.getInstance().get(ExpiredItems.class, getOwner())
                     .thenCompose(items -> {
-                        ExpiredItems expiredItems = items.orElseGet(() -> ExpiredItems.empty(getOwner()));
+                        ExpiredItems expiredItems = items.orElseGet(() -> ImplExpiredItems.empty(getOwner()));
                         expiredItems.add(collectableItem);
                         return DataService.getInstance().save(ExpiredItems.class, expiredItems);
                     })
@@ -157,17 +158,15 @@ public abstract class ActiveListing extends BaseListing {
             CollectableItem collectableItem = CollectableItem.of(itemStack.clone());
 
             CacheAccess.get(ExpiredItems.class, getOwner())
-                    .ifPresent(
+                    .ifPresentOrElse(
                             items -> {
                                 try {
                                     items.add(collectableItem);
                                 } catch (Exception e) {
                                     LOGGER.log(Level.WARNING, "Failed to add to cached expired items", e);
                                 }
-                            }
-                    );
-
-            handleCancelledItemToDatabase(collectableItem);
+                            },
+                            () -> handleCancelledItemToDatabase(collectableItem));
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to add cancelled item to expired items", e);
         }
@@ -179,7 +178,7 @@ public abstract class ActiveListing extends BaseListing {
                     .get(ExpiredItems.class, owner)
                     .thenAccept(expiredOpt -> {
                         try {
-                            ExpiredItems expired = expiredOpt.orElseGet(() -> ExpiredItems.empty(owner));
+                            ExpiredItems expired = expiredOpt.orElseGet(() -> ImplExpiredItems.empty(owner));
                             expired.add(collectableItem);
                             DataService.getInstance().save(ExpiredItems.class, expired)
                                     .exceptionally(saveThrowable -> {

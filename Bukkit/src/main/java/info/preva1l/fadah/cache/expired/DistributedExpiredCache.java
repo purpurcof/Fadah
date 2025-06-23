@@ -65,6 +65,6 @@ public final class DistributedExpiredCache implements Cache<ExpiredItems> {
 
     @Override
     public int amountByPlayer(@NotNull UUID player) {
-        return expiredItems.get(player).expiredItems().size();
+        return expiredItems.get(player).items().size();
     }
 }

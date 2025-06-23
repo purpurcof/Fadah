@@ -9,6 +9,7 @@ import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
+import info.preva1l.fadah.records.history.ImplHistory;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -42,7 +43,7 @@ public class MySQLFixerV3 implements V3Fixer {
                 final ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
                     List<HistoricItem> items = GSON.fromJson(resultSet.getString("items"), HISTORY_LIST_TYPE);
-                    DataService.getInstance().save(History.class, new History(player, items));
+                    DataService.getInstance().save(History.class, new ImplHistory(player, items));
                 }
             }
             try (PreparedStatement deleteStatement = connection.prepareStatement("""

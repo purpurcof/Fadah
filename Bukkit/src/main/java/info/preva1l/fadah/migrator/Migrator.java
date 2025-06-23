@@ -5,6 +5,7 @@ import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
+import info.preva1l.fadah.records.collection.ImplCollectionBox;
 import info.preva1l.fadah.records.listing.Listing;
 
 import java.util.List;
@@ -32,7 +33,8 @@ public interface Migrator {
 
             for (UUID owner : collectionBoxes.keySet()) {
                 CollectionBox box = DataService.getInstance().get(CollectionBox.class, owner).join()
-                        .orElse(new CollectionBox(owner, collectionBoxes.get(owner)));
+                        .orElse(ImplCollectionBox.empty(owner));
+                box.items().addAll(collectionBoxes.get(owner));
                 DataService.getInstance().save(CollectionBox.class, box);
                 migratedCollectionBoxes++;
             }

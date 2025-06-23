@@ -5,6 +5,7 @@ import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.Menus;
 import info.preva1l.fadah.config.misc.Tuple;
+import info.preva1l.fadah.records.StorageHolder;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
@@ -63,15 +64,15 @@ public class CollectionMenu extends PaginatedFastInv {
         addPaginationControls();
     }
 
-    private List<CollectableItem> getCurrentItems() {
+    private StorageHolder<CollectableItem> getCurrentItems() {
         return expired
-                ? CacheAccess.getNotNull(ExpiredItems.class, owner.getUniqueId()).expiredItems()
-                : CacheAccess.getNotNull(CollectionBox.class, owner.getUniqueId()).collectableItems();
+                ? CacheAccess.getNotNull(ExpiredItems.class, owner.getUniqueId())
+                : CacheAccess.getNotNull(CollectionBox.class, owner.getUniqueId());
     }
 
     @Override
     protected void fillPaginationItems() {
-        List<CollectableItem> items = getCurrentItems();
+        List<CollectableItem> items = getCurrentItems().items();
         items.sort(CollectableItem::compareTo);
 
         for (CollectableItem item : items) {
@@ -93,7 +94,7 @@ public class CollectionMenu extends PaginatedFastInv {
     }
 
     private void claimItem(CollectableItem item) {
-        List<CollectableItem> currentItems = getCurrentItems();
+        List<CollectableItem> currentItems = getCurrentItems().items();
         if (!currentItems.contains(item)) return;
 
         Tasks.sync(Fadah.getInstance(), player, () -> {

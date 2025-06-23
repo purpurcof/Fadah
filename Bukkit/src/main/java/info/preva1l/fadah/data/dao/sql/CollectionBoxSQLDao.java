@@ -20,7 +20,7 @@ public class CollectionBoxSQLDao extends CommonCollectionBoxSQLDao {
      */
     @Override
     public void save(CollectionBox collectableList) {
-        if (collectableList.collectableItems().isEmpty()) {
+        if (collectableList.items().isEmpty()) {
             delete(collectableList);
             return;
         }
@@ -32,7 +32,7 @@ public class CollectionBoxSQLDao extends CommonCollectionBoxSQLDao {
                     ON DUPLICATE KEY UPDATE
                         `items` = VALUES(`items`);""")) {
                 statement.setString(1, collectableList.owner().toString());
-                statement.setString(2, GSON.toJson(collectableList.collectableItems(), COLLECTION_LIST_TYPE));
+                statement.setString(2, GSON.toJson(collectableList.items(), COLLECTION_LIST_TYPE));
                 statement.executeUpdate();
             }
         } catch (SQLException e) {

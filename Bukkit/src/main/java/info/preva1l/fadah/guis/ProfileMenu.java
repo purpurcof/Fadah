@@ -104,7 +104,7 @@ public class ProfileMenu extends FastInv {
                                         ? Text.capitalizeFirst(Lang.i().getWords().getYour())
                                         : owner.getName()),
                                 Tuple.of("%username%", owner.getName()),
-                                Tuple.of("%amount%", CacheAccess.getNotNull(CollectionBox.class, owner.getUniqueId()).collectableItems().size()))
+                                Tuple.of("%amount%", CacheAccess.amountByPlayer(CollectionBox.class, owner.getUniqueId())))
                         ).build(), e -> {
                     if ((viewer.getUniqueId() != owner.getUniqueId() && viewer.hasPermission("fadah.manage.collection-box"))
                             || viewer.getUniqueId() == owner.getUniqueId()) {
@@ -129,7 +129,7 @@ public class ProfileMenu extends FastInv {
                                         ? Text.capitalizeFirst(Lang.i().getWords().getYour())
                                         : owner.getName()),
                                 Tuple.of("%username%", owner.getName()),
-                                Tuple.of("%amount%", CacheAccess.getNotNull(ExpiredItems.class, owner.getUniqueId()).expiredItems().size()))
+                                Tuple.of("%amount%", CacheAccess.amountByPlayer(ExpiredItems.class, owner.getUniqueId())))
                         ).build(), e -> {
                     if ((viewer.getUniqueId() != owner.getUniqueId() && viewer.hasPermission("fadah.manage.expired-listings"))
                             || viewer.getUniqueId() == owner.getUniqueId()) {

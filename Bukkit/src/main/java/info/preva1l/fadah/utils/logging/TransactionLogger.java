@@ -5,6 +5,7 @@ import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.hooks.impl.InfluxDBHook;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
+import info.preva1l.fadah.records.history.ImplHistory;
 import info.preva1l.fadah.records.listing.BidListing;
 import info.preva1l.fadah.records.listing.BinListing;
 import info.preva1l.fadah.records.listing.Listing;
@@ -167,7 +168,7 @@ public class TransactionLogger {
         DataService.getInstance()
                 .get(History.class, owner)
                 .thenAccept(historyOpt -> {
-                    var history = historyOpt.orElseGet(() -> History.empty(owner));
+                    var history = historyOpt.orElseGet(() -> ImplHistory.empty(owner));
                     history.add(historicItem);
                     DataService.getInstance().save(History.class, history);
                 });

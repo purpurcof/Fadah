@@ -51,13 +51,13 @@ public class PlayerListener implements Listener {
 
         CacheAccess.get(ExpiredItems.class, e.getPlayer().getUniqueId())
                 .ifPresent(items -> {
-                    if (items.expiredItems().isEmpty()) return;
+                    if (items.items().isEmpty()) return;
                     Lang.sendMessage(e.getPlayer(), String.join("\n", Lang.i().getNotifications().getExpiredItem()));
                 });
 
         CacheAccess.get(CollectionBox.class, e.getPlayer().getUniqueId())
                 .ifPresent(items -> {
-                    if (items.collectableItems().isEmpty()) return;
+                    if (items.items().isEmpty()) return;
                     Lang.sendMessage(e.getPlayer(), String.join("\n", Lang.i().getNotifications().getNewItem()));
                 });
 

@@ -47,6 +47,6 @@ public final class MemoryCollectionCache implements Cache<CollectionBox> {
 
     @Override
     public int amountByPlayer(@NotNull UUID player) {
-        return collectionBoxes.get(player).collectableItems().size();
+        return collectionBoxes.get(player).items().size();
     }
 }

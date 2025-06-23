@@ -7,6 +7,7 @@ import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
+import info.preva1l.fadah.records.collection.ImplCollectionBox;
 import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -48,7 +49,7 @@ public abstract class CommonCollectionBoxSQLDao implements Dao<CollectionBox> {
                 final ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
                     List<CollectableItem> items = GSON.fromJson(resultSet.getString("items"), COLLECTION_LIST_TYPE);
-                    return Optional.of(new CollectionBox(id, items));
+                    return Optional.of(new ImplCollectionBox(id, items));
                 }
             }
         } catch (SQLException e) {

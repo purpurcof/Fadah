@@ -7,6 +7,7 @@ import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
+import info.preva1l.fadah.records.history.ImplHistory;
 import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -49,7 +50,7 @@ public abstract class CommonHistorySQLDao implements Dao<History> {
                 final ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
                     List<HistoricItem> items = GSON.fromJson(resultSet.getString("items"), HISTORY_LIST_TYPE);
-                    return Optional.of(new History(id, items));
+                    return Optional.of(new ImplHistory(id, items));
                 }
             }
         } catch (SQLException e) {

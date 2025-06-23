@@ -30,7 +30,7 @@ public class HistorySQLDao extends CommonHistorySQLDao {
                     ON DUPLICATE KEY UPDATE
                         `items` = VALUES(`items`);""")) {
                 statement.setString(1, history.owner().toString());
-                statement.setString(2, GSON.toJson(history.historicItems(), HISTORY_LIST_TYPE));
+                statement.setString(2, GSON.toJson(history.items(), HISTORY_LIST_TYPE));
                 statement.executeUpdate();
             }
 

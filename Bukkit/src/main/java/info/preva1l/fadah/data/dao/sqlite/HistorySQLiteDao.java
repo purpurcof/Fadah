@@ -29,7 +29,7 @@ public class HistorySQLiteDao extends CommonHistorySQLDao {
                     ON CONFLICT(`playerUUID`) DO UPDATE SET
                         `items` = excluded.`items`;""")) {
                 statement.setString(1, history.owner().toString());
-                statement.setString(2, GSON.toJson(history.historicItems(), HISTORY_LIST_TYPE));
+                statement.setString(2, GSON.toJson(history.items(), HISTORY_LIST_TYPE));
                 statement.executeUpdate();
             } catch (Exception e) {
                 e.printStackTrace();

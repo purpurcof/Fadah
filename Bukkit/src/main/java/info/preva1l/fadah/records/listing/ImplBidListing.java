@@ -10,6 +10,7 @@ import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
+import info.preva1l.fadah.records.collection.ImplCollectionBox;
 import info.preva1l.fadah.security.AwareDataService;
 import info.preva1l.fadah.utils.Text;
 import lombok.Getter;
@@ -256,7 +257,7 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
                                     DataService.getInstance()
                                             .get(CollectionBox.class, winningBid.bidder())
                                             .thenCompose(items -> {
-                                                CollectionBox box = items.orElseGet(() -> CollectionBox.empty(winningBid.bidder()));
+                                                CollectionBox box = items.orElseGet(() -> ImplCollectionBox.empty(winningBid.bidder()));
                                                 box.add(collectableItem);
                                                 return DataService.getInstance().save(CollectionBox.class, box);
                                             })

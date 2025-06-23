@@ -145,7 +145,7 @@ public class HistoryMenu extends PaginatedFastInv {
     }
 
     private List<HistoricItem> getAndFilterHistoricItems() {
-        List<HistoricItem> items = new ArrayList<>(CacheAccess.getNotNull(History.class, owner.getUniqueId()).historicItems());
+        List<HistoricItem> items = new ArrayList<>(CacheAccess.getNotNull(History.class, owner.getUniqueId()).items());
 
         if (dateSearch != null && !dateSearch.trim().isEmpty())
             items.removeIf(item -> !doesItemMatchDateSearch(item));
