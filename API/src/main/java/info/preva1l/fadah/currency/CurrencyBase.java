@@ -9,8 +9,8 @@ import org.jetbrains.annotations.ApiStatus;
  * <br><br>
  * Created on 11/03/2025
  *
- * @since 3.0.0
  * @author Preva1l
+ * @since 3.0.0
  */
 @ApiStatus.NonExtendable
 public interface CurrencyBase {
@@ -42,6 +42,7 @@ public interface CurrencyBase {
      * Does not affect if the currency gets loaded or not.
      *
      * @return if users can use the currency.
+     * @since 3.2.0
      */
     default boolean isEnabled() {
         return true;
