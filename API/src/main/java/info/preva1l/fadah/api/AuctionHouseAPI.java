@@ -2,6 +2,7 @@ package info.preva1l.fadah.api;
 
 import info.preva1l.fadah.api.managers.CategoryManager;
 import info.preva1l.fadah.api.managers.ListingManager;
+import info.preva1l.fadah.filters.MatcherArgsRegistry;
 import info.preva1l.fadah.records.Category;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
@@ -38,7 +39,7 @@ public abstract class AuctionHouseAPI {
      * Get the custom item filtering namespacedkey
      *
      * @return namespacedkey
-     * @deprecated replaced with {@link info.preva1l.fadah.processor.ProcessorArgsRegistry} and category matchers
+     * @deprecated replaced with {@link MatcherArgsRegistry} and category matchers
      */
     @Deprecated(since = "2.9", forRemoval = true)
     public NamespacedKey getCustomItemNameSpacedKey() {
@@ -50,7 +51,7 @@ public abstract class AuctionHouseAPI {
      *
      * @param key namespacedkey
      * @since 1.0
-     * @deprecated replaced with {@link info.preva1l.fadah.processor.ProcessorArgsRegistry} and category matchers
+     * @deprecated replaced with {@link MatcherArgsRegistry} and category matchers
      */
     @Deprecated(since = "2.9", forRemoval = true)
     public void setCustomItemNameSpacedKey(NamespacedKey key) {

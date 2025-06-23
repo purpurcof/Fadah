@@ -97,9 +97,7 @@ public class CollectionMenu extends PaginatedFastInv {
         if (!currentItems.contains(item)) return;
 
         Tasks.sync(Fadah.getInstance(), player, () -> {
-            if (!getCurrentItems().contains(item)) {
-                return;
-            }
+            if (!getCurrentItems().contains(item)) return;
 
             ItemStack itemStack = item.itemStack();
             if (!tryAddToInventory(player, itemStack)) {
@@ -135,7 +133,9 @@ public class CollectionMenu extends PaginatedFastInv {
                 item.itemStack(),
                 null,
                 null,
-                null);
+                false,
+                null
+        );
 
         CacheAccess.getNotNull(History.class, owner.getUniqueId()).add(historicItem);
     }
@@ -158,10 +158,5 @@ public class CollectionMenu extends PaginatedFastInv {
         setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.BACK, -1),
                 Menus.i().getBackButton().itemStack(), e ->
                         new ProfileMenu(player, owner).open(player));
-    }
-
-    @Override
-    protected void updatePagination() {
-        super.updatePagination();
     }
 }

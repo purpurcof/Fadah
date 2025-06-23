@@ -1,6 +1,7 @@
 package info.preva1l.fadah.config.upgraders;
 
 import info.preva1l.fadah.config.upgraders.impl.CurrencyConfigUpgrader;
+import info.preva1l.fadah.config.upgraders.impl.MatcherUpgrader;
 import info.preva1l.trashcan.flavor.annotations.Configure;
 import info.preva1l.trashcan.flavor.annotations.Service;
 import info.preva1l.trashcan.flavor.annotations.inject.Inject;
@@ -25,7 +26,8 @@ public final class ConfigUpgraderService {
     @Configure
     public void configure() {
         Stream.of(
-                new CurrencyConfigUpgrader(logger)
+                new CurrencyConfigUpgrader(logger),
+                new MatcherUpgrader(logger)
         ).forEach(ConfigUpgrader::migrate);
     }
 }

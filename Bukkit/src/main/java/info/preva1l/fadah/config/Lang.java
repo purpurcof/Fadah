@@ -320,6 +320,8 @@ public class Lang {
         private String listingCancelledAdmin = "Listing Cancelled by Admins";
         private String expiredItemClaimedAdmin = "Expired Listing Claimed by Admins";
         private String collectionBoxClaimedAdmin = "Collection Box Item Claimed by Admins";
+        private String listingBidReceived = "Bid Received";
+        private String listingBidPlaced = "Bid Placed";
     }
 
     private Sort sort = new Sort();

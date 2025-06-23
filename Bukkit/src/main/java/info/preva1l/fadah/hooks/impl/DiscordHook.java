@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.records.listing.Listing;
+import info.preva1l.fadah.utils.Text;
 import info.preva1l.hooker.annotation.Hook;
 import info.preva1l.hooker.annotation.OnStart;
 import info.preva1l.hooker.annotation.Reloadable;
@@ -12,7 +13,6 @@ import info.preva1l.hooker.annotation.Require;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -87,7 +87,7 @@ public class DiscordHook {
     private String formatString(String str, Listing listing) {
         return str
                 .replace("%player%", listing.getOwnerName())
-                .replace("%item%", ((TextComponent) listing.getItemStack().displayName()).content())
+                .replace("%item%", Text.extractItemNameToString(listing.getItemStack()))
                 .replace("%price%", df.format(listing.getPrice()));
     }
 

@@ -34,7 +34,8 @@ public class TransactionLogger {
                 listing.getItemStack(),
                 price,
                 null,
-                bidding
+                bidding,
+                null
         );
 
         CacheAccess.getNotNull(History.class, listing.getOwner()).add(historicItem);
@@ -54,11 +55,13 @@ public class TransactionLogger {
     public void listingSold(Listing listing, OfflinePlayer buyer) {
         boolean bidding = false;
         double price;
+        Double startingBid = null;
         if (listing instanceof BinListing bin) {
             price = bin.getPrice();
         } else if (listing instanceof BidListing bid) {
             bidding = true;
             price = bid.getCurrentBid().bidAmount();
+            startingBid = bid.getStartingBid();
         } else throw new IllegalArgumentException("Invalid listing class: " + listing);
 
         // In Game logs
@@ -68,7 +71,8 @@ public class TransactionLogger {
                 listing.getItemStack(),
                 price,
                 buyer.getUniqueId(),
-                bidding
+                bidding,
+                startingBid
         );
 
         CacheAccess.get(History.class, listing.getOwner())
@@ -83,7 +87,8 @@ public class TransactionLogger {
                 listing.getItemStack(),
                 price,
                 listing.getOwner(),
-                bidding
+                bidding,
+                startingBid
         );
 
         CacheAccess.get(History.class, buyer.getUniqueId())
@@ -148,7 +153,8 @@ public class TransactionLogger {
                 listing.getItemStack(),
                 null,
                 null,
-                bidding
+                bidding,
+                null
         );
         CacheAccess.get(History.class, listing.getOwner())
                 .ifPresentOrElse(

@@ -5,7 +5,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Access to the category registry via the API.
@@ -38,7 +37,7 @@ public interface CategoryManager {
      * @return the category id or "{@code _none_}"
      * @since 3.0.0
      */
-    CompletableFuture<String> forItem(@NotNull ItemStack item);
+    String forItem(@NotNull ItemStack item);
 
     /**
      * Register a custom category via the api.

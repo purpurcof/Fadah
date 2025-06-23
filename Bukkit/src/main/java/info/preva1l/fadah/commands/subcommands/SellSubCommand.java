@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 
 public final class SellSubCommand {
     private final Fadah plugin;
@@ -89,35 +88,22 @@ public final class SellSubCommand {
                 .itemStack(item)
                 .length(Config.i().getDefaultListingLength().toMillis())
                 .toPost()
-                .buildAndSubmit().thenAccept(result -> Tasks.sync(plugin, player, () -> {
+                .buildAndSubmit()
+                .failure(result -> {
                     if (result == PostResult.RESTRICTED_ITEM) {
-                        player.getInventory().setItemInMainHand(item);
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getRestricted());
-                        running.remove(player.getUniqueId());
-                        return;
-                    }
-
-                    if (result == PostResult.MAX_LISTINGS) {
-                        player.getInventory().setItemInMainHand(item);
+                    } else if (result == PostResult.MAX_LISTINGS) {
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMaxListings()
                                 .replace("%max%", PermissionsHook.getValue(String.class, Permission.MAX_LISTINGS, player))
                                 .replace("%current%", String.valueOf(CacheAccess.amountByPlayer(Listing.class, player.getUniqueId())))
                         );
-                        running.remove(player.getUniqueId());
-                        return;
-                    }
-
-                    if (!result.successful()) {
-                        player.getInventory().setItemInMainHand(item);
+                    } else {
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getOther().replace("%ex%", result.message()));
                     }
 
+                    player.getInventory().setItemInMainHand(item);
                     running.remove(player.getUniqueId());
-                }))
-                .exceptionally(t -> {
-                    plugin.getLogger().log(Level.SEVERE, t.getMessage(), t);
-                    running.remove(player.getUniqueId());
-                    return null;
-                });
+                })
+                .success(result -> running.remove(player.getUniqueId()));
     }
 }

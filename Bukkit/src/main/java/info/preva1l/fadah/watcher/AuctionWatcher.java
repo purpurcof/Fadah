@@ -16,12 +16,12 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 @UtilityClass
@@ -36,26 +36,27 @@ public class AuctionWatcher {
         return Optional.ofNullable(watchingListings.get(uuid));
     }
 
-    @Blocking
     public void alertWatchers(@NotNull Listing listing) {
-        for (Map.Entry<UUID, Watching> entry : watchingListings.entrySet()) {
-            Watching watching = entry.getValue();
-            if (watching.getSearch() != null) {
-                if (Text.doesItemHaveString(watching.getSearch().toUpperCase(), listing.getItemStack())
-                        || checkForEnchantmentOnBook(watching.getSearch().toUpperCase(), listing.getItemStack())) {
-                    if (priceCheck(listing, watching)) {
+        CompletableFuture.runAsync(() -> {
+            for (Map.Entry<UUID, Watching> entry : watchingListings.entrySet()) {
+                Watching watching = entry.getValue();
+                if (watching.getSearch() != null) {
+                    if (Text.doesItemHaveString(watching.getSearch().toUpperCase(), listing.getItemStack())
+                            || checkForEnchantmentOnBook(watching.getSearch().toUpperCase(), listing.getItemStack())) {
+                        if (priceCheck(listing, watching)) {
+                            sendAlert(entry.getKey(), listing);
+                            return;
+                        }
                         sendAlert(entry.getKey(), listing);
                         return;
                     }
+                }
+
+                if (priceCheck(listing, watching)) {
                     sendAlert(entry.getKey(), listing);
-                    return;
                 }
             }
-
-            if (priceCheck(listing, watching)) {
-                sendAlert(entry.getKey(), listing);
-            }
-        }
+        });
     }
 
     private boolean priceCheck(Listing listing, Watching watching) {

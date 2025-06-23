@@ -3,7 +3,6 @@ package info.preva1l.fadah.commands;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.commands.parsers.ColoringFormatter;
 import info.preva1l.fadah.config.Lang;
-import info.preva1l.fadah.utils.Text;
 import info.preva1l.trashcan.extension.annotations.ExtensionReload;
 import info.preva1l.trashcan.flavor.annotations.Configure;
 import info.preva1l.trashcan.flavor.annotations.Service;
@@ -22,14 +21,11 @@ import org.incendo.cloud.minecraft.extras.caption.ComponentCaptionFormatter;
 import org.incendo.cloud.minecraft.extras.caption.RichVariable;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
 
-import java.util.logging.Logger;
-
 @Service(priority = 2)
 public final class CommandService {
     public static final CommandService instance = new CommandService();
 
     @Inject private Fadah plugin;
-    @Inject private Logger logger;
 
     private LegacyPaperCommandManager<CommandSender> commandManager;
     private AnnotationParser<CommandSender> parser;
@@ -57,47 +53,40 @@ public final class CommandService {
         parser = new AnnotationParser<>(commandManager, CommandSender.class);
 
         commandManager.captionRegistry().registerProvider((caption, recipient) -> switch (caption.key()) {
-            case "exception.invalid_syntax" -> Lang.i().getErrors().getInvalidUsage();
-            case "exception.invalid_argument" -> Lang.i().getErrors().getInvalidArgument();
-            case "exception.no_permission" -> Lang.i().getErrors().getNoPermission();
-            case "exception.no_such_command" -> Lang.i().getErrors().getCommandNotFound();
-            case "exception.invalid_sender" -> Lang.i().getErrors().getMustBePlayer();
+            case "exception.invalid_syntax" -> Lang.i().getPrefix() + Lang.i().getErrors().getInvalidUsage();
+            case "exception.invalid_argument" -> Lang.i().getPrefix() + Lang.i().getErrors().getInvalidArgument();
+            case "exception.no_permission" -> Lang.i().getPrefix() + Lang.i().getErrors().getNoPermission();
+            case "exception.no_such_command" -> Lang.i().getPrefix() + Lang.i().getErrors().getCommandNotFound();
+            case "exception.invalid_sender" -> Lang.i().getPrefix() + Lang.i().getErrors().getMustBePlayer();
             default -> null;
         });
 
         ColoringFormatter formatter = new ColoringFormatter();
         MinecraftExceptionHandler.<CommandSender>createNative()
                 .captionFormatter(formatter)
-                .handler(InvalidSyntaxException.class, (sender, ctx) -> prefix()
-                        .append(ctx.context()
-                                .formatCaption(
-                                        formatter,
-                                        StandardCaptionKeys.EXCEPTION_INVALID_SYNTAX,
-                                        CaptionVariable.of("syntax", ctx.exception().correctSyntax())
-                                )))
-                .handler(ArgumentParseException.class, (sender, ctx) -> prefix()
-                        .append(ctx.context()
-                                .formatCaption(
-                                        formatter,
-                                        StandardCaptionKeys.EXCEPTION_INVALID_ARGUMENT,
-                                        RichVariable.of("cause", getMessage(formatter, ctx.exception().getCause()))
-                                )))
-                .handler(NoPermissionException.class, (sender, ctx) -> prefix()
-                        .append(ctx.context()
-                                .formatCaption(
-                                        formatter,
-                                        StandardCaptionKeys.EXCEPTION_NO_PERMISSION,
-                                        CaptionVariable.of("permission", ctx.exception().permissionResult().permission().permissionString())
-                                )))
-                .handler(NoSuchCommandException.class, (sender, ctx) -> prefix()
-                        .append(ctx.context().formatCaption(formatter, StandardCaptionKeys.EXCEPTION_NO_SUCH_COMMAND)))
-                .handler(InvalidCommandSenderException.class, (sender, ctx) -> prefix()
-                        .append(ctx.context().formatCaption(formatter, StandardCaptionKeys.EXCEPTION_INVALID_SENDER)))
+                .handler(InvalidSyntaxException.class, (sender, ctx) -> ctx.context()
+                        .formatCaption(
+                                formatter,
+                                StandardCaptionKeys.EXCEPTION_INVALID_SYNTAX,
+                                CaptionVariable.of("syntax", ctx.exception().correctSyntax())
+                        ))
+                .handler(ArgumentParseException.class, (sender, ctx) -> ctx.context()
+                        .formatCaption(
+                                formatter,
+                                StandardCaptionKeys.EXCEPTION_INVALID_ARGUMENT,
+                                RichVariable.of("cause", getMessage(formatter, ctx.exception().getCause()))
+                        ))
+                .handler(NoPermissionException.class, (sender, ctx) -> ctx.context()
+                        .formatCaption(
+                                formatter,
+                                StandardCaptionKeys.EXCEPTION_NO_PERMISSION,
+                                CaptionVariable.of("permission", ctx.exception().permissionResult().permission().permissionString())
+                        ))
+                .handler(NoSuchCommandException.class, (sender, ctx) ->
+                        ctx.context().formatCaption(formatter, StandardCaptionKeys.EXCEPTION_NO_SUCH_COMMAND))
+                .handler(InvalidCommandSenderException.class, (sender, ctx) ->
+                        ctx.context().formatCaption(formatter, StandardCaptionKeys.EXCEPTION_INVALID_SENDER))
                 .registerTo(commandManager);
-    }
-
-    private Component prefix() {
-        return Text.text(Lang.i().getPrefix());
     }
 
     private <C> Component getMessage(final ComponentCaptionFormatter<C> formatter, final Throwable throwable) {

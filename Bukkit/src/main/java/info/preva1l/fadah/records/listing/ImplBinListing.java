@@ -110,7 +110,7 @@ public final class ImplBinListing extends ActiveListing implements BinListing {
     private void sendNotifications(@NotNull Player buyer, ItemStack itemStack, double sellerAmount) {
         Lang.sendMessage(buyer, String.join("\n", Lang.i().getNotifications().getNewItem()));
 
-        String itemName = Text.extractItemName(itemStack);
+        Component itemName = Text.extractItemName(itemStack);
         String formattedPrice = Config.i().getFormatting().numbers().format(sellerAmount);
         Component message = Text.text(Lang.i().getNotifications().getSale(),
                 Tuple.of("%item%", itemName),

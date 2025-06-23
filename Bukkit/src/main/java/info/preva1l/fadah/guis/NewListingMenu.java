@@ -1,6 +1,5 @@
 package info.preva1l.fadah.guis;
 
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.commands.subcommands.SellSubCommand;
 import info.preva1l.fadah.config.Config;
@@ -15,7 +14,6 @@ import info.preva1l.fadah.hooks.impl.permissions.PermissionsHook;
 import info.preva1l.fadah.records.listing.ImplListingBuilder;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.records.post.PostResult;
-import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.utils.TimeUtil;
 import info.preva1l.fadah.utils.guis.FastInv;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
@@ -28,10 +26,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 import java.time.Instant;
-import java.util.logging.Level;
 
 public class NewListingMenu extends FastInv {
-    private final Fadah plugin = Fadah.getInstance();
     private final Player player;
     private final ItemStack itemToSell;
     private long timeOffsetMillis;
@@ -88,36 +84,23 @@ public class NewListingMenu extends FastInv {
                 .biddable(isBidding)
                 .toPost()
                 .postAdvert(advertise)
-                .buildAndSubmit().thenAccept(result -> Tasks.sync(plugin, player, () -> {
+                .buildAndSubmit()
+                .failure(result -> {
+                    giveItemBack = true;
                     if (result == PostResult.RESTRICTED_ITEM) {
-                        giveItemBack = true;
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getRestricted());
-                        SellSubCommand.running.remove(player.getUniqueId());
-                        return;
-                    }
-
-                    if (result == PostResult.MAX_LISTINGS) {
-                        giveItemBack = true;
+                    } else if (result == PostResult.MAX_LISTINGS) {
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMaxListings()
                                 .replace("%max%", PermissionsHook.getValue(String.class, Permission.MAX_LISTINGS, player))
                                 .replace("%current%", String.valueOf(CacheAccess.amountByPlayer(Listing.class, player.getUniqueId())))
                         );
-                        SellSubCommand.running.remove(player.getUniqueId());
-                        player.closeInventory();
-                        return;
-                    }
-
-                    if (!result.successful()) {
-                        giveItemBack = true;
+                    } else {
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getOther().replace("%ex%", result.message()));
                     }
 
                     player.closeInventory();
-                }))
-                .exceptionally(t -> {
-                    Fadah.getInstance().getLogger().log(Level.SEVERE, t.getMessage(), t);
-                    return null;
-                });
+                })
+                .success(result -> player.closeInventory());
     }
 
     @Override

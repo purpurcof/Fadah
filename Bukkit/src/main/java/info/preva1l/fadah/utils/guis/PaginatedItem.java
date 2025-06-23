@@ -6,4 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.function.Consumer;
 
 public record PaginatedItem(ItemStack itemStack, Consumer<InventoryClickEvent> eventConsumer) {
+    public PaginatedItem(ItemStack itemStack) {
+        this(itemStack, (e) -> {});
+    }
 }

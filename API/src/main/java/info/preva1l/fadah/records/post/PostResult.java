@@ -1,6 +1,7 @@
 package info.preva1l.fadah.records.post;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * The result of a post.
@@ -82,7 +83,17 @@ public class PostResult {
      * {@link PostResult#SUCCESS} or {@link PostResult#SUCCESS_ADVERT_FAIL}. This could possibly change in the future.
      */
     public boolean successful() {
-        return ordinal == PostResult.SUCCESS.ordinal() || ordinal == PostResult.SUCCESS_ADVERT_FAIL.ordinal();
+        return this == PostResult.SUCCESS || this == PostResult.SUCCESS_ADVERT_FAIL;
+    }
+
+    public PostResult success(Consumer<PostResult> supplier) {
+        if (successful()) supplier.accept(this);
+        return this;
+    }
+
+    public PostResult failure(Consumer<PostResult> supplier) {
+        if (!successful()) supplier.accept(this);
+        return this;
     }
 
     @Override

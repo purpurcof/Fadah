@@ -91,6 +91,8 @@ public final class BukkitAuctionHouseAPI extends AuctionHouseAPI {
             case LISTING_ADMIN_CANCEL -> actions.getListingCancelledAdmin();
             case EXPIRED_ITEM_ADMIN_CLAIM -> actions.getExpiredItemClaimedAdmin();
             case COLLECTION_BOX_ADMIN_CLAIM -> actions.getCollectionBoxClaimedAdmin();
+            case LISTING_BID_RECEIVED -> actions.getListingBidReceived();
+            case LISTING_BID_PLACED -> actions.getListingBidPlaced();
         };
     }
 }

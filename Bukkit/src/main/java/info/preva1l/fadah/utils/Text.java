@@ -7,15 +7,18 @@ import info.preva1l.hooker.Hooker;
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.internal.parser.Token;
 import net.kyori.adventure.text.minimessage.internal.parser.TokenParser;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +32,7 @@ import java.util.stream.Collectors;
 public class Text {
     private final MiniMessage miniMessage = MiniMessage.builder().build();
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacyAmpersand();
+    private final PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
     private final Pattern REMOVE_PATTERN = Pattern.compile("&#(\\w{5}[0-9a-fA-F])|&[0-9a-fA-Fk-orK-OR]");
 
     @SafeVarargs
@@ -45,8 +49,7 @@ public class Text {
     public Component text(@Nullable Player player, @NotNull String message, Tuple<String, Object>... args) {
         Optional<PapiHook> hook = Hooker.getHook(PapiHook.class);
         if (hook.isPresent()) message = hook.get().format(player, message);
-        return miniMessage.deserialize(unescape(miniMessage.serialize(
-                                        legacySerializer.deserialize("<!italic>" + replace(message, args)))));
+        return replace(miniMessage.deserialize(unescape(miniMessage.serialize(legacySerializer.deserialize("<!italic>" + message)))), args);
     }
 
     @SafeVarargs
@@ -57,10 +60,6 @@ public class Text {
     @SafeVarargs
     public List<Component> list(@Nullable Player player, List<String> list, Tuple<String, Object>... args) {
         return list.stream().map(string -> Text.text(player, string, args)).collect(Collectors.toList());
-    }
-
-    public Component cloudify(String message) {
-        return text("<!italic>" + message.replaceAll("%([^%]+)%", "<$1>"));
     }
 
     /**
@@ -102,18 +101,40 @@ public class Text {
      * @return formatted string
      */
     @SafeVarargs
-    public String replace(String message, Tuple<String, Object>... args) {
+    public Component replace(Component message, Tuple<String, Object>... args) {
+        if (args.length == 0) return message;
+
+        Component result = message;
         for (Tuple<String, Object> replacement : args) {
-            if (!message.contains(replacement.first())) continue;
-
-            if (replacement.second() instanceof Component comp) {
-                message = message.replace(replacement.first(), legacySerializer.serialize(comp));
-                continue;
+            Object value = replacement.second();
+            if (value instanceof Component comp) {
+                result = result.replaceText(b -> b.match(replacement.first()).replacement(comp));
+            } else {
+                result = result.replaceText(b -> b.match(replacement.first()).replacement(String.valueOf(value)));
             }
-
-            message = message.replace(replacement.first(), String.valueOf(replacement.second()));
         }
-        return message;
+
+        if (!result.children().isEmpty()) {
+            List<Component> children = new ArrayList<>(result.children().size());
+            for (Component child : result.children()) {
+                ClickEvent event = child.clickEvent();
+                if (event != null) {
+                    String eventValue = event.value();
+                    for (Tuple<String, Object> replacement : args) {
+                        Object value = replacement.second();
+                        String replaceWith = value instanceof TextComponent tc ? tc.content() : String.valueOf(value);
+                        eventValue = eventValue.replace(replacement.first(), replaceWith);
+                    }
+                    if (!eventValue.equals(event.value())) {
+                        child = child.clickEvent(ClickEvent.clickEvent(event.action(), eventValue));
+                    }
+                }
+                children.add(replace(child, args));
+            }
+            result = result.children(children);
+        }
+
+        return result;
     }
 
     /**
@@ -176,10 +197,14 @@ public class Text {
      * Gets an item name from an item stack
      *
      * @param item item stack
-     * @return formatted item name
+     * @return item name component
      */
     public Component extractItemName(ItemStack item) {
         return item.displayName();
+    }
+
+    public String extractItemNameToString(ItemStack item) {
+        return plainSerializer.serialize(extractItemName(item));
     }
 
     /**

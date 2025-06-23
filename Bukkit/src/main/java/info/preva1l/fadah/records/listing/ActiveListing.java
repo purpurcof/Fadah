@@ -157,16 +157,17 @@ public abstract class ActiveListing extends BaseListing {
             CollectableItem collectableItem = CollectableItem.of(itemStack.clone());
 
             CacheAccess.get(ExpiredItems.class, getOwner())
-                    .ifPresentOrElse(
+                    .ifPresent(
                             items -> {
                                 try {
                                     items.add(collectableItem);
                                 } catch (Exception e) {
                                     LOGGER.log(Level.WARNING, "Failed to add to cached expired items", e);
                                 }
-                            },
-                            () -> handleCancelledItemToDatabase(collectableItem)
+                            }
                     );
+
+            handleCancelledItemToDatabase(collectableItem);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to add cancelled item to expired items", e);
         }

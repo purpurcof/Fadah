@@ -6,7 +6,7 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.data.DataService;
-import info.preva1l.fadah.filters.Restrictions;
+import info.preva1l.fadah.filters.MatcherService;
 import info.preva1l.fadah.hooks.impl.DiscordHook;
 import info.preva1l.fadah.hooks.impl.permissions.Permission;
 import info.preva1l.fadah.hooks.impl.permissions.PermissionsHook;
@@ -23,11 +23,10 @@ import info.preva1l.hooker.Hooker;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Created on 7/03/2025
@@ -44,39 +43,33 @@ public final class ImplPost extends Post {
     }
 
     @Override
-    public CompletableFuture<PostResult> buildAndSubmit() {
-        ExecutorService executor = DataService.getInstance().getThreadPool();
-
+    public PostResult buildAndSubmit() {
         if (bypassTax) listingBuilder.tax(0.0);
 
-        return listingBuilder.build().thenComposeAsync(listing ->
-                Restrictions.isRestrictedItem(listing.getItemStack()).thenApplyAsync(restricted ->
-                        (!restricted || bypassRestrictedItems) ? listing : null, executor), executor
-        ).thenComposeAsync(listing -> {
-            if (listing == null) return CompletableFuture.completedFuture(PostResult.RESTRICTED_ITEM);
+        Listing listing = listingBuilder.build();
+        if (isRestrictedItem(listing.getItemStack())) return PostResult.RESTRICTED_ITEM;
 
-            if (!bypassMaxListings && player != null) {
-                int currentListings = CacheAccess.amountByPlayer(Listing.class, player.getUniqueId());
-                int maxListings = PermissionsHook.getValue(Integer.class, Permission.MAX_LISTINGS, player);
+        if (!bypassMaxListings && player != null) {
+            int currentListings = CacheAccess.amountByPlayer(Listing.class, player.getUniqueId());
+            int maxListings = PermissionsHook.getValue(Integer.class, Permission.MAX_LISTINGS, player);
 
-                if (currentListings >= maxListings) return CompletableFuture.completedFuture(PostResult.MAX_LISTINGS);
-            }
+            if (currentListings >= maxListings) return PostResult.MAX_LISTINGS;
+        }
 
-            if (callEvent) {
-                ListingCreateEvent event = new ListingCreateEvent(player, listing);
-                Bukkit.getServer().getPluginManager().callEvent(event);
-                if (event.isCancelled()) return CompletableFuture.completedFuture(PostResult.custom(event.getCancelReason()));
-            }
+        if (callEvent) {
+            ListingCreateEvent event = new ListingCreateEvent(player, listing);
+            Bukkit.getServer().getPluginManager().callEvent(event);
+            if (event.isCancelled()) return PostResult.custom(event.getCancelReason());
+        }
 
-            CacheAccess.add(Listing.class, listing);
-            DataService.getInstance().save(Listing.class, listing);
+        CacheAccess.add(Listing.class, listing);
+        DataService.getInstance().save(Listing.class, listing);
 
-            if (!processMessages(listing)) {
-                return CompletableFuture.completedFuture(PostResult.SUCCESS_ADVERT_FAIL);
-            }
+        if (!processMessages(listing)) {
+            return PostResult.SUCCESS_ADVERT_FAIL;
+        }
 
-            return CompletableFuture.completedFuture(PostResult.SUCCESS);
-        }, executor);
+        return PostResult.SUCCESS;
     }
 
     private boolean processMessages(Listing listing) {
@@ -94,6 +87,14 @@ public final class ImplPost extends Post {
         if (alertWatchers) AuctionWatcher.alertWatchers(listing);
 
         return true;
+    }
+
+    private boolean isRestrictedItem(ItemStack item) {
+        for (String blacklist : Config.i().getBlacklists()) {
+            boolean result = MatcherService.instance.process(blacklist, true, item); // restrict on failure just in case
+            if (result) return true;
+        }
+        return false;
     }
 
     private void notifyPlayer(Listing listing) {

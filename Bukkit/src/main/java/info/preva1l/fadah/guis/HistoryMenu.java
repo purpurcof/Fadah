@@ -17,14 +17,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class HistoryMenu extends PaginatedFastInv {
     private final Player viewer;
     private final OfflinePlayer owner;
-    private final List<HistoricItem> historicItems;
+    private final String dateSearch;
 
     public HistoryMenu(Player viewer, OfflinePlayer owner, @Nullable String dateSearch) {
         super(LayoutService.MenuType.HISTORY.getLayout().guiSize(), LayoutService.MenuType.HISTORY.getLayout().formattedTitle(
@@ -36,13 +39,7 @@ public class HistoryMenu extends PaginatedFastInv {
                 List.of(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34));
         this.viewer = viewer;
         this.owner = owner;
-        this.historicItems = CacheAccess.getNotNull(History.class, owner.getUniqueId()).historicItems();
-
-        if (dateSearch != null) {
-            this.historicItems.removeIf(historicItem -> !TimeUtil.formatTimeToVisualDate(historicItem.loggedDate()).contains(dateSearch));
-        }
-
-        this.historicItems.sort(HistoricItem::compareTo);
+        this.dateSearch = dateSearch;
 
         fillers();
         setPaginationMappings(getLayout().paginationSlots());
@@ -55,35 +52,82 @@ public class HistoryMenu extends PaginatedFastInv {
 
     @Override
     protected synchronized void fillPaginationItems() {
-        for (HistoricItem historicItem : historicItems) {
-            ItemBuilder itemStack = new ItemBuilder(historicItem.itemStack().clone());
-            if (historicItem.playerUUID() != null) {
-                itemStack.addLore(historicItem.action() == HistoricItem.LoggedAction.LISTING_SOLD
-                        ? getLang().getLore(player,"lore-with-buyer",
-                        Tuple.of("%action%", historicItem.action().getLocaleActionName()),
-                        Tuple.of("%buyer%", Bukkit.getOfflinePlayer(historicItem.playerUUID()).getName()),
-                        Tuple.of("%price%", Config.i().getFormatting().numbers().format(historicItem.price())),
-                        Tuple.of("%date%", TimeUtil.formatTimeToVisualDate(historicItem.loggedDate())))
+        getAndFilterHistoricItems().forEach(this::createAndAddPaginatedItem);
+    }
 
-                        : getLang().getLore(player, "lore-with-seller",
-                        Tuple.of("%action%", historicItem.action().getLocaleActionName()),
-                        Tuple.of("%seller%", Bukkit.getOfflinePlayer(historicItem.playerUUID()).getName()),
-                        Tuple.of("%price%", Config.i().getFormatting().numbers().format(historicItem.price())),
-                        Tuple.of("%date%", TimeUtil.formatTimeToVisualDate(historicItem.loggedDate())))
-                );
-            } else if (historicItem.price() != null && historicItem.price() != 0d) {
-                itemStack.addLore(getLang().getLore(player, "lore-with-price",
-                        Tuple.of("%action%", historicItem.action().getLocaleActionName()),
-                        Tuple.of("%price%", Config.i().getFormatting().numbers().format(historicItem.price())),
-                        Tuple.of("%date%", TimeUtil.formatTimeToVisualDate(historicItem.loggedDate())))
-                );
-            } else {
-                itemStack.addLore(getLang().getLore(player, "lore",
-                        Tuple.of("%action%", historicItem.action().getLocaleActionName()),
-                        Tuple.of("%date%", TimeUtil.formatTimeToVisualDate(historicItem.loggedDate())))
-                );
-            }
-            addPaginationItem(new PaginatedItem(itemStack.build(), (e) -> {}));
+    private void createAndAddPaginatedItem(@NotNull HistoricItem historicItem) {
+        ItemBuilder itemBuilder = new ItemBuilder(historicItem.itemStack().clone());
+
+        if (historicItem.playerUUID() != null) {
+            addLoreWithPlayer(itemBuilder, historicItem);
+        } else if (hasValidPrice(historicItem)) {
+            addLoreWithPrice(itemBuilder, historicItem);
+        } else {
+            addBasicLore(itemBuilder, historicItem);
+        }
+
+        addPaginationItem(new PaginatedItem(itemBuilder.build()));
+    }
+
+    private void addLoreWithPlayer(@NotNull ItemBuilder itemBuilder, @NotNull HistoricItem historicItem) {
+        String playerName = getPlayerName(historicItem.playerUUID());
+
+        if (historicItem.action() == HistoricItem.LoggedAction.LISTING_SOLD) {
+            itemBuilder.addLore(getLang().getLore(player, "lore-with-buyer",
+                    Tuple.of("%action%", historicItem.action().getLocaleActionName()),
+                    Tuple.of("%buyer%", playerName),
+                    Tuple.of("%price%", formatPrice(historicItem.price())),
+                    Tuple.of("%date%", TimeUtil.formatTimeToVisualDate(historicItem.loggedDate()))
+            ));
+        } else {
+            itemBuilder.addLore(getLang().getLore(player, "lore-with-seller",
+                    Tuple.of("%action%", historicItem.action().getLocaleActionName()),
+                    Tuple.of("%seller%", playerName),
+                    Tuple.of("%price%", formatPrice(historicItem.price())),
+                    Tuple.of("%date%", TimeUtil.formatTimeToVisualDate(historicItem.loggedDate()))
+            ));
+        }
+    }
+
+    private void addLoreWithPrice(@NotNull ItemBuilder itemBuilder, @NotNull HistoricItem historicItem) {
+        itemBuilder.addLore(getLang().getLore(player, "lore-with-price",
+                Tuple.of("%action%", historicItem.action().getLocaleActionName()),
+                Tuple.of("%price%", formatPrice(historicItem.price())),
+                Tuple.of("%date%", TimeUtil.formatTimeToVisualDate(historicItem.loggedDate()))
+        ));
+    }
+
+    private void addBasicLore(@NotNull ItemBuilder itemBuilder, @NotNull HistoricItem historicItem) {
+        itemBuilder.addLore(getLang().getLore(player, "lore",
+                Tuple.of("%action%", historicItem.action().getLocaleActionName()),
+                Tuple.of("%date%", TimeUtil.formatTimeToVisualDate(historicItem.loggedDate()))
+        ));
+    }
+
+    private boolean hasValidPrice(@Nullable HistoricItem historicItem) {
+        return historicItem != null &&
+                historicItem.price() != null &&
+                historicItem.price() > 0.0;
+    }
+
+    private String formatPrice(@Nullable Double price) {
+        if (price == null) return "0";
+
+        try {
+            return Config.i().getFormatting().numbers().format(price);
+        } catch (Exception e) {
+            return String.valueOf(price);
+        }
+    }
+
+    private String getPlayerName(@Nullable UUID playerUUID) {
+        if (playerUUID == null) return Lang.i().getWords().getNone();
+
+        try {
+            String player = Bukkit.getOfflinePlayer(playerUUID).getName();
+            return player == null ? Lang.i().getWords().getNone() : player;
+        } catch (Exception e) {
+            return Lang.i().getWords().getNone();
         }
     }
 
@@ -100,10 +144,22 @@ public class HistoryMenu extends PaginatedFastInv {
                                 search -> new HistoryMenu(viewer, owner, search).open(viewer)));
     }
 
-    @Override
-    protected void updatePagination() {
-        this.historicItems.sort(HistoricItem::compareTo);
+    private List<HistoricItem> getAndFilterHistoricItems() {
+        List<HistoricItem> items = new ArrayList<>(CacheAccess.getNotNull(History.class, owner.getUniqueId()).historicItems());
 
-        super.updatePagination();
+        if (dateSearch != null && !dateSearch.trim().isEmpty())
+            items.removeIf(item -> !doesItemMatchDateSearch(item));
+
+        items.sort(HistoricItem::compareTo);
+        return items;
+    }
+
+    private boolean doesItemMatchDateSearch(@NotNull HistoricItem item) {
+        try {
+            String formattedDate = TimeUtil.formatTimeToVisualDate(item.loggedDate());
+            return formattedDate.toLowerCase().contains(dateSearch.toLowerCase().trim());
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

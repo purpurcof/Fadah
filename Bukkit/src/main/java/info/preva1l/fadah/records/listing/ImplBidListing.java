@@ -142,7 +142,7 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
 
     private void sendBidConfirmation(@NotNull Player bidder, double bidAmount) {
         try {
-            String itemName = Text.extractItemName(itemStack);
+            Component itemName = Text.extractItemName(itemStack);
             String formattedPrice = Config.i().getFormatting().numbers().format(bidAmount);
             Component message = Text.text(Lang.i().getNotifications().getBidPlaced(),
                     Tuple.of("%item%", itemName),
@@ -170,7 +170,7 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
 
     private void sendOutbidNotification(@NotNull Bid outbidBid, double newBidAmount) {
         try {
-            String itemName = Text.extractItemName(itemStack);
+            Component itemName = Text.extractItemName(itemStack);
             String formattedPrice = Config.i().getFormatting().numbers().format(newBidAmount);
             Component outbidMessage = Text.text(Lang.i().getNotifications().getOutBid(),
                     Tuple.of("%item%", itemName),
@@ -307,7 +307,7 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
             double taxAmount = (this.getTax() / 100.0) * winningBid.bidAmount();
             double sellerAmount = winningBid.bidAmount() - taxAmount;
 
-            String itemName = Text.extractItemName(itemStack);
+            Component itemName = Text.extractItemName(itemStack);
             String formattedPrice = Config.i().getFormatting().numbers().format(sellerAmount);
             Component message = Text.text(Lang.i().getNotifications().getSale(),
                     Tuple.of("%item%", itemName),

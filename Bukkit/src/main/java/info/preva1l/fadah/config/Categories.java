@@ -3,8 +3,7 @@ package info.preva1l.fadah.config;
 import com.google.common.collect.Sets;
 import de.exlll.configlib.*;
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.data.DataService;
-import info.preva1l.fadah.processor.JSProcessorService;
+import info.preva1l.fadah.filters.MatcherService;
 import info.preva1l.fadah.records.Category;
 import info.preva1l.trashcan.extension.annotations.ExtensionReload;
 import lombok.AccessLevel;
@@ -16,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Created on 26/04/2025
@@ -188,21 +186,16 @@ public class Categories {
         return category.name();
     }
 
-    public static CompletableFuture<String> getCategoryForItem(ItemStack item) {
-        if (i().sortedCache.isEmpty()) {
-            return CompletableFuture.completedFuture("_none_");
-        }
-        return CompletableFuture.supplyAsync(() -> {
-            for (Category category : i().sortedCache) {
-                for (String matcher : category.matchers()) {
-                    // default to false so we don't add it to a broken category
-                    if (JSProcessorService.instance.process(matcher, false, item)) {
-                        return category.id();
-                    }
-                }
+    public static String getCategoryForItem(ItemStack item) {
+        if (i().sortedCache.isEmpty()) return "_none_";
+
+        for (Category category : i().sortedCache) {
+            for (String matcher : category.matchers()) {
+                // default to false so we don't add it to a broken category
+                if (MatcherService.instance.process(matcher, false, item)) return category.id();
             }
-            return "_none_";
-        }, DataService.getInstance().getThreadPool());
+        }
+        return "_none_";
     }
 
     public static boolean registerCategory(@NotNull Category category) {

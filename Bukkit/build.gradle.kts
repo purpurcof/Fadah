@@ -36,7 +36,6 @@ dependencies {
 
     library("net.wesjd:anvilgui:1.10.5-SNAPSHOT") { setRemapped(true) }
     library("net.kyori:adventure-text-serializer-gson:4.21.0")
-    library("org.mozilla:rhino:1.8.0")
     library("com.influxdb:influxdb-client-java:7.2.0")
 
     dependency("me.clip:placeholderapi:2.11.6", "PlaceholderAPI") { load = RLO.AFTER ; required = false }

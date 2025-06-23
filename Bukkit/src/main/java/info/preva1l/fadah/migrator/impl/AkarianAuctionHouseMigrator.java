@@ -36,7 +36,7 @@ public final class AkarianAuctionHouseMigrator implements Migrator {
             ItemStack item = oldListing.getItemStack();
             double price = oldListing.getPrice();
 
-            String categoryId = Categories.getCategoryForItem(item).join();
+            String categoryId = Categories.getCategoryForItem(item);
 
             long expiry = oldListing.getEnd();
             listings.add(new ImplBinListing(id, owner, ownerName == null ? "Unknown Seller" : ownerName, item, categoryId, "vault", price, 0,
