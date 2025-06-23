@@ -26,7 +26,7 @@ dependencies {
     implementation(project(":API"))
     paper("1.19.3-R0.1-SNAPSHOT")
 
-    trashcan()
+    trashcan("1.2.1")
 
     library("com.zaxxer:HikariCP:6.3.0")
     library("org.xerial:sqlite-jdbc:3.49.1.0")
@@ -34,24 +34,25 @@ dependencies {
     library("org.mariadb.jdbc:mariadb-java-client:3.5.3")
     library("org.mongodb:mongodb-driver-sync:5.5.0")
 
+    library("com.github.puregero:multilib:1.2.4")
     library("net.wesjd:anvilgui:1.10.5-SNAPSHOT") { setRemapped(true) }
     library("net.kyori:adventure-text-serializer-gson:4.21.0")
     library("com.influxdb:influxdb-client-java:7.2.0")
 
-    dependency("me.clip:placeholderapi:2.11.6", "PlaceholderAPI") { load = RLO.AFTER ; required = false }
-    dependency("net.luckperms:api:5.4", "LuckPerms") { load = RLO.AFTER ; required = false }
-    dependency("com.gmail.nossr50.mcMMO:mcMMO:2.2.004", "mcMMO") { required = false }
+    dependency("me.clip:placeholderapi:2.11.6", "PlaceholderAPI") { load = RLO.BEFORE ; required = false }
+    dependency("net.luckperms:api:5.4", "LuckPerms") { load = RLO.BEFORE ; required = false }
+    dependency("com.gmail.nossr50.mcMMO:mcMMO:2.2.004", "mcMMO") { load = RLO.BEFORE ; required = false }
 
     // Currency
-    dependency("com.github.MilkBowl:VaultAPI:1.7", "Vault") { load = RLO.AFTER ; required = false }
-    dependency("com.github.Emibergo02:RedisEconomy:4.3.9", "RedisEconomy") { load = RLO.AFTER ; required = false }
-    dependency(files("../libs/CoinsEngine-2.3.5.jar"), "CoinsEngine") { load = RLO.AFTER ; required = false }
-    dependency("org.black_ixx:playerpoints:3.2.0", "PlayerPoints") { load = RLO.AFTER ; required = false }
+    dependency("com.github.MilkBowl:VaultAPI:1.7", "Vault") { load = RLO.BEFORE ; required = false }
+    dependency("com.github.Emibergo02:RedisEconomy:4.3.9", "RedisEconomy") { load = RLO.BEFORE ; required = false }
+    dependency(files("../libs/CoinsEngine-2.3.5.jar"), "CoinsEngine") { load = RLO.BEFORE ; required = false }
+    dependency("org.black_ixx:playerpoints:3.2.0", "PlayerPoints") { load = RLO.BEFORE ; required = false }
 
     // Eco Items
     compileOnly("com.willfp:libreforge:4.58.1") { isTransitive = false }
     compileOnly("com.willfp:eco:6.56.0") { isTransitive = false }
-    dependency("com.willfp:EcoItems:5.43.1", "EcoItems") { required = false }
+    dependency("com.willfp:EcoItems:5.43.1", "EcoItems") { load = RLO.BEFORE ; required = false }
 
     // Migrators
     dependency("com.github.Maxlego08:zAuctionHouseV3-API:3.2.1.9", "zAuctionHouseV3") { required = false }
@@ -60,7 +61,6 @@ dependencies {
 }
 
 tasks.withType<ShadowJar> {
-    relocate("com.github.puregero.multilib", "info.preva1l.fadah.libs.multilib")
     relocate("info.preva1l.hooker", "info.preva1l.fadah.hooks.lib")
     relocate("info.preva1l.trashcan", "info.preva1l.fadah.trashcan")
 }

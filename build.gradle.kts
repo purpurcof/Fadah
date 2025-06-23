@@ -23,7 +23,8 @@ allprojects {
 
     repositories {
         mavenCentral()
-        finallyADecent(dev = true)
+        finallyADecent(dev = devMode)
+        finallyADecent()
     }
 }
 
