@@ -21,22 +21,27 @@ public interface Currency extends CurrencyBase {
      * The symbol for the currency. (Example: $)
      *
      * @return the currencies display symbol.
+     * @since 3.2.0
      */
     char getSymbol();
 
     /**
-     * Withdraw money from a player balance on this currency.
+     * Withdraw money from a player's balance on this currency.
      *
-     * @param player the player to withdraw from.
-     * @param amountToTake the amount to withdraw.
+     * @param player the player to take from.
+     * @param amountToTake the amount to take.
+     * @return true if successful, false if there was a problem
+     * @since 3.2.0
      */
     boolean withdraw(OfflinePlayer player, double amountToTake);
 
     /**
-     * Give money to a player.
+     * Add money to a player's balance on this currency.
      *
      * @param player the player to give money to.
      * @param amountToAdd the amount to give.
+     * @return true if successful, false if there was a problem
+     * @since 3.2.0
      */
     boolean add(OfflinePlayer player, double amountToAdd);
 
