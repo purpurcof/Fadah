@@ -1,15 +1,15 @@
 package info.preva1l.fadah.utils.guis;
 
-import com.github.puregero.multilib.regionized.RegionizedTask;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Menus;
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Tasks;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public abstract class PaginatedFastInv extends FastInv {
     protected final Player player;
@@ -19,32 +19,14 @@ public abstract class PaginatedFastInv extends FastInv {
     private List<Integer> paginationMappings;
     private final List<PaginatedItem> paginatedItems = new ArrayList<>();
     protected boolean needsClearing = false;
-    private final RegionizedTask updateTask;
-
-    protected PaginatedFastInv(int size, @NotNull String title, @NotNull Player player, LayoutService.MenuType menuType) {
-        super(size, title, menuType);
-        this.player = player;
-        this.paginationMappings = List.of(
-                11, 12, 13, 14, 15, 16, 20,
-                21, 22, 23, 24, 25, 29, 30,
-                31, 32, 33, 34, 38, 39, 40,
-                41, 42, 43);
-
-        updateTask = TaskManager.Async.runTask(Fadah.getInstance(), this::updatePagination, 20L, 20L);
-        addCloseHandler(event -> updateTask.cancel());
-    }
+    private final ScheduledFuture<?> updateTask;
 
     protected PaginatedFastInv(int size, @NotNull Component title, @NotNull Player player, LayoutService.MenuType menuType) {
-        super(size, title, menuType);
-        this.player = player;
-        this.paginationMappings = List.of(
+        this(size, title, player, menuType, List.of(
                 11, 12, 13, 14, 15, 16, 20,
                 21, 22, 23, 24, 25, 29, 30,
                 31, 32, 33, 34, 38, 39, 40,
-                41, 42, 43);
-
-        updateTask = TaskManager.Async.runTask(Fadah.getInstance(), this::updatePagination, 20L, 20L);
-        addCloseHandler(event -> updateTask.cancel());
+                41, 42, 43));
     }
 
     protected PaginatedFastInv(int size, @NotNull Component title, @NotNull Player player, LayoutService.MenuType menuType, @NotNull List<Integer> paginationMappings) {
@@ -52,8 +34,8 @@ public abstract class PaginatedFastInv extends FastInv {
         this.player = player;
         this.paginationMappings = paginationMappings;
 
-        updateTask = TaskManager.Async.runTask(Fadah.getInstance(), this::updatePagination, 20L, 20L);
-        addCloseHandler(event -> updateTask.cancel());
+        updateTask = Tasks.getLoopDeLoop().scheduleAtFixedRate(this::updatePagination, 1, 1, TimeUnit.SECONDS);
+        addCloseHandler(event -> updateTask.cancel(true));
     }
 
     protected void setPaginationMappings(List<Integer> list) {

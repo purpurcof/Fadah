@@ -13,7 +13,6 @@ import net.kyori.adventure.text.minimessage.internal.parser.TokenParser;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -179,24 +178,8 @@ public class Text {
      * @param item item stack
      * @return formatted item name
      */
-    public String extractItemName(ItemStack item) {
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            Component display = meta.displayName();
-            if (display != null) {
-                return ((TextComponent) display).content();
-            }
-
-            if (meta.hasLocalizedName()) {
-                return meta.getLocalizedName();
-            }
-        }
-        String[] split = item.getType().name().toLowerCase().split("_");
-        StringBuilder builder = new StringBuilder();
-        for (String s : split) {
-            builder.append(capitalizeFirst(s)).append(" ");
-        }
-        return builder.toString().trim();
+    public Component extractItemName(ItemStack item) {
+        return item.displayName();
     }
 
     /**

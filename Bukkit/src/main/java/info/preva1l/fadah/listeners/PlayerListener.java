@@ -9,7 +9,7 @@ import info.preva1l.fadah.guis.NewListingMenu;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.utils.Reflections;
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.UpdateService;
 import org.bukkit.entity.Player;
@@ -35,7 +35,7 @@ public class PlayerListener implements Listener {
             return;
         }
 
-        invalidateIfNoJoin.put(e.getUniqueId(), TaskManager.Sync.runLater(Fadah.getInstance(),
+        invalidateIfNoJoin.put(e.getUniqueId(), Tasks.syncDelayed(Fadah.getInstance(),
                 () -> DataService.instance
                         .invalidateAndSavePlayerData(e.getUniqueId())
                         .thenRun(() -> invalidateIfNoJoin.remove(e.getUniqueId())), 1200L));

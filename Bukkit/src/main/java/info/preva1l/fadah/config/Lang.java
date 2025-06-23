@@ -381,7 +381,7 @@ public class Lang {
     public static class Errors {
         private String disabled = "&cThe Auction House is currently disabled!";
         private String commandNotFound = "&cThis command does not exist!";
-        private String mustBePlayer = "&cOnly players can run this command!";
+        private String mustBePlayer = "&cOnly players can sync this command!";
         private String restricted = "&cYou cannot sell this item!";
         private String noPermission = "&cYou do not have permission to execute this command!";
         private String playerNotFound = "&c%player% was not found!";

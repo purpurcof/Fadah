@@ -11,7 +11,7 @@ import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
 import info.preva1l.fadah.security.AwareDataService;
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.TimeUtil;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
@@ -86,7 +86,7 @@ public class CollectionMenu extends PaginatedFastInv {
         if (processingItems.putIfAbsent(item, true) != null) return;
 
         try {
-            executeSafely(() -> claimItem(item));
+            executeSafely(item, () -> claimItem(item));
         } finally {
             processingItems.remove(item);
         }
@@ -96,7 +96,7 @@ public class CollectionMenu extends PaginatedFastInv {
         List<CollectableItem> currentItems = getCurrentItems();
         if (!currentItems.contains(item)) return;
 
-        TaskManager.Sync.run(Fadah.getInstance(), player, () -> {
+        Tasks.sync(Fadah.getInstance(), player, () -> {
             if (!getCurrentItems().contains(item)) {
                 return;
             }
@@ -140,14 +140,14 @@ public class CollectionMenu extends PaginatedFastInv {
         CacheAccess.getNotNull(History.class, owner.getUniqueId()).add(historicItem);
     }
 
-    private void executeSafely(Runnable action) {
+    private void executeSafely(CollectableItem item, Runnable action) {
         try {
             if (expired) {
                 var items = CacheAccess.getNotNull(ExpiredItems.class, owner.getUniqueId());
-                AwareDataService.instance.execute(ExpiredItems.class, items, action);
+                AwareDataService.instance.execute(ExpiredItems.class, items, item, action);
             } else {
                 var items = CacheAccess.getNotNull(CollectionBox.class, owner.getUniqueId());
-                AwareDataService.instance.execute(CollectionBox.class, items, action);
+                AwareDataService.instance.execute(CollectionBox.class, items, item, action);
             }
         } catch (Exception e) {
             Logger.getLogger("Fadah").log(Level.SEVERE, "Issue in collection menu", e);

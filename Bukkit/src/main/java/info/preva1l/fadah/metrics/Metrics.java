@@ -21,7 +21,7 @@
 
 package info.preva1l.fadah.metrics;
 
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Tasks;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -99,7 +99,7 @@ public class Metrics {
                         enabled,
                         this::appendPlatformData,
                         this::appendServiceData,
-                        submitDataTask -> TaskManager.Sync.run(plugin, submitDataTask), // Fadah - Folia support`
+                        submitDataTask -> Tasks.sync(plugin, submitDataTask), // Fadah - Folia support`
                         plugin::isEnabled,
                         (message, error) -> this.plugin.getLogger().log(Level.WARNING, message, error),
                         (message) -> this.plugin.getLogger().log(Level.INFO, message),

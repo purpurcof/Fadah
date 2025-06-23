@@ -2,11 +2,9 @@ package info.preva1l.fadah.hooks.impl;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.TaskManager;
-import info.preva1l.fadah.utils.Text;
 import info.preva1l.hooker.annotation.Hook;
 import info.preva1l.hooker.annotation.OnStart;
 import info.preva1l.hooker.annotation.Reloadable;
@@ -14,6 +12,7 @@ import info.preva1l.hooker.annotation.Require;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -26,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Hook(id = "discord")
 @Reloadable
@@ -42,12 +42,12 @@ public class DiscordHook {
     }
 
     public void send(Listing listing) {
-        TaskManager.Async.run(Fadah.getInstance(), () -> {
+        CompletableFuture.runAsync(() -> {
             switch (conf.getMessageMode()) {
                 case EMBED -> sendEmbed(listing);
                 case PLAIN_TEXT -> sendPlain(listing);
             }
-        });
+        }, DataService.instance.getThreadPool());
     }
 
     private void sendEmbed(Listing listing) {
@@ -87,7 +87,7 @@ public class DiscordHook {
     private String formatString(String str, Listing listing) {
         return str
                 .replace("%player%", listing.getOwnerName())
-                .replace("%item%", Text.extractItemName(listing.getItemStack()))
+                .replace("%item%", ((TextComponent) listing.getItemStack().displayName()).content())
                 .replace("%price%", df.format(listing.getPrice()));
     }
 

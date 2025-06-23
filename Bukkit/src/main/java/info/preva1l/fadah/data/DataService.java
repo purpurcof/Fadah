@@ -13,7 +13,7 @@ import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.records.history.History;
 import info.preva1l.fadah.records.listing.BidListing;
 import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.watcher.AuctionWatcher;
 import info.preva1l.fadah.watcher.Watching;
 import info.preva1l.trashcan.flavor.annotations.Close;
@@ -64,7 +64,12 @@ public final class DataService {
 
         Broker.getInstance().load();
 
-        TaskManager.Async.runTask(plugin, listingExpiryTask(), 10L);
+        Tasks.getLoopDeLoop().scheduleAtFixedRate(
+                listingExpiryTask(),
+                0L,
+                1L,
+                TimeUnit.SECONDS
+        );
     }
 
     public <T> CompletableFuture<List<T>> getAll(Class<T> clazz) {

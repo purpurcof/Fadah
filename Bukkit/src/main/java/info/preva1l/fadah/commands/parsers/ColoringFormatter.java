@@ -18,6 +18,7 @@ import java.util.List;
  *
  * @author Preva1l
  */
+@SuppressWarnings("unchecked")
 public final class ColoringFormatter implements ComponentCaptionFormatter<CommandSender> {
     public @NonNull Component formatCaption(final @NonNull Caption captionKey, final @NonNull CommandSender recipient, final @NonNull String caption, final @NonNull List<@NonNull CaptionVariable> variables) {
         final List<Tuple<String, Object>> replacements = new ArrayList<>();

@@ -13,7 +13,7 @@ import info.preva1l.fadah.multiserver.Payload;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.security.AwareDataService;
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -110,7 +110,7 @@ public abstract class ActiveListing extends BaseListing {
 
     private void fireExpirationEvent() {
         try {
-            TaskManager.Sync.run(Fadah.getInstance(), () -> {
+            Tasks.sync(Fadah.getInstance(), () -> {
                 try {
                     Bukkit.getServer().getPluginManager().callEvent(
                             new ListingEndEvent(this, ListingEndReason.EXPIRED)
@@ -208,7 +208,7 @@ public abstract class ActiveListing extends BaseListing {
 
     private void fireCancellationEvent(boolean isAdmin) {
         try {
-            TaskManager.Sync.run(Fadah.getInstance(), () -> {
+            Tasks.sync(Fadah.getInstance(), () -> {
                 try {
                     ListingEndReason reason = isAdmin ? ListingEndReason.CANCELLED_ADMIN : ListingEndReason.CANCELLED;
                     Bukkit.getServer().getPluginManager().callEvent(new ListingEndEvent(this, reason));
@@ -298,7 +298,7 @@ public abstract class ActiveListing extends BaseListing {
     }
 
     private void firePurchaseEvent(OfflinePlayer buyer) {
-        TaskManager.Sync.run(Fadah.instance, () -> {
+        Tasks.sync(Fadah.instance, () -> {
             try {
                 StaleListing staleListing = getAsStale();
                 if (staleListing != null) {

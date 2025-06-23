@@ -1,9 +1,9 @@
 package info.preva1l.fadah.processor;
 
-import info.preva1l.fadah.utils.Text;
 import info.preva1l.trashcan.flavor.annotations.Configure;
 import info.preva1l.trashcan.flavor.annotations.Service;
 import info.preva1l.trashcan.flavor.annotations.inject.Inject;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +33,7 @@ public final class JSProcessorService {
     public void configure() {
         ProcessorArgsRegistry.register(STRING, "material", item -> item.getType().toString());
 
-        ProcessorArgsRegistry.register(STRING, "name", Text::extractItemName);
+        ProcessorArgsRegistry.register(STRING, "name", item -> ((TextComponent) item.ef).content());
 
         ProcessorArgsRegistry.register(INTEGER, "amount", item -> String.valueOf(item.getAmount()));
 

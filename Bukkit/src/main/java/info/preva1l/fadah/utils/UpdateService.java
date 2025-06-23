@@ -33,7 +33,7 @@ public class UpdateService {
                 .build();
         checker.check().thenAccept(checked -> completed = checked);
 
-        TaskManager.Sync.runLater(plugin, () -> notifyUpdate(Bukkit.getConsoleSender()), 60L);
+        Tasks.syncDelayed(plugin, () -> notifyUpdate(Bukkit.getConsoleSender()), 60L);
     }
 
     public void notifyUpdate(@NotNull CommandSender recipient) {

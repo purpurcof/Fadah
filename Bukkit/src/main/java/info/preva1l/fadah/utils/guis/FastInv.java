@@ -1,8 +1,8 @@
 package info.preva1l.fadah.utils.guis;
 
-import com.github.puregero.multilib.MultiLib;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Menus;
+import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.utils.config.LanguageConfig;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -47,16 +47,6 @@ public class FastInv implements InventoryHolder {
      */
     public FastInv(LayoutService.MenuType menuType) {
         this(owner -> Bukkit.createInventory(owner, menuType.getLayout().guiSize(), menuType.getLayout().formattedTitle()), menuType);
-    }
-
-    /**
-     * Create a new FastInv with a custom size and title.
-     *
-     * @param size  The size of the inventory.
-     * @param title The title (name) of the inventory.
-     */
-    public FastInv(int size, String title, LayoutService.MenuType menuType) {
-        this(owner -> Bukkit.createInventory(owner, size, title), menuType);
     }
 
     public FastInv(int size, Component title, LayoutService.MenuType menuType) {
@@ -181,10 +171,7 @@ public class FastInv implements InventoryHolder {
      * @param player The player to open the menu.
      */
     public void open(Player player) {
-        MultiLib.getEntityScheduler(player).execute(Fadah.getInstance(),
-                () -> player.openInventory(this.inventory),
-                null,
-                0L);
+        Tasks.sync(Fadah.getInstance(), player, () -> player.openInventory(this.inventory));
     }
 
     /**

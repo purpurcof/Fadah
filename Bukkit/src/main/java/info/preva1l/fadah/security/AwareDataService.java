@@ -1,5 +1,6 @@
 package info.preva1l.fadah.security;
 
+import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.records.listing.Listing;
@@ -29,14 +30,19 @@ public final class AwareDataService {
     public static final AwareDataService instance = new AwareDataService();
 
     private final Map<Class<?>, AwareDataProvider<?>> providers = new HashMap<>();
+    private final Map<Class<?>, AwareCollectableDataProvider<?>> collectableProviders = new HashMap<>();
 
     @Configure
     public void configure() {
         ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
         providers.put(Listing.class, new ListingAwareDataProvider(executor));
-        providers.put(CollectionBox.class, new CollectionBoxAwareDataProvider(executor));
-        providers.put(ExpiredItems.class, new ExpiredListingsAwareDataProvider(executor));
+        collectableProviders.put(CollectionBox.class, new CollectionBoxAwareDataProvider(executor));
+        collectableProviders.put(ExpiredItems.class, new ExpiredListingsAwareDataProvider(executor));
+    }
+
+    public <T> void execute(Class<T> clazz, T obj, CollectableItem item, Runnable action) {
+        getProviderCollectable(clazz).execute(obj, item, action);
     }
 
     public <T> void execute(Class<T> clazz, T obj, Runnable action) {
@@ -45,5 +51,9 @@ public final class AwareDataService {
 
     private <T> AwareDataProvider<T> getProvider(Class<T> clazz) {
         return (AwareDataProvider<T>) providers.get(clazz);
+    }
+
+    private <T> AwareCollectableDataProvider<T> getProviderCollectable(Class<T> clazz) {
+        return (AwareCollectableDataProvider<T>) collectableProviders.get(clazz);
     }
 }

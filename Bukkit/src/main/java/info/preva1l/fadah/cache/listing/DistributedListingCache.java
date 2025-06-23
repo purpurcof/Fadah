@@ -21,7 +21,7 @@ public final class DistributedListingCache implements Cache<Listing> {
                 .timeToLive(Duration.ZERO)
                 .maxIdle(Duration.ZERO)
                 .evictionPolicy(LocalCachedMapOptions.EvictionPolicy.NONE)
-                .syncStrategy(LocalCachedMapOptions.SyncStrategy.UPDATE)
+                .syncStrategy(LocalCachedMapOptions.SyncStrategy.INVALIDATE)
                 .storeMode(LocalCachedMapOptions.StoreMode.LOCALCACHE_REDIS)
                 .reconnectionStrategy(LocalCachedMapOptions.ReconnectionStrategy.LOAD)
                 .expirationEventPolicy(LocalCachedMapOptions.ExpirationEventPolicy.SUBSCRIBE_WITH_KEYSPACE_CHANNEL)
@@ -64,7 +64,7 @@ public final class DistributedListingCache implements Cache<Listing> {
 
     @Override
     public int amountByPlayer(@NotNull UUID player) {
-        return (int) listings.values().stream()
+        return (int) getAll().stream()
                 .filter(listing -> listing.isOwner(player))
                 .count();
     }

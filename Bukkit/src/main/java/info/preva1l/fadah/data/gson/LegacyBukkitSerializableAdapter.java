@@ -20,7 +20,6 @@ public class LegacyBukkitSerializableAdapter implements JsonSerializer<Configura
         this.plugin = plugin;
     }
 
-    @Deprecated
     @Override
     public ConfigurationSerializable deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         try {

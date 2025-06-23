@@ -15,7 +15,7 @@ import info.preva1l.fadah.hooks.impl.permissions.PermissionsHook;
 import info.preva1l.fadah.records.listing.ImplListingBuilder;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.records.post.PostResult;
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.utils.TimeUtil;
 import info.preva1l.fadah.utils.guis.FastInv;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
@@ -88,7 +88,7 @@ public class NewListingMenu extends FastInv {
                 .biddable(isBidding)
                 .toPost()
                 .postAdvert(advertise)
-                .buildAndSubmit().thenAccept(result -> TaskManager.Sync.run(plugin, player, () -> {
+                .buildAndSubmit().thenAccept(result -> Tasks.sync(plugin, player, () -> {
                     if (result == PostResult.RESTRICTED_ITEM) {
                         giveItemBack = true;
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getRestricted());
