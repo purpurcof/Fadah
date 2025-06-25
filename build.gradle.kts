@@ -22,7 +22,7 @@ allprojects {
     version = "3.2.0"
 
     repositories {
-        mavenCentral()
+        maven("https://maven-central.storage-download.googleapis.com/maven2")
         finallyADecent(dev = devMode)
         finallyADecent()
     }
