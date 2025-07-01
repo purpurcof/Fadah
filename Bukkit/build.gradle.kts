@@ -2,10 +2,13 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import info.preva1l.trashcan.description.paper.Permission
 import info.preva1l.trashcan.description.paper.PluginLoadOrder
 import info.preva1l.trashcan.description.paper.dependency
-import info.preva1l.trashcan.paper
 import info.preva1l.trashcan.setRemapped
 import info.preva1l.trashcan.trashcan
 import info.preva1l.trashcan.description.paper.PaperDependencyDefinition.RelativeLoadOrder as RLO
+
+plugins {
+    fadah.common
+}
 
 trashcan {
     paper = true
@@ -24,38 +27,31 @@ repositories {
 
 dependencies {
     implementation(project(":API"))
-    paper("1.19.3-R0.1-SNAPSHOT")
-
     trashcan("1.2.1")
 
-    library("com.zaxxer:HikariCP:6.3.0")
-    library("org.xerial:sqlite-jdbc:3.49.1.0")
-    library("com.mysql:mysql-connector-j:9.3.0")
-    library("org.mariadb.jdbc:mariadb-java-client:3.5.3")
-    library("org.mongodb:mongodb-driver-sync:5.5.0")
+    library(libs.bundles.databases)
 
-    library("com.github.puregero:multilib:1.2.4")
-    library("net.wesjd:anvilgui:1.10.5-SNAPSHOT") { setRemapped(true) }
-    library("net.kyori:adventure-text-serializer-gson:4.21.0")
-    library("com.influxdb:influxdb-client-java:7.2.0")
+    library(libs.multilib)
+    library(libs.anvilgui) { setRemapped(true) }
+    library(libs.adventure.gson)
+    library(libs.influxdb)
 
-    dependency("me.clip:placeholderapi:2.11.6", "PlaceholderAPI") { load = RLO.BEFORE ; required = false }
-    dependency("net.luckperms:api:5.4", "LuckPerms") { load = RLO.BEFORE ; required = false }
-    dependency("com.gmail.nossr50.mcMMO:mcMMO:2.2.004", "mcMMO") { load = RLO.BEFORE ; required = false }
+    dependency(libs.placeholderapi(), "PlaceholderAPI") { load = RLO.BEFORE ; required = false }
+    dependency(libs.luckperms(), "LuckPerms") { load = RLO.BEFORE ; required = false }
+    compileOnly(libs.mcmmo) { isTransitive = false }
 
     // Currency
-    dependency("com.github.MilkBowl:VaultAPI:1.7", "Vault") { load = RLO.BEFORE ; required = false }
-    dependency("com.github.Emibergo02:RedisEconomy:4.3.9", "RedisEconomy") { load = RLO.BEFORE ; required = false }
+    dependency(libs.vault(), "Vault") { load = RLO.BEFORE ; required = false }
+    dependency(libs.rediseconomy(), "RedisEconomy") { load = RLO.BEFORE ; required = false }
     dependency(files("../libs/CoinsEngine-2.3.5.jar"), "CoinsEngine") { load = RLO.BEFORE ; required = false }
-    dependency("org.black_ixx:playerpoints:3.2.0", "PlayerPoints") { load = RLO.BEFORE ; required = false }
+    dependency(libs.playerpoints(), "PlayerPoints") { load = RLO.BEFORE ; required = false }
 
     // Eco Items
-    compileOnly("com.willfp:libreforge:4.58.1") { isTransitive = false }
-    compileOnly("com.willfp:eco:6.56.0") { isTransitive = false }
-    dependency("com.willfp:EcoItems:5.43.1", "EcoItems") { load = RLO.BEFORE ; required = false }
+    compileOnly(libs.bundles.eco) { isTransitive = false }
+    dependency(libs.eco.items(), "EcoItems") { load = RLO.BEFORE ; required = false }
 
     // Migrators
-    dependency("com.github.Maxlego08:zAuctionHouseV3-API:3.2.1.9", "zAuctionHouseV3") { required = false }
+    dependency(libs.zauctionhouse(), "zAuctionHouseV3") { required = false }
     dependency(files("../libs/AuctionHouse-1.20.4-3.7.1.jar"), "AuctionHouse") { required = false }
     compileOnly(files("../libs/AkarianAuctionHouse-1.3.1-b6.jar"))
 }
@@ -75,6 +71,10 @@ paper {
     apiVersion = "1.19"
 
     load = PluginLoadOrder.POSTWORLD
+
+    dependencies {
+        serverDependencies.register("mcMMO") { load = RLO.BEFORE ; required = false }
+    }
 
     permissions {
         register("fadah.max-listings.<amount>") {
@@ -116,3 +116,6 @@ paper {
         }
     }
 }
+
+operator fun Provider<MinimalExternalModuleDependency>.invoke(): String =
+    get().let { "${it.module.group}:${it.module.name}:${it.version}" }

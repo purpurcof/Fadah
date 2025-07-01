@@ -1,0 +1,65 @@
+[versions]
+# database providers
+hikari = "6.3.0"
+sqlite = "3.49.1.0"
+mysql = "9.3.0"
+mariadb = "3.5.3"
+mongo = "5.5.0"
+
+adventure = "4.21.0"
+
+influxdb = "7.2.0"
+multilib = "1.2.4"
+anvilgui = "1.10.6-SNAPSHOT"
+
+placeholderapi = "2.11.6"
+luckperms = "5.4"
+mcmmo = "2.2.004"
+
+# currency
+vault = "1.7"
+rediseconomy = "4.3.9"
+playerpoints = "3.2.0"
+
+# eco
+libreforge = "4.58.1"
+eco = "6.56.0"
+eco-items = "5.43.1"
+
+# migrators
+zauctionhouse = "3.2.1.9"
+
+[libraries]
+# database providers
+hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
+sqlite = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite" }
+mysql = { module = "com.mysql:mysql-connector-j", version.ref = "mysql" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version.ref = "mariadb" }
+mongo = { module = "org.mongodb:mongodb-driver-sync", version.ref = "mongo" }
+
+adventure-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref = "adventure" }
+
+influxdb = { module = "com.influxdb:influxdb-client-java", version.ref = "influxdb" }
+multilib = { module = "com.github.puregero:multilib", version.ref = "multilib" }
+anvilgui = { module = "net.wesjd:anvilgui", version.ref = "anvilgui" }
+
+placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
+luckperms = { module = "net.luckperms:api", version.ref = "luckperms" }
+mcmmo = { module = "com.gmail.nossr50.mcMMO:mcMMO", version.ref = "mcmmo" }
+
+# currency
+vault = { module = "com.github.MilkBowl:VaultAPI", version.ref = "vault" }
+rediseconomy = { module = "com.github.Emibergo02:RedisEconomy", version.ref = "rediseconomy" }
+playerpoints = { module = "org.black_ixx:playerpoints", version.ref = "playerpoints" }
+
+# eco
+libreforge = { module = "com.willfp:libreforge", version.ref = "libreforge" }
+eco = { module = "com.willfp:eco", version.ref = "eco" }
+eco-items = { module = "com.willfp:EcoItems", version.ref = "eco-items" }
+
+# migrators
+zauctionhouse = { module = "com.github.Maxlego08:zAuctionHouseV3-API", version.ref = "zauctionhouse" }
+
+[bundles]
+databases = [ "hikari", "sqlite", "mysql", "mariadb", "mongo" ]
+eco = [ "libreforge", "eco" ]
