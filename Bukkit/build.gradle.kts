@@ -50,7 +50,6 @@ dependencies {
     compileOnly(libs.bundles.eco) { isTransitive = false }
     dependency(libs.eco.items(), "EcoItems") { load = RLO.BEFORE ; required = false }
 
-    // Migrators
     dependency(libs.zauctionhouse(), "zAuctionHouseV3") { required = false }
     dependency(files("../libs/AuctionHouse-1.20.4-3.7.1.jar"), "AuctionHouse") { required = false }
     compileOnly(files("../libs/AkarianAuctionHouse-1.3.1-b6.jar"))

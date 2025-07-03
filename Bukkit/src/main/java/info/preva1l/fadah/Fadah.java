@@ -2,6 +2,7 @@ package info.preva1l.fadah;
 
 import info.preva1l.fadah.api.AuctionHouseAPI;
 import info.preva1l.fadah.api.BukkitAuctionHouseAPI;
+import info.preva1l.fadah.listeners.BombyListener;
 import info.preva1l.fadah.listeners.PlayerListener;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.FastInvManager;
@@ -24,6 +25,7 @@ public final class Fadah extends BasePlugin {
         AuctionHouseAPI.setInstance(new BukkitAuctionHouseAPI());
 
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
+        getServer().getPluginManager().registerEvents(new BombyListener(), this);
         FastInvManager.register(this);
 
         Text.list(List.of(
