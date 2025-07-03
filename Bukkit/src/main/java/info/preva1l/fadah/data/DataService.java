@@ -10,10 +10,13 @@ import info.preva1l.fadah.data.handler.SQLiteHandler;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
+import info.preva1l.fadah.records.collection.ImplCollectionBox;
+import info.preva1l.fadah.records.collection.ImplExpiredItems;
 import info.preva1l.fadah.records.history.History;
+import info.preva1l.fadah.records.history.ImplHistory;
 import info.preva1l.fadah.records.listing.BidListing;
 import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.watcher.AuctionWatcher;
 import info.preva1l.fadah.watcher.Watching;
 import info.preva1l.trashcan.flavor.annotations.Close;
@@ -64,7 +67,12 @@ public final class DataService {
 
         Broker.getInstance().load();
 
-        TaskManager.Async.runTask(plugin, listingExpiryTask(), 10L);
+        Tasks.getLoopDeLoop().scheduleAtFixedRate(
+                listingExpiryTask(),
+                0L,
+                1L,
+                TimeUnit.SECONDS
+        );
     }
 
     public <T> CompletableFuture<List<T>> getAll(Class<T> clazz) {
@@ -128,11 +136,12 @@ public final class DataService {
     }
 
     public CompletableFuture<Void> loadPlayerData(UUID uuid) {
+        if (CacheAccess.get(History.class, uuid).isPresent()) return CompletableFuture.completedFuture(null);
         return fixPlayerData(uuid)
                 .thenCompose(ignored -> CompletableFuture.allOf(
-                        loadAndCache(CollectionBox.class, uuid, () -> CollectionBox.empty(uuid)),
-                        loadAndCache(ExpiredItems.class, uuid, () -> ExpiredItems.empty(uuid)),
-                        loadAndCache(History.class, uuid, () -> History.empty(uuid)),
+                        loadAndCache(CollectionBox.class, uuid, () -> ImplCollectionBox.empty(uuid)),
+                        loadAndCache(ExpiredItems.class, uuid, () -> ImplExpiredItems.empty(uuid)),
+                        loadAndCache(History.class, uuid, () -> ImplHistory.empty(uuid)),
                         get(Watching.class, uuid)
                                 .thenAccept(opt -> opt.ifPresent(AuctionWatcher::watch))
                 ));

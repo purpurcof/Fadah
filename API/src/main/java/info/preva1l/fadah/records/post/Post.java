@@ -3,8 +3,6 @@ package info.preva1l.fadah.records.post;
 import info.preva1l.fadah.api.ListingCreateEvent;
 import info.preva1l.fadah.records.listing.ListingBuilder;
 
-import java.util.concurrent.CompletableFuture;
-
 /**
  * A post is the final step before publishing a listing,
  * it allows you to configure everything about the initial listing.
@@ -178,7 +176,7 @@ public abstract class Post {
     /**
      * Build the post and the listing and submit it to the auction house.
      *
-     * @return a completable future of {@link PostResult}
+     * @return a {@link PostResult}
      */
-    public abstract CompletableFuture<PostResult> buildAndSubmit();
+    public abstract PostResult buildAndSubmit();
 }

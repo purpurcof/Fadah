@@ -2,7 +2,7 @@ package info.preva1l.fadah.utils.guis;
 
 import com.github.puregero.multilib.MultiLib;
 import info.preva1l.fadah.utils.Reflections;
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.trashcan.extension.annotations.ExtensionReload;
 import info.preva1l.trashcan.extension.annotations.PluginDisable;
 import org.bukkit.Bukkit;
@@ -100,7 +100,7 @@ public final class FastInvManager {
         public void onInventoryClose(InventoryCloseEvent e) {
             if (e.getInventory().getHolder(false) instanceof FastInv inv) {
                 if (inv.handleClose(e)) {
-                    TaskManager.Sync.run(this.plugin, () -> inv.open((Player) e.getPlayer()));
+                    Tasks.sync(this.plugin, () -> inv.open((Player) e.getPlayer()));
                 }
             }
         }

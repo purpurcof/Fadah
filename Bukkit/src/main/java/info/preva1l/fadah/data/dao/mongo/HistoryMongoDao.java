@@ -6,29 +6,37 @@ import com.google.gson.reflect.TypeToken;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
+import com.mongodb.client.model.ReplaceOptions;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.NotImplementedException;
+import info.preva1l.fadah.records.history.ImplHistory;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bson.Document;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 
-@RequiredArgsConstructor
 public class HistoryMongoDao implements Dao<History> {
     private static final Gson GSON = new GsonBuilder()
             .registerTypeHierarchyAdapter(ConfigurationSerializable.class, new BukkitSerializableAdapter())
             .serializeNulls().disableHtmlEscaping().create();
-    private static final Type HISTORY_LIST_TYPE = new TypeToken<ArrayList<HistoricItem>>() {}.getType();
-    private final MongoDatabase database;
+    private static final Type HISTORY_LIST_TYPE = new TypeToken<CopyOnWriteArrayList<HistoricItem>>() {}.getType();
+    private final MongoCollection<Document> collection;
+
+    public HistoryMongoDao(MongoDatabase database) {
+        this.collection = database.getCollection("history");
+
+        collection.createIndex(Indexes.ascending("playerUUID"), new IndexOptions().unique(true));
+    }
 
     /**
      * Get an object from the database by its id.
@@ -39,15 +47,14 @@ public class HistoryMongoDao implements Dao<History> {
     @Override
     public Optional<History> get(UUID id) {
         try {
-            MongoCollection<Document> collection = database.getCollection("history");
             final Document document = collection.find().filter(Filters.eq("playerUUID", id)).first();
             if (document == null) return Optional.empty();
 
-            ArrayList<HistoricItem> items = GSON.fromJson(document.getString("items"), HISTORY_LIST_TYPE);
+            CopyOnWriteArrayList<HistoricItem> items = GSON.fromJson(document.getString("items"), HISTORY_LIST_TYPE);
 
-            if (items == null) items = new ArrayList<>();
+            if (items == null) items = new CopyOnWriteArrayList<>();
 
-            return Optional.of(new History(id, items));
+            return Optional.of(new ImplHistory(id, items));
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
@@ -61,7 +68,7 @@ public class HistoryMongoDao implements Dao<History> {
      */
     @Override
     public List<History> getAll() {
-        throw new NotImplementedException();
+        throw new NotImplementedException("getAll");
     }
 
     /**
@@ -73,8 +80,13 @@ public class HistoryMongoDao implements Dao<History> {
     public void save(History expiredItems) {
         try {
             Document document = new Document("playerUUID", expiredItems.owner())
-                    .append("items", GSON.toJson(expiredItems.historicItems(), HISTORY_LIST_TYPE));
-            database.getCollection("history").replaceOne(Filters.eq("playerUUID", expiredItems.owner()), document);
+                    .append("items", GSON.toJson(expiredItems.items(), HISTORY_LIST_TYPE));
+
+            collection.replaceOne(
+                    Filters.eq("playerUUID", expiredItems.owner()),
+                    document,
+                    new ReplaceOptions().upsert(true)
+            );
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
@@ -88,7 +100,7 @@ public class HistoryMongoDao implements Dao<History> {
      */
     @Override
     public void update(History expiredItems, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("update");
     }
 
     /**
@@ -98,6 +110,6 @@ public class HistoryMongoDao implements Dao<History> {
      */
     @Override
     public void delete(History expiredItems) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("delete");
     }
 }

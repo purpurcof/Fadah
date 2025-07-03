@@ -8,7 +8,6 @@ import info.preva1l.fadah.utils.Text;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Comparator;
@@ -75,15 +74,9 @@ public enum SortingMethod {
     private static class AlphabeticalComparator implements Comparator<Listing> {
         @Override
         public int compare(Listing o1, Listing o2) {
-            Component display1 = o1.getItemStack().getItemMeta().displayName();
-            String check1 = o1.getItemStack().hasItemMeta()
-                    ? (display1 != null ? ((TextComponent) display1).content() : o1.getItemStack().getType().name())
-                    : o1.getItemStack().getType().name();
-            Component display2 = o2.getItemStack().getItemMeta().displayName();
-            String check2 = o2.getItemStack().hasItemMeta()
-                    ? (display2 != null ? ((TextComponent) display2).content() : o2.getItemStack().getType().name())
-                    : o2.getItemStack().getType().name();
-            return check1.compareToIgnoreCase(check2);
+            String name1 = Text.extractItemNameToString(o1.getItemStack());
+            String name2 = Text.extractItemNameToString(o2.getItemStack());
+            return name1.compareToIgnoreCase(name2);
         }
     }
 }

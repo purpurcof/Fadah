@@ -2,7 +2,7 @@ package info.preva1l.fadah.currency;
 
 import org.bukkit.OfflinePlayer;
 
-import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -24,9 +24,10 @@ import java.util.function.Predicate;
 public record SubCurrency(
         String id,
         String name,
+        char symbol,
         String requiredPlugin,
-        BiConsumer<OfflinePlayer, Double> withdraw,
-        BiConsumer<OfflinePlayer, Double> add,
+        BiPredicate<OfflinePlayer, Double> withdraw,
+        BiPredicate<OfflinePlayer, Double> add,
         Function<OfflinePlayer, Double> get,
         Predicate<Void> preloadCheck
 ) implements Currency {
@@ -46,6 +47,11 @@ public record SubCurrency(
         return name;
     }
 
+    @Override
+    public char getSymbol() {
+        return symbol;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -58,16 +64,16 @@ public record SubCurrency(
      * {@inheritDoc}
      */
     @Override
-    public void withdraw(OfflinePlayer player, double amountToTake) {
-        withdraw.accept(player, amountToTake);
+    public boolean withdraw(OfflinePlayer player, double amountToTake) {
+        return withdraw.test(player, amountToTake);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void add(OfflinePlayer player, double amountToAdd) {
-        add.accept(player, amountToAdd);
+    public boolean add(OfflinePlayer player, double amountToAdd) {
+        return add.test(player, amountToAdd);
     }
 
     /**

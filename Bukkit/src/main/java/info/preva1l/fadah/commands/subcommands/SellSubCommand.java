@@ -6,14 +6,13 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.currency.CurrencyRegistry;
-import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.guis.NewListingMenu;
 import info.preva1l.fadah.hooks.impl.permissions.Permission;
 import info.preva1l.fadah.hooks.impl.permissions.PermissionsHook;
 import info.preva1l.fadah.records.listing.ImplListingBuilder;
 import info.preva1l.fadah.records.listing.Listing;
 import info.preva1l.fadah.records.post.PostResult;
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.utils.Text;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -23,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 
 public final class SellSubCommand {
     private final Fadah plugin;
@@ -37,7 +35,7 @@ public final class SellSubCommand {
 
     public void addRunning(UUID uuid) {
         running.add(uuid);
-        TaskManager.Async.runLater(plugin, () -> running.remove(uuid), 20 * 60L);
+        Tasks.syncDelayed(plugin, () -> running.remove(uuid), 20 * 60L);
     }
 
     public void execute(Player player, double price) {
@@ -76,7 +74,7 @@ public final class SellSubCommand {
         if (Config.i().isMinimalMode()) {
             handleSell(player, price);
         } else {
-            TaskManager.Async.run(Fadah.getInstance(), () -> new NewListingMenu(player, price).open(player));
+             new NewListingMenu(player, price).open(player);
         }
     }
 
@@ -90,35 +88,22 @@ public final class SellSubCommand {
                 .itemStack(item)
                 .length(Config.i().getDefaultListingLength().toMillis())
                 .toPost()
-                .buildAndSubmit().thenAcceptAsync(result -> TaskManager.Sync.run(plugin, player, () -> {
+                .buildAndSubmit()
+                .failure(result -> {
                     if (result == PostResult.RESTRICTED_ITEM) {
-                        player.getInventory().setItemInMainHand(item);
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getRestricted());
-                        running.remove(player.getUniqueId());
-                        return;
-                    }
-
-                    if (result == PostResult.MAX_LISTINGS) {
-                        player.getInventory().setItemInMainHand(item);
+                    } else if (result == PostResult.MAX_LISTINGS) {
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getCommands().getSell().getMaxListings()
                                 .replace("%max%", PermissionsHook.getValue(String.class, Permission.MAX_LISTINGS, player))
                                 .replace("%current%", String.valueOf(CacheAccess.amountByPlayer(Listing.class, player.getUniqueId())))
                         );
-                        running.remove(player.getUniqueId());
-                        return;
-                    }
-
-                    if (!result.successful()) {
-                        player.getInventory().setItemInMainHand(item);
+                    } else {
                         Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getOther().replace("%ex%", result.message()));
                     }
 
+                    player.getInventory().setItemInMainHand(item);
                     running.remove(player.getUniqueId());
-                }), DataService.getInstance().getThreadPool())
-                .exceptionally(t -> {
-                    plugin.getLogger().log(Level.SEVERE, t.getMessage(), t);
-                    running.remove(player.getUniqueId());
-                    return null;
-                });
+                })
+                .success(result -> running.remove(player.getUniqueId()));
     }
 }

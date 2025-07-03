@@ -7,7 +7,8 @@ import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.ExpiredItems;
-import org.apache.commons.lang.NotImplementedException;
+import info.preva1l.fadah.records.collection.ImplExpiredItems;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.lang.reflect.Type;
@@ -15,10 +16,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created on 19/03/2025
@@ -29,7 +30,7 @@ public abstract class CommonSQLExpiredListingsDao implements Dao<ExpiredItems> {
     protected static final Gson GSON = new GsonBuilder()
             .registerTypeHierarchyAdapter(ConfigurationSerializable.class, new BukkitSerializableAdapter())
             .serializeNulls().disableHtmlEscaping().create();
-    protected static final Type EXPIRED_LIST_TYPE = new TypeToken<ArrayList<CollectableItem>>() {}.getType();
+    protected static final Type EXPIRED_LIST_TYPE = new TypeToken<CopyOnWriteArrayList<CollectableItem>>() {}.getType();
 
     /**
      * Get an object from the database by its id.
@@ -47,8 +48,8 @@ public abstract class CommonSQLExpiredListingsDao implements Dao<ExpiredItems> {
                 statement.setString(1, id.toString());
                 final ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
-                    List<CollectableItem> items = GSON.fromJson(resultSet.getString("items"), EXPIRED_LIST_TYPE);
-                    return Optional.of(new ExpiredItems(id, items));
+                    CopyOnWriteArrayList<CollectableItem> items = GSON.fromJson(resultSet.getString("items"), EXPIRED_LIST_TYPE);
+                    return Optional.of(new ImplExpiredItems(id, items));
                 }
             }
         } catch (SQLException e) {
@@ -66,7 +67,7 @@ public abstract class CommonSQLExpiredListingsDao implements Dao<ExpiredItems> {
      */
     @Override
     public void update(ExpiredItems collectableItem, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("update");
     }
 
     /**
@@ -76,7 +77,7 @@ public abstract class CommonSQLExpiredListingsDao implements Dao<ExpiredItems> {
      */
     @Override
     public void delete(ExpiredItems collectableItem) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("delete");
     }
 
     /**
@@ -86,7 +87,7 @@ public abstract class CommonSQLExpiredListingsDao implements Dao<ExpiredItems> {
      */
     @Override
     public List<ExpiredItems> getAll() {
-        throw new NotImplementedException();
+        throw new NotImplementedException("getAll");
     }
 
     protected abstract Connection getConnection() throws SQLException;

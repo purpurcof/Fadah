@@ -5,6 +5,7 @@ import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.hooks.impl.InfluxDBHook;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
+import info.preva1l.fadah.records.history.ImplHistory;
 import info.preva1l.fadah.records.listing.BidListing;
 import info.preva1l.fadah.records.listing.BinListing;
 import info.preva1l.fadah.records.listing.Listing;
@@ -34,10 +35,15 @@ public class TransactionLogger {
                 listing.getItemStack(),
                 price,
                 null,
-                bidding
+                bidding,
+                null
         );
 
-        CacheAccess.getNotNull(History.class, listing.getOwner()).add(historicItem);
+        CacheAccess.get(History.class, listing.getOwner())
+                .ifPresentOrElse(
+                        cache -> cache.add(historicItem),
+                        () -> fetchAndSaveHistory(listing.getOwner(), historicItem)
+                );
 
         // Log file logs
         String logMessage = "[NEW LISTING] Seller: %s (%s), Price: %.2f, ItemStack: %s".formatted(
@@ -54,11 +60,13 @@ public class TransactionLogger {
     public void listingSold(Listing listing, OfflinePlayer buyer) {
         boolean bidding = false;
         double price;
+        Double startingBid = null;
         if (listing instanceof BinListing bin) {
             price = bin.getPrice();
         } else if (listing instanceof BidListing bid) {
             bidding = true;
             price = bid.getCurrentBid().bidAmount();
+            startingBid = bid.getStartingBid();
         } else throw new IllegalArgumentException("Invalid listing class: " + listing);
 
         // In Game logs
@@ -68,7 +76,8 @@ public class TransactionLogger {
                 listing.getItemStack(),
                 price,
                 buyer.getUniqueId(),
-                bidding
+                bidding,
+                startingBid
         );
 
         CacheAccess.get(History.class, listing.getOwner())
@@ -83,7 +92,8 @@ public class TransactionLogger {
                 listing.getItemStack(),
                 price,
                 listing.getOwner(),
-                bidding
+                bidding,
+                startingBid
         );
 
         CacheAccess.get(History.class, buyer.getUniqueId())
@@ -148,7 +158,8 @@ public class TransactionLogger {
                 listing.getItemStack(),
                 null,
                 null,
-                bidding
+                bidding,
+                null
         );
         CacheAccess.get(History.class, listing.getOwner())
                 .ifPresentOrElse(
@@ -161,7 +172,7 @@ public class TransactionLogger {
         DataService.getInstance()
                 .get(History.class, owner)
                 .thenAccept(historyOpt -> {
-                    var history = historyOpt.orElseGet(() -> History.empty(owner));
+                    var history = historyOpt.orElseGet(() -> ImplHistory.empty(owner));
                     history.add(historicItem);
                     DataService.getInstance().save(History.class, history);
                 });

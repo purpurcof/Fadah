@@ -3,9 +3,7 @@ package info.preva1l.fadah.data.fixers.v2;
 import com.zaxxer.hikari.HikariDataSource;
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.data.DataService;
-import info.preva1l.fadah.records.collection.CollectableItem;
-import info.preva1l.fadah.records.collection.CollectionBox;
-import info.preva1l.fadah.records.collection.ExpiredItems;
+import info.preva1l.fadah.records.collection.*;
 import info.preva1l.fadah.utils.serialization.ItemSerializer;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.inventory.ItemStack;
@@ -30,7 +28,7 @@ public class SQLFixerV2 implements V2Fixer {
                 WHERE `playerUUID`=?;""")) {
                 statement.setString(1, player.toString());
                 final ResultSet resultSet = statement.executeQuery();
-                ExpiredItems expiredItems = ExpiredItems.empty(player);
+                ExpiredItems expiredItems = ImplExpiredItems.empty(player);
                 while (resultSet.next()) {
                     final ItemStack itemStack = ItemSerializer.deserialize(resultSet.getString("itemStack"))[0];
                     final long dateAdded = resultSet.getLong("dateAdded");
@@ -61,7 +59,7 @@ public class SQLFixerV2 implements V2Fixer {
                 WHERE `playerUUID`=?;""")) {
                 statement.setString(1, player.toString());
                 final ResultSet resultSet = statement.executeQuery();
-                CollectionBox box = CollectionBox.empty(player);
+                CollectionBox box = ImplCollectionBox.empty(player);
                 while (resultSet.next()) {
                     final ItemStack itemStack = ItemSerializer.deserialize(resultSet.getString("itemStack"))[0];
                     final long dateAdded = resultSet.getLong("dateAdded");

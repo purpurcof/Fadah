@@ -1,6 +1,6 @@
 package info.preva1l.fadah.currency;
 
-import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.config.CurrencySettings;
 import lombok.Getter;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -16,23 +16,33 @@ public class VaultCurrency implements Currency {
 
     @Override
     public String getName() {
-        return Config.i().getCurrency().getVault().getName();
+        return CurrencySettings.i().getVault().getName();
     }
 
     @Override
-    public void withdraw(OfflinePlayer player, double amountToTake) {
-        if (economy == null) {
-            throw new RuntimeException("Vault has no compatible economy plugin.");
-        }
-        economy.withdrawPlayer(player, amountToTake);
+    public char getSymbol() {
+        return CurrencySettings.i().getPlayerPoints().getSymbol();
     }
 
     @Override
-    public void add(OfflinePlayer player, double amountToAdd) {
+    public boolean isEnabled() {
+        return CurrencySettings.i().getVault().isEnabled();
+    }
+
+    @Override
+    public boolean withdraw(OfflinePlayer player, double amountToTake) {
         if (economy == null) {
             throw new RuntimeException("Vault has no compatible economy plugin.");
         }
-        economy.depositPlayer(player, amountToAdd);
+        return economy.withdrawPlayer(player, amountToTake).transactionSuccess();
+    }
+
+    @Override
+    public boolean add(OfflinePlayer player, double amountToAdd) {
+        if (economy == null) {
+            throw new RuntimeException("Vault has no compatible economy plugin.");
+        }
+        return economy.depositPlayer(player, amountToAdd).transactionSuccess();
     }
 
 

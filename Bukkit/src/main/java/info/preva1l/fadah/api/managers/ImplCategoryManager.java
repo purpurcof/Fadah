@@ -6,7 +6,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Created on 7/03/2025
@@ -20,7 +19,7 @@ public final class ImplCategoryManager implements CategoryManager {
     }
 
     @Override
-    public CompletableFuture<String> forItem(@NotNull ItemStack item) {
+    public String forItem(@NotNull ItemStack item) {
         return Categories.getCategoryForItem(item);
     }
 

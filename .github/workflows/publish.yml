@@ -23,13 +23,13 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Fix Gradle Permissions
         run: chmod +x ./gradlew
 
       - name: Publish with Gradle Wrapper
         env:
-          fad_username: ${{ secrets.REPO_USERNAME }}
-          fad_password: ${{ secrets.REPO_PASSWORD }}
-        run: ./gradlew publishApi
+          ORG_GRADLE_PROJECT_FinallyADecentUsername: ${{ secrets.REPO_USERNAME }}
+          ORG_GRADLE_PROJECT_FinallyADecentPassword: ${{ secrets.REPO_PASSWORD }}
+        run: ./gradlew publishApi --no-daemon

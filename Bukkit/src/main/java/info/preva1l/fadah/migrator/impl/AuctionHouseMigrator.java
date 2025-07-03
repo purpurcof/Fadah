@@ -39,7 +39,7 @@ public final class AuctionHouseMigrator implements Migrator {
             String ownerName = listing.getSellerName();
             ItemStack itemStack = listing.getItem();
             double price = listing.getPrice();
-            String categoryId = Categories.getCategoryForItem(itemStack).join();
+            String categoryId = Categories.getCategoryForItem(itemStack);
             listings.add(new ImplBinListing(id, owner, ownerName, itemStack, categoryId, "vault", price, 0,
                     Instant.now().toEpochMilli(), expiry));
         }

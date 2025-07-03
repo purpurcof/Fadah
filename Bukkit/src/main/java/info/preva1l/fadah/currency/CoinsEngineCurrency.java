@@ -1,6 +1,6 @@
 package info.preva1l.fadah.currency;
 
-import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.config.CurrencySettings;
 import info.preva1l.fadah.config.misc.SubEconomy;
 import lombok.Getter;
 import su.nightexpress.coinsengine.api.CoinsEngineAPI;
@@ -15,11 +15,17 @@ public class CoinsEngineCurrency implements MultiCurrency {
     private final List<Currency> currencies = new ArrayList<>();
 
     @Override
+    public boolean isEnabled() {
+        return CurrencySettings.i().getVault().isEnabled();
+    }
+
+    @Override
     public boolean preloadChecks() {
-        for (SubEconomy eco : Config.i().getCurrency().getCoinsEngine().getCurrencies()) {
+        for (SubEconomy eco : CurrencySettings.i().getCoinsEngine().getCurrencies()) {
             Currency subCur = new SubCurrency(
                     id + "_" + eco.economy(),
                     eco.displayName(),
+                    eco.symbol(),
                     requiredPlugin,
                     (p, a) -> CoinsEngineAPI.removeBalance(p.getUniqueId(), getCurrency(eco), a),
                     (p, a) -> CoinsEngineAPI.addBalance(p.getUniqueId(), getCurrency(eco), a),

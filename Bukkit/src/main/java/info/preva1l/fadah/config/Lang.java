@@ -263,6 +263,16 @@ public class Lang {
             private String disabled = "&c&lDISABLED";
         }
 
+        private Open open = new Open();
+
+        @Getter
+        @Configuration
+        @NoArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class Open {
+            private String description = "Open the auction house menu for another player";
+            private List<String> aliases = List.of();
+        }
+
         private About about = new About();
 
         @Getter
@@ -320,6 +330,8 @@ public class Lang {
         private String listingCancelledAdmin = "Listing Cancelled by Admins";
         private String expiredItemClaimedAdmin = "Expired Listing Claimed by Admins";
         private String collectionBoxClaimedAdmin = "Collection Box Item Claimed by Admins";
+        private String listingBidReceived = "Bid Received";
+        private String listingBidPlaced = "Bid Placed";
     }
 
     private Sort sort = new Sort();
@@ -381,7 +393,7 @@ public class Lang {
     public static class Errors {
         private String disabled = "&cThe Auction House is currently disabled!";
         private String commandNotFound = "&cThis command does not exist!";
-        private String mustBePlayer = "&cOnly players can run this command!";
+        private String mustBePlayer = "&cOnly players can sync this command!";
         private String restricted = "&cYou cannot sell this item!";
         private String noPermission = "&cYou do not have permission to execute this command!";
         private String playerNotFound = "&c%player% was not found!";

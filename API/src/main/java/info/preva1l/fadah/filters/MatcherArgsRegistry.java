@@ -1,4 +1,4 @@
-package info.preva1l.fadah.processor;
+package info.preva1l.fadah.filters;
 
 import com.google.common.base.Preconditions;
 import org.bukkit.inventory.ItemStack;
@@ -11,35 +11,35 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 
 /**
- * A registry of {@link ProcessorArg}.
+ * A registry of {@link MatcherArg}.
  * <br><br>
  * Created on 20/02/2025
  *
  * @author Preva1l
  */
-public final class ProcessorArgsRegistry {
-    private static final List<ProcessorArg> values = new ArrayList<>();
+public final class MatcherArgsRegistry {
+    private static final List<MatcherArg> values = new ArrayList<>();
 
     /**
      * Registries can not be initialized.
      */
-    private ProcessorArgsRegistry() {
+    private MatcherArgsRegistry() {
         throw new UnsupportedOperationException("Registries can not be initialized.");
     }
 
     /**
-     * Build and register a {@link ProcessorArg}.
+     * Build and register a {@link MatcherArg}.
      *
      * @param argType the argument type for the replacer.
      * @param placeholder the string to replace, excluding the surrounding {@code %%}.
      * @param parser the parser function.
-     * @see ProcessorArg
+     * @see MatcherArg
      */
-    public static void register(@NotNull ProcessorArgType argType, @NotNull String placeholder, Function<@NotNull ItemStack, @NotNull String> parser) {
+    public static void register(@NotNull MatcherArgType argType, @NotNull String placeholder, Function<@NotNull ItemStack, @NotNull String> parser) {
         Preconditions.checkNotNull(parser);
-        Logger.getLogger("Fadah").info("[Services] [JSProcessorService] Matcher Registered: " + placeholder);
+        Logger.getLogger("Fadah").info("[Services] [MatcherService] Matcher Registered: " + placeholder);
         values.add(
-                new ProcessorArg(
+                new MatcherArg(
                         argType,
                         "%" + placeholder + "%",
                         parser
@@ -48,11 +48,11 @@ public final class ProcessorArgsRegistry {
     }
 
     /**
-     * Get all the currently registered {@link ProcessorArg}'s.
+     * Get all the currently registered {@link MatcherArg}'s.
      *
      * @return an immutable list of all registered replacers.
      */
-    public static List<ProcessorArg> get() {
+    public static List<MatcherArg> get() {
         return Collections.unmodifiableList(values);
     }
 }

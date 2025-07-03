@@ -17,7 +17,6 @@ import info.preva1l.fadah.records.Category;
 import info.preva1l.fadah.records.listing.BidListing;
 import info.preva1l.fadah.records.listing.BinListing;
 import info.preva1l.fadah.records.listing.Listing;
-import info.preva1l.fadah.utils.TaskManager;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.LayoutService;
 import net.kyori.adventure.text.format.TextColor;
@@ -33,9 +32,8 @@ import org.incendo.cloud.minecraft.extras.MinecraftHelp;
 import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.CompletableFuture;
-
 import static org.incendo.cloud.bukkit.parser.OfflinePlayerParser.offlinePlayerParser;
+import static org.incendo.cloud.bukkit.parser.PlayerParser.playerParser;
 import static org.incendo.cloud.parser.standard.EnumParser.enumParser;
 import static org.incendo.cloud.parser.standard.StringParser.greedyStringParser;
 import static org.incendo.cloud.parser.standard.StringParser.stringParser;
@@ -72,10 +70,13 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
         manager.command(
                 builder.senderType(Player.class)
                         .permission("fadah.use")
-                        .futureHandler(cmd ->
-                                CompletableFuture.runAsync(() ->
-                                        new MainMenu(null, cmd.sender(), null, null, null)
-                                                .open(cmd.sender()), DataService.instance.getThreadPool()))
+                        .handler(cmd -> new MainMenu(
+                                null,
+                                cmd.sender(),
+                                null,
+                                null,
+                                null
+                        ).open(cmd.sender()))
         );
 
         registerSubCommands();
@@ -139,6 +140,9 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
         toggleCommand(null);
         conf.getToggle().getAliases().forEach(this::toggleCommand);
 
+        openCommand(null);
+        conf.getOpen().getAliases().forEach(this::openCommand);
+
         reloadCommand(null);
         conf.getReload().getAliases().forEach(this::reloadCommand);
 
@@ -178,7 +182,7 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                         .flag(manager.flagBuilder("sort-method").withAliases("s").withComponent(enumParser(SortingMethod.class)).build())
                         .flag(manager.flagBuilder("sort-direction").withAliases("d").withComponent(enumParser(SortingDirection.class)).build())
                         .flag(manager.flagBuilder("player").withAliases("p").withComponent(offlinePlayerParser()).build())
-                        .futureHandler(cmd -> {
+                        .handler(cmd -> {
                             Category category = cmd.flags().<String>getValue("category")
                                     .flatMap(Categories::getCategory)
                                     .orElse(null);
@@ -187,11 +191,11 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                             OfflinePlayer owner = cmd.flags().<OfflinePlayer>getValue("p").orElse(null);
 
                             if (owner != null) {
-                                return inspect(cmd.sender(), owner, cmd.get("search"), sort, direction);
+                                inspect(cmd.sender(), owner, cmd.get("search"), sort, direction);
+                                return;
                             }
 
-                            return CompletableFuture.runAsync(
-                                    () -> new MainMenu(category, cmd.sender(), cmd.get("search"), sort, direction).open(cmd.sender()));
+                            new MainMenu(category, cmd.sender(), cmd.get("search"), sort, direction).open(cmd.sender());
                         })
         );
     }
@@ -208,14 +212,16 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                         .senderType(Player.class)
                         .permission("fadah.profile")
                         .optional("owner", offlinePlayerParser())
-                        .futureHandler(cmd -> CompletableFuture.runAsync(() -> {
+                        .handler(cmd -> {
                             OfflinePlayer owner = cmd.getOrDefault("owner", null);
                             if (owner == null || !cmd.sender().hasPermission("fadah.manage.profile")) {
                                 owner = cmd.sender();
                             }
 
+                            DataService.instance.loadPlayerData(owner.getUniqueId()).join();
+
                             new ProfileMenu(cmd.sender(), owner).open(cmd.sender());
-                        }))
+                        })
         );
     }
 
@@ -231,13 +237,13 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                         .senderType(Player.class)
                         .permission("fadah.active-listings")
                         .optional("owner", offlinePlayerParser())
-                        .futureHandler(cmd -> {
+                        .handler(cmd -> {
                             OfflinePlayer owner = cmd.getOrDefault("owner", null);
                             if (owner == null || !cmd.sender().hasPermission("fadah.manage.active-listings")) {
                                 owner = cmd.sender();
                             }
 
-                            return inspect(cmd.sender(), owner, null, null, null);
+                            inspect(cmd.sender(), owner, null, null, null);
                         })
         );
     }
@@ -254,14 +260,18 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                         .senderType(Player.class)
                         .permission("fadah.collection-box")
                         .optional("owner", offlinePlayerParser())
-                        .futureHandler(cmd -> CompletableFuture.runAsync(() -> {
+                        .handler(cmd -> {
                             OfflinePlayer owner = cmd.getOrDefault("owner", null);
                             if (owner == null || !cmd.sender().hasPermission("fadah.manage.collection-box")) {
                                 owner = cmd.sender();
                             }
 
-                            new CollectionMenu(cmd.sender(), owner, LayoutService.MenuType.COLLECTION_BOX).open(cmd.sender());
-                        }))
+                            OfflinePlayer finalOwner = owner;
+                            DataService.instance.loadPlayerData(owner.getUniqueId())
+                                    .thenRun(() ->
+                                            new CollectionMenu(cmd.sender(), finalOwner, LayoutService.MenuType.COLLECTION_BOX)
+                                                    .open(cmd.sender()));
+                        })
         );
     }
 
@@ -277,14 +287,18 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                         .senderType(Player.class)
                         .permission("fadah.expired-items")
                         .optional("owner", offlinePlayerParser())
-                        .futureHandler(cmd -> CompletableFuture.runAsync(() -> {
+                        .handler(cmd -> {
                             OfflinePlayer owner = cmd.getOrDefault("owner", null);
                             if (owner == null || !cmd.sender().hasPermission("fadah.manage.expired-items")) {
                                 owner = cmd.sender();
                             }
 
-                            new CollectionMenu(cmd.sender(), owner, LayoutService.MenuType.EXPIRED_LISTINGS).open(cmd.sender());
-                        }))
+                            OfflinePlayer finalOwner = owner;
+                            DataService.instance.loadPlayerData(owner.getUniqueId())
+                                    .thenRun(() ->
+                                            new CollectionMenu(cmd.sender(), finalOwner, LayoutService.MenuType.COLLECTION_BOX)
+                                                    .open(cmd.sender()));
+                        })
         );
     }
 
@@ -300,14 +314,16 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                         .senderType(Player.class)
                         .permission("fadah.use")
                         .optional("owner", offlinePlayerParser())
-                        .futureHandler(cmd -> CompletableFuture.runAsync(() -> {
+                        .handler(cmd -> {
                             OfflinePlayer owner = cmd.getOrDefault("owner", null);
                             if (owner == null || !cmd.sender().hasPermission("fadah.manage.history")) {
                                 owner = cmd.sender();
                             }
 
+                            DataService.instance.loadPlayerData(owner.getUniqueId()).join();
+
                             new HistoryMenu(cmd.sender(), owner, null).open(cmd.sender());
-                        }))
+                        })
         );
     }
 
@@ -323,7 +339,7 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                         .senderType(Player.class)
                         .permission("fadah.view")
                         .required("owner", offlinePlayerParser())
-                        .futureHandler(cmd -> inspect(cmd.sender(), cmd.get("owner"), null, null, null))
+                        .handler(cmd -> inspect(cmd.sender(), cmd.get("owner"), null, null, null))
         );
     }
 
@@ -338,8 +354,7 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                         .meta(aliasMeta, alias)
                         .senderType(Player.class)
                         .permission("fadah.watch")
-                        .futureHandler(cmd -> CompletableFuture.runAsync(
-                                () -> new WatchMenu(cmd.sender()).open(cmd.sender())))
+                        .handler(cmd -> new WatchMenu(cmd.sender()).open(cmd.sender()))
         );
     }
 
@@ -385,6 +400,21 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
         );
     }
 
+    private void openCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "open";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getOpen().getDescription()))
+                        .meta(aliasMeta, alias)
+                        .permission("fadah.open-other")
+                        .required("player", playerParser())
+                        .handler(this::open)
+        );
+    }
+
     private void reloadCommand(@Nullable String name) {
         boolean alias = true;
         if (name == null) {
@@ -419,13 +449,11 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                                         return;
                                     }
 
-                                    TaskManager.Async.run(Fadah.getInstance(), () -> {
-                                        if (listing instanceof BinListing bin) {
-                                            new ConfirmPurchaseMenu(bin, player, player::closeInventory).open(player);
-                                        } else if (listing instanceof BidListing bid) {
-                                            new PlaceBidMenu(bid, player, player::closeInventory).open(player);
-                                        }
-                                    });
+                                    if (listing instanceof BinListing bin) {
+                                        new ConfirmPurchaseMenu(bin, player, player::closeInventory).open(player);
+                                    } else if (listing instanceof BidListing bid) {
+                                        new PlaceBidMenu(bid, player, player::closeInventory).open(player);
+                                    }
                                 }, () -> cmd.sender().sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist())))
                         )
         );

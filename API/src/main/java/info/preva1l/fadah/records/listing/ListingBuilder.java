@@ -10,7 +10,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * A listing builder allows you to create a new listing via the API.
@@ -170,5 +169,5 @@ public abstract class ListingBuilder {
      * @since 3.0.0
      */
     @ApiStatus.Internal
-    public abstract CompletableFuture<Listing> build();
+    public abstract Listing build();
 }

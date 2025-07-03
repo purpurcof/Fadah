@@ -18,13 +18,16 @@ public final class DistributedCollectionCache implements Cache<CollectionBox> {
 
     public DistributedCollectionCache() {
         final LocalCachedMapOptions<UUID, CollectionBox> options = LocalCachedMapOptions.<UUID, CollectionBox>name("collection-boxes")
-                .cacheSize(1000000)
-                .maxIdle(Duration.ofSeconds(60))
-                .timeToLive(Duration.ofSeconds(60))
+                .cacheSize(0)
+                .timeToLive(Duration.ZERO)
+                .maxIdle(Duration.ZERO)
                 .evictionPolicy(LocalCachedMapOptions.EvictionPolicy.NONE)
                 .syncStrategy(LocalCachedMapOptions.SyncStrategy.UPDATE)
                 .storeMode(LocalCachedMapOptions.StoreMode.LOCALCACHE_REDIS)
-                .expirationEventPolicy(LocalCachedMapOptions.ExpirationEventPolicy.SUBSCRIBE_WITH_KEYSPACE_CHANNEL);
+                .reconnectionStrategy(LocalCachedMapOptions.ReconnectionStrategy.LOAD)
+                .expirationEventPolicy(LocalCachedMapOptions.ExpirationEventPolicy.SUBSCRIBE_WITH_KEYEVENT_PATTERN)
+                .cacheProvider(LocalCachedMapOptions.CacheProvider.REDISSON)
+                .storeCacheMiss(false);
 
         collectionBoxes = RedisBroker.getRedisson().getLocalCachedMap(options);
     }
@@ -52,7 +55,7 @@ public final class DistributedCollectionCache implements Cache<CollectionBox> {
 
     @Override
     public @NotNull List<CollectionBox> getAll() {
-        return new ArrayList<>(collectionBoxes.values());
+        return new ArrayList<>(collectionBoxes.readAllValues());
     }
 
     @Override
@@ -62,6 +65,6 @@ public final class DistributedCollectionCache implements Cache<CollectionBox> {
 
     @Override
     public int amountByPlayer(@NotNull UUID player) {
-        return collectionBoxes.get(player).collectableItems().size();
+        return collectionBoxes.get(player).items().size();
     }
 }

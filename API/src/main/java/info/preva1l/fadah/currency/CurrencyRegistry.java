@@ -3,28 +3,30 @@ package info.preva1l.fadah.currency;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 /**
- * A registry of {@link Currency}.
+ * A thread-safe registry of {@link Currency}.
  * <br><br>
  * Created on 22/10/2024
  *
  * @author Preva1l
  */
 public final class CurrencyRegistry {
-    private static final Map<Integer, String> enumerator = new ConcurrentHashMap<>();
-    private static final Map<String, Currency> values = new ConcurrentHashMap<>();
+    private static final Logger LOGGER = Logger.getLogger("Fadah");
+
+    private static final Map<String, Currency> currencies = new ConcurrentHashMap<>();
+    private static final List<String> orderedIds = Collections.synchronizedList(new ArrayList<>());
 
     /**
-     * Registries can not be initialized.
+     * Registries cannot be instantiated.
      */
     private CurrencyRegistry() {
-        throw new UnsupportedOperationException("Registries can not be initialized.");
+        throw new UnsupportedOperationException("Registries cannot be instantiated.");
     }
 
     /**
@@ -38,7 +40,7 @@ public final class CurrencyRegistry {
      * @see CurrencyRegistry#register(CurrencyBase)
      */
     @Deprecated(since = "3.0.0")
-    public static void registerMulti(MultiCurrency currency) {
+    public static void registerMulti(@NotNull MultiCurrency currency) {
         register(currency);
     }
 
@@ -52,128 +54,164 @@ public final class CurrencyRegistry {
      * @since 3.0.0
      * @see CurrencyRegistry#registerMulti(MultiCurrency)
      */
-    public static void register(CurrencyBase currencyBase) {
-        if (values.containsKey(currencyBase.getId())) {
-            throw new IllegalArgumentException("Currency with the id " + currencyBase.getId() + " is already registered!");
+    public static void register(@NotNull CurrencyBase currencyBase) {
+        Objects.requireNonNull(currencyBase, "Currency base cannot be null");
+
+        String currencyId = currencyBase.getId().toLowerCase();
+
+        if (currencies.containsKey(currencyId)) {
+            throw new IllegalArgumentException("Currency with the id '" + currencyId + "' is already registered!");
         }
 
         if (!currencyBase.getRequiredPlugin().isEmpty()) {
             Plugin requiredPlugin = Bukkit.getPluginManager().getPlugin(currencyBase.getRequiredPlugin());
-            if (requiredPlugin == null || !requiredPlugin.isEnabled()) return;
+            if (requiredPlugin == null || !requiredPlugin.isEnabled()) {
+                if (currencyBase.isEnabled())
+                    LOGGER.warning("[Services] [CurrencyService] Required plugin '" + currencyBase.getRequiredPlugin() + "' not found or disabled for currency: " + currencyId);
+                return;
+            }
         }
 
         if (!currencyBase.preloadChecks()) {
-            Logger.getLogger("Fadah")
-                    .severe("[Services] [CurrencyService] Tried enabling %s but the preload checks failed!"
-                            .formatted(currencyBase.getId().toLowerCase()));
+            LOGGER.severe("[Services] [CurrencyService] Preload checks failed for currency: " + currencyId);
             return;
         }
 
         if (currencyBase instanceof MultiCurrency multiCurrency) {
-            for (Currency currency : multiCurrency.getCurrencies()) {
-                register(currency);
-            }
+            registerMultiCurrencyInternal(multiCurrency);
             return;
         }
 
-        // Sanity check in-case someone implements CurrencyBase for some unknown reason
-        if (!(currencyBase instanceof Currency currency)) return;
+        if (currencyBase instanceof Currency currency) {
+            registerSingleCurrency(currency);
+        } else {
+            LOGGER.warning("[Services] [CurrencyService] Unknown CurrencyBase implementation: " +
+                    currencyBase.getClass().getSimpleName());
+        }
+    }
 
-        values.put(currency.getId().toLowerCase(), currency);
-        enumerator.put(enumerator.size(), currency.getId().toLowerCase());
+    /**
+     * Internal method to handle MultiCurrency registration.
+     */
+    private static void registerMultiCurrencyInternal(@NotNull MultiCurrency multiCurrency) {
+        List<Currency> subCurrencies = multiCurrency.getCurrencies();
+        if (subCurrencies == null || subCurrencies.isEmpty()) {
+            LOGGER.warning("[Services] [CurrencyService] MultiCurrency '" +
+                    multiCurrency.getId() + "' has no sub-currencies");
+            return;
+        }
 
-        Logger.getLogger("Fadah").info("[Services] [CurrencyService] Registered: " + currency.getId());
+        for (Currency currency : subCurrencies) {
+            if (currency != null) {
+                registerSingleCurrency(currency);
+            }
+        }
+    }
+
+    /**
+     * Internal method to register a single currency.
+     */
+    private static void registerSingleCurrency(@NotNull Currency currency) {
+        String currencyId = currency.getId().toLowerCase();
+
+        currencies.put(currencyId, currency);
+        orderedIds.add(currencyId);
+
+        LOGGER.info("[Services] [CurrencyService] Registered: " + currency.getId());
     }
 
     /**
      * Get a currency by its id.
-     * <p>
-     * The currency id must be lowercase, but this is automatically fixed in this method.
      *
      * @param currencyId the currency to get.
-     * @return the currency with the specified id, or null if it isn't loaded.
+     * @return the currency with the specified id, or null if it isn't loaded or enabled.
      */
-    public static Currency get(String currencyId) {
-        return values.get(currencyId.toLowerCase());
+    public static @Nullable Currency get(@NotNull String currencyId) {
+        Objects.requireNonNull(currencyId, "Currency ID cannot be null");
+
+        Currency currency = currencies.get(currencyId.toLowerCase());
+        return (currency != null && currency.isEnabled()) ? currency : null;
     }
 
     /**
      * Unregister a currency.
      *
      * @param currency the currency to unregister.
-     * @implNote This method is pretty slow but should be fast enough to run on the main thread.
      */
     public static void unregister(@NotNull Currency currency) {
+        Objects.requireNonNull(currency, "Currency cannot be null");
+
         String currencyId = currency.getId().toLowerCase();
 
-        values.remove(currencyId);
-
-        int removedKey = enumerator.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(currencyId))
-                .findFirst()
-                .map(Map.Entry::getKey).orElse(-1);
-
-        if (removedKey != -1) {
-            enumerator.remove(removedKey);
-            enumerator.entrySet().removeIf(entry -> entry.getKey() > removedKey);
-
-            int newKey = removedKey;
-            for (Map.Entry<Integer, String> entry : enumerator.entrySet()) {
-                enumerator.put(newKey++, entry.getValue());
-            }
+        Currency removed = currencies.remove(currencyId);
+        if (removed != null) {
+            orderedIds.remove(currencyId);
+            LOGGER.info("[Services] [CurrencyService] Unregistered: " + currency.getId());
         }
     }
 
     /**
-     * Get the currency after the provided currency based of the enumerator order.
+     * Get the next enabled currency based on registration order.
      *
-     * @param current the seed.
-     * @return the next currency.
+     * @param current the current currency
+     * @return the next enabled currency, or null if none found
      */
-    public static Currency getNext(@NotNull Currency current) {
-        Integer currentIndex = null;
-        for (Map.Entry<Integer, String> entry : enumerator.entrySet()) {
-            if (entry.getValue().equalsIgnoreCase(current.getId())) {
-                currentIndex = entry.getKey();
-                break;
-            }
-        }
-        if (currentIndex == null || currentIndex == enumerator.size() - 1) {
-            return null;
-        }
-        int nextIndex = currentIndex + 1;
-        String nextCurrencyId = enumerator.get(nextIndex);
-        return values.get(nextCurrencyId);
+    public static @Nullable Currency getNext(@NotNull Currency current) {
+        return getAdjacent(current, 1);
     }
 
     /**
-     * Get the currency before the provided currency based of the enumerator order.
+     * Get the previous enabled currency based on registration order.
      *
-     * @param current the seed.
-     * @return the previous currency.
+     * @param current the current currency
+     * @return the previous enabled currency, or null if none found
      */
-    public static Currency getPrevious(@NotNull Currency current) {
-        Integer currentIndex = null;
-        for (Map.Entry<Integer, String> entry : enumerator.entrySet()) {
-            if (entry.getValue().equalsIgnoreCase(current.getId())) {
-                currentIndex = entry.getKey();
-                break;
-            }
-        }
-        if (currentIndex == null || currentIndex == 0) {
-            return null;
-        }
-        int previousIndex = currentIndex - 1;
-        String previousCurrencyId = enumerator.get(previousIndex);
-        return values.get(previousCurrencyId);
+    public static @Nullable Currency getPrevious(@NotNull Currency current) {
+        return getAdjacent(current, -1);
     }
 
     /**
-     * Get all the currently loaded currencies.
+     * Core logic to get adjacent currency by direction.
      *
-     * @return an immutable list.
+     * @param current the current currency
+     * @param direction +1 for next, -1 for previous
+     * @return the adjacent enabled currency or null
      */
-    public static List<Currency> getAll() {
-        return List.copyOf(values.values());
+    private static @Nullable Currency getAdjacent(@NotNull Currency current, int direction) {
+        Objects.requireNonNull(current, "Current currency cannot be null");
+
+        String currentId = current.getId().toLowerCase();
+        List<String> snapshot = new ArrayList<>(orderedIds);
+        int currentIndex = snapshot.indexOf(currentId);
+
+        if (currentIndex == -1) return null;
+
+        int size = snapshot.size();
+
+        for (int i = 1; i < size; i++) {
+            int nextIndex = currentIndex + (direction * i);
+
+            if (nextIndex < 0 || nextIndex >= size) break;
+
+            String nextId = snapshot.get(nextIndex);
+            Currency nextCurrency = currencies.get(nextId);
+
+            if (nextCurrency != null && nextCurrency.isEnabled()) return nextCurrency;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get all currently loaded and enabled currencies in registration order.
+     *
+     * @return an immutable list of enabled currencies.
+     */
+    public static @NotNull List<Currency> getAll() {
+        return orderedIds.stream()
+                .map(currencies::get)
+                .filter(Objects::nonNull)
+                .filter(Currency::isEnabled)
+                .toList();
     }
 }

@@ -1,9 +1,17 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import net.minecrell.pluginyml.bukkit.BukkitPluginDescription
-import net.minecrell.pluginyml.paper.PaperPluginDescription
+import info.preva1l.trashcan.description.paper.Permission
+import info.preva1l.trashcan.description.paper.PluginLoadOrder
+import info.preva1l.trashcan.description.paper.dependency
+import info.preva1l.trashcan.setRemapped
+import info.preva1l.trashcan.trashcan
+import info.preva1l.trashcan.description.paper.PaperDependencyDefinition.RelativeLoadOrder as RLO
 
 plugins {
-    id("de.eldoria.plugin-yml.paper") version "0.7.1"
+    fadah.common
+}
+
+trashcan {
+    paper = true
 }
 
 repositories {
@@ -19,95 +27,52 @@ repositories {
 
 dependencies {
     implementation(project(":API"))
-    compileOnly("io.papermc.paper:paper-api:1.19.3-R0.1-SNAPSHOT")
+    trashcan("1.2.1")
 
-    // Trashcan
-    annotationProcessor("info.preva1l.trashcan:paper:1.1.0")
-    implementation("info.preva1l.trashcan:paper:1.1.0")
+    library(libs.bundles.databases)
 
-    compileOnly("me.clip:placeholderapi:2.11.6") // Placeholder support
+    library(libs.multilib)
+    library(libs.anvilgui) { setRemapped(true) }
+    library(libs.adventure.gson)
+    library(libs.influxdb)
 
-    // Database
-    library("com.zaxxer:HikariCP:6.3.0")
-    library("org.xerial:sqlite-jdbc:3.49.1.0")
-    library("com.mysql:mysql-connector-j:9.3.0")
-    library("org.mariadb.jdbc:mariadb-java-client:3.5.3")
-    library("org.mongodb:mongodb-driver-sync:5.5.0")
-
-    library("net.wesjd:anvilgui:1.10.5-SNAPSHOT") // Search Menu
-
-    library("net.kyori:adventure-text-serializer-gson:4.21.0")
-
-    library("org.mozilla:rhino:1.8.0")
+    dependency(libs.placeholderapi(), "PlaceholderAPI") { load = RLO.BEFORE ; required = false }
+    dependency(libs.luckperms(), "LuckPerms") { load = RLO.BEFORE ; required = false }
+    compileOnly(libs.mcmmo) { isTransitive = false }
 
     // Currency
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
-    compileOnly("com.github.Emibergo02:RedisEconomy:4.3.9")
-    compileOnly(files("../libs/CoinsEngine-2.3.5.jar"))
-    compileOnly("org.black_ixx:playerpoints:3.2.0")
+    dependency(libs.vault(), "Vault") { load = RLO.BEFORE ; required = false }
+    dependency(libs.rediseconomy(), "RedisEconomy") { load = RLO.BEFORE ; required = false }
+    dependency(files("../libs/CoinsEngine-2.3.5.jar"), "CoinsEngine") { load = RLO.BEFORE ; required = false }
+    dependency(libs.playerpoints(), "PlayerPoints") { load = RLO.BEFORE ; required = false }
 
     // Eco Items
-    compileOnly("com.willfp:libreforge:4.58.1")
-    compileOnly("com.willfp:eco:6.56.0")
-    compileOnly("com.willfp:EcoItems:5.43.1")
-    compileOnly("com.influxdb:influxdb-client-java:7.2.0") // InfluxDB logging
-    compileOnly("net.luckperms:api:5.4") // Permissions enhancement
-    compileOnly("com.gmail.nossr50.mcMMO:mcMMO:2.2.004") {
-        isTransitive = false
-    }
+    compileOnly(libs.bundles.eco) { isTransitive = false }
+    dependency(libs.eco.items(), "EcoItems") { load = RLO.BEFORE ; required = false }
 
-    // Migrators
-    compileOnly("com.github.Maxlego08:zAuctionHouseV3-API:3.2.1.9") // zAuctionHouse
-    compileOnly(files("../libs/AuctionHouse-1.20.4-3.7.1.jar")) // AuctionHouse
-    compileOnly(files("../libs/AkarianAuctionHouse-1.3.1-b6.jar")) // AkarianAuctionHouse
-
-    // I hate IntelliJ
-    //implementation("su.nightexpress:nightcore:2.5.1")
-    //implementation("io.lettuce:lettuce-core:6.6.0.RELEASE")
+    dependency(libs.zauctionhouse(), "zAuctionHouseV3") { required = false }
+    dependency(files("../libs/AuctionHouse-1.20.4-3.7.1.jar"), "AuctionHouse") { required = false }
+    compileOnly(files("../libs/AkarianAuctionHouse-1.3.1-b6.jar"))
 }
 
 tasks.withType<ShadowJar> {
-    relocate("com.github.puregero.multilib", "info.preva1l.fadah.libs.multilib")
     relocate("info.preva1l.hooker", "info.preva1l.fadah.hooks.lib")
     relocate("info.preva1l.trashcan", "info.preva1l.fadah.trashcan")
-
-    manifest {
-        attributes["paperweight-mappings-namespace"] = "spigot"
-    }
 }
 
 paper {
-    name = "Fadah"
-    version = rootProject.version.toString()
     description = "Fadah (Finally a Decent Auction House) is the fast, modern and advanced auction house plugin that you have been looking for!"
-    website = "https://docs.preva1l.info/"
+    website = "https://docs.preva1l.info/fadah/"
     author = "Preva1l"
     main = rootProject.group.toString() + ".Fadah"
-    loader = "info.preva1l.fadah.FadahLibraryloader"
-    generateLibrariesJson = true
+    loader = "info.preva1l.fadah.trashcan.extension.libloader.BaseLibraryLoader"
     foliaSupported = true
     apiVersion = "1.19"
 
-    load = BukkitPluginDescription.PluginLoadOrder.POSTWORLD
+    load = PluginLoadOrder.POSTWORLD
 
-    serverDependencies {
-        listOf(
-            "PlaceholderAPI",
-            "EcoItems",
-            "LuckPerms",
-            "zAuctionHouseV3",
-            "AuctionHouse",
-            "RedisEconomy",
-            "CoinsEngine",
-            "Vault",
-            "PlayerPoints",
-            "mcMMO"
-        ).forEach {
-            register(it) {
-                load = PaperPluginDescription.RelativeLoadOrder.AFTER
-                required = false
-            }
-        }
+    dependencies {
+        serverDependencies.register("mcMMO") { load = RLO.BEFORE ; required = false }
     }
 
     permissions {
@@ -121,43 +86,23 @@ paper {
 
         register("fadah.advert-price.<amount>") {
             description = "The cost of a listing advertisement."
-            default = BukkitPluginDescription.Permission.Default.TRUE
+            default = Permission.Default.TRUE
         }
 
-        register("fadah.use") {
-            default = BukkitPluginDescription.Permission.Default.TRUE
-        }
-
-        register("fadah.collection-box") {
-            default = BukkitPluginDescription.Permission.Default.TRUE
-        }
-
-        register("fadah.expired-items") {
-            default = BukkitPluginDescription.Permission.Default.TRUE
-        }
-
-        register("fadah.help") {
-            default = BukkitPluginDescription.Permission.Default.TRUE
-        }
-
-        register("fadah.profile") {
-            default = BukkitPluginDescription.Permission.Default.TRUE
-        }
-
-        register("fadah.active-listings") {
-            default = BukkitPluginDescription.Permission.Default.TRUE
-        }
-
-        register("fadah.watch") {
-            default = BukkitPluginDescription.Permission.Default.TRUE
-        }
-
-        register("fadah.search") {
-            default = BukkitPluginDescription.Permission.Default.TRUE
-        }
-
-        register("fadah.view") {
-            default = BukkitPluginDescription.Permission.Default.TRUE
+        listOf(
+            "fadah.use",
+            "fadah.collection-box",
+            "fadah.expired-items",
+            "fadah.help",
+            "fadah.profile",
+            "fadah.active-listings",
+            "fadah.watch",
+            "fadah.search",
+            "fadah.view",
+        ).forEach {
+            register(it) {
+                default = Permission.Default.TRUE
+            }
         }
 
         register("fadah.manage.*") {
@@ -170,3 +115,6 @@ paper {
         }
     }
 }
+
+operator fun Provider<MinimalExternalModuleDependency>.invoke(): String =
+    get().let { "${it.module.group}:${it.module.name}:${it.version}" }

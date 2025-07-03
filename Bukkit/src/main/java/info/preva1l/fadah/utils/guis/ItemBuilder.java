@@ -210,10 +210,7 @@ public class ItemBuilder {
 
     @SneakyThrows
     public ItemBuilder attributeSillyStuff() {
-        for (Attribute attribute : (Attribute[]) Attribute.class.getDeclaredMethod("values").invoke(null)) {
-            meta(meta -> meta.setAttributeModifiers(ImmutableListMultimap.of()));
-        }
-        return this;
+        return meta(meta -> meta.setAttributeModifiers(ImmutableListMultimap.of()));
     }
 
     public ItemBuilder setAttributes(Multimap<Attribute,AttributeModifier> map) {

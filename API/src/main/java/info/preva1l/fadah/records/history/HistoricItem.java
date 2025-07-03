@@ -17,9 +17,10 @@ import java.util.UUID;
  * @param loggedDate when the action happened, in epoch millis.
  * @param action     the action that got logged.
  * @param itemStack  the item that had an action performed on it.
- * @param price      nullable, only used for {@link LoggedAction#LISTING_START}, {@link LoggedAction#LISTING_PURCHASED}, {@link LoggedAction#LISTING_SOLD}
- * @param playerUUID nullable, only used for {@link LoggedAction#LISTING_SOLD} and {@link LoggedAction#LISTING_PURCHASED}
- * @param biddable if the item was bidding or bin
+ * @param price      nullable, only used for {@link LoggedAction#LISTING_START}, {@link LoggedAction#LISTING_PURCHASED}, {@link LoggedAction#LISTING_SOLD}, {@link LoggedAction#LISTING_BID_RECEIVED}, {@link LoggedAction#LISTING_BID_PLACED}
+ * @param playerUUID nullable, only used for {@link LoggedAction#LISTING_SOLD}, {@link LoggedAction#LISTING_PURCHASED}, {@link LoggedAction#LISTING_BID_RECEIVED}, {@link LoggedAction#LISTING_BID_PLACED}
+ * @param biddable   if the item was bidding or bin
+ * @param starting   nullable, the starting bid of a bidding listing, only used for {@link LoggedAction#LISTING_SOLD} and {@link LoggedAction#LISTING_PURCHASED}
  * @author Preva1l
  */
 public record HistoricItem(
@@ -28,22 +29,24 @@ public record HistoricItem(
         @Expose @NotNull ItemStack itemStack,
         @Expose @Nullable Double price,
         @Expose @Nullable UUID playerUUID,
-        @Expose @Nullable Boolean biddable
+        @Expose @Nullable Boolean biddable,
+        @Expose @Nullable Double starting
 ) implements Comparable<HistoricItem> {
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof HistoricItem(
-                Long date, LoggedAction action1, ItemStack stack, Double price1, UUID buyerUid
-                , Boolean biddable1
+                Long date, LoggedAction action1, ItemStack stack,
+                Double price1, UUID buyerUid, Boolean biddable1, Double starting2
         ))) return false;
         return Objects.equals(price, price1)
                 && Objects.equals(loggedDate, date)
                 && Objects.equals(playerUUID, buyerUid)
                 && action == action1
                 && Objects.equals(itemStack, stack)
-                && Objects.equals(biddable, biddable1);
+                && Objects.equals(biddable, biddable1)
+                && Objects.equals(starting, starting2);
     }
 
     /**
@@ -89,7 +92,16 @@ public record HistoricItem(
         /**
          * When an admin claims an item in a player's collection box.
          */
-        COLLECTION_BOX_ADMIN_CLAIM;
+        COLLECTION_BOX_ADMIN_CLAIM,
+        /**
+         * When a player bids on a listing.
+         */
+        LISTING_BID_RECEIVED,
+        /**
+         * When a player places a bid on a listing.
+         */
+        LISTING_BID_PLACED,
+        ;
 
         /**
          * Get the actions locale value from the plugins config file.

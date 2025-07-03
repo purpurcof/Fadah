@@ -6,11 +6,12 @@ import com.google.gson.reflect.TypeToken;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.records.listing.*;
 import info.preva1l.fadah.utils.serialization.ItemSerializer;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bson.Document;
 import org.bukkit.inventory.ItemStack;
 
@@ -22,11 +23,17 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 
-@RequiredArgsConstructor
 public class ListingMongoDao implements Dao<Listing> {
-    private final MongoDatabase database;
     protected static final Gson GSON = new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
     protected static final Type BIDS_TYPE = new TypeToken<ConcurrentSkipListSet<Bid>>(){}.getType();
+
+    private final MongoCollection<Document> collection;
+
+    public ListingMongoDao(final MongoDatabase database) {
+        this.collection = database.getCollection("listings");
+
+        collection.createIndex(Indexes.ascending("uuid"), new IndexOptions().unique(true));
+    }
 
     /**
      * Get an object from the database by its id.
@@ -37,7 +44,6 @@ public class ListingMongoDao implements Dao<Listing> {
     @Override
     public Optional<Listing> get(UUID id) {
         try {
-            MongoCollection<Document> collection = database.getCollection("listings");
             final Document doc = collection.find().filter(Filters.eq("uuid", id)).first();
             if (doc == null) return Optional.empty();
 
@@ -57,7 +63,6 @@ public class ListingMongoDao implements Dao<Listing> {
     public List<Listing> getAll() {
         try {
             List<Listing> list = new ArrayList<>();
-            MongoCollection<Document> collection = database.getCollection("listings");
             for (Document doc : collection.find()) {
                 final UUID id = doc.get("uuid", UUID.class);
 
@@ -89,7 +94,7 @@ public class ListingMongoDao implements Dao<Listing> {
                     .append("itemStack", ItemSerializer.serialize(listing.getItemStack()))
                     .append("biddable", listing instanceof BidListing)
                     .append("bids", listing instanceof BidListing bid ? GSON.toJson(bid.getBids(), BIDS_TYPE) : "");
-            database.getCollection("listings").insertOne(document);
+            collection.insertOne(document);
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
@@ -103,7 +108,7 @@ public class ListingMongoDao implements Dao<Listing> {
      */
     @Override
     public void update(Listing listing, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("update");
     }
 
     /**
@@ -114,7 +119,7 @@ public class ListingMongoDao implements Dao<Listing> {
     @Override
     public void delete(Listing listing) {
         try {
-            database.getCollection("listings").findOneAndDelete(Filters.eq("uuid", listing.getId()));
+            collection.findOneAndDelete(Filters.eq("uuid", listing.getId()));
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, e.getMessage(), e);
         }

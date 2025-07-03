@@ -9,8 +9,11 @@ import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
+import info.preva1l.fadah.records.collection.ImplCollectionBox;
+import info.preva1l.fadah.records.collection.ImplExpiredItems;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
+import info.preva1l.fadah.records.history.ImplHistory;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -42,7 +45,7 @@ public final class BukkitAuctionHouseAPI extends AuctionHouseAPI {
 
         return DataService.getInstance()
                 .get(CollectionBox.class, playerUniqueId)
-                .thenApply(it -> it.orElse(CollectionBox.empty(playerUniqueId)));
+                .thenApply(it -> it.orElse(ImplCollectionBox.empty(playerUniqueId)));
     }
 
     @Override
@@ -58,7 +61,7 @@ public final class BukkitAuctionHouseAPI extends AuctionHouseAPI {
 
         return DataService.getInstance()
                 .get(ExpiredItems.class, playerUniqueId)
-                .thenApply(it -> it.orElse(ExpiredItems.empty(playerUniqueId)));
+                .thenApply(it -> it.orElse(ImplExpiredItems.empty(playerUniqueId)));
     }
 
     @Override
@@ -74,7 +77,7 @@ public final class BukkitAuctionHouseAPI extends AuctionHouseAPI {
 
         return DataService.getInstance()
                 .get(History.class, playerUniqueId)
-                .thenApply(it -> it.orElse(History.empty(playerUniqueId)));
+                .thenApply(it -> it.orElse(ImplHistory.empty(playerUniqueId)));
     }
 
     @Override
@@ -91,6 +94,8 @@ public final class BukkitAuctionHouseAPI extends AuctionHouseAPI {
             case LISTING_ADMIN_CANCEL -> actions.getListingCancelledAdmin();
             case EXPIRED_ITEM_ADMIN_CLAIM -> actions.getExpiredItemClaimedAdmin();
             case COLLECTION_BOX_ADMIN_CLAIM -> actions.getCollectionBoxClaimedAdmin();
+            case LISTING_BID_RECEIVED -> actions.getListingBidReceived();
+            case LISTING_BID_PLACED -> actions.getListingBidPlaced();
         };
     }
 }

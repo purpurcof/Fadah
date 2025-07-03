@@ -3,7 +3,6 @@ package info.preva1l.fadah.records.listing;
 import com.google.common.base.Preconditions;
 import info.preva1l.fadah.config.Categories;
 import info.preva1l.fadah.config.Config;
-import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.hooks.impl.permissions.Permission;
 import info.preva1l.fadah.hooks.impl.permissions.PermissionsHook;
 import info.preva1l.fadah.records.post.ImplPost;
@@ -15,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
@@ -50,43 +48,42 @@ public final class ImplListingBuilder extends ListingBuilder {
     }
 
     @Override
-    public CompletableFuture<Listing> build() {
+    public Listing build() {
         Preconditions.checkNotNull(itemStack);
         Preconditions.checkNotNull(currency);
         Preconditions.checkNotNull(price);
         Preconditions.checkNotNull(tax);
         Preconditions.checkNotNull(length);
 
-        return Categories.getCategoryForItem(itemStack)
-                .thenApplyAsync(category -> {
-                    if (biddable) {
-                        return new ImplBidListing(
-                                UUID.randomUUID(),
-                                ownerUuid,
-                                ownerName,
-                                itemStack,
-                                category,
-                                currency.getId(),
-                                price,
-                                tax,
-                                System.currentTimeMillis(),
-                                Instant.now().plus(length, ChronoUnit.MILLIS).toEpochMilli(),
-                                new ConcurrentSkipListSet<>()
-                        );
-                    } else {
-                        return new ImplBinListing(
-                                UUID.randomUUID(),
-                                ownerUuid,
-                                ownerName,
-                                itemStack,
-                                category,
-                                currency.getId(),
-                                price,
-                                tax,
-                                System.currentTimeMillis(),
-                                Instant.now().plus(length, ChronoUnit.MILLIS).toEpochMilli()
-                        );
-                    }
-                }, DataService.getInstance().getThreadPool());
+        String category = Categories.getCategoryForItem(itemStack);
+
+        if (biddable) {
+            return new ImplBidListing(
+                    UUID.randomUUID(),
+                    ownerUuid,
+                    ownerName,
+                    itemStack,
+                    category,
+                    currency.getId(),
+                    price,
+                    tax,
+                    System.currentTimeMillis(),
+                    Instant.now().plus(length, ChronoUnit.MILLIS).toEpochMilli(),
+                    new ConcurrentSkipListSet<>()
+            );
+        } else {
+            return new ImplBinListing(
+                    UUID.randomUUID(),
+                    ownerUuid,
+                    ownerName,
+                    itemStack,
+                    category,
+                    currency.getId(),
+                    price,
+                    tax,
+                    System.currentTimeMillis(),
+                    Instant.now().plus(length, ChronoUnit.MILLIS).toEpochMilli()
+            );
+        }
     }
 }

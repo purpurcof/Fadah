@@ -2,7 +2,7 @@ package info.preva1l.fadah.guis;
 
 import info.preva1l.fadah.Fadah;
 import info.preva1l.fadah.config.Lang;
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.utils.Text;
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
 import net.wesjd.anvilgui.AnvilGUI;
@@ -39,7 +39,7 @@ public class InputMenu<T> implements Listener {
         });
 
         guiBuilder.onClose((state)-> {
-            TaskManager.Sync.runLater(Fadah.getInstance(), () ->
+            Tasks.syncDelayed(Fadah.getInstance(), () ->
                     callback.accept(convertInput(state.getText(), placeholder)),1L);
         });
 

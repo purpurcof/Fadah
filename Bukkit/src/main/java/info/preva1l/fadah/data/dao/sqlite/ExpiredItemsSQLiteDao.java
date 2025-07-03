@@ -28,7 +28,7 @@ public class ExpiredItemsSQLiteDao extends CommonSQLExpiredListingsDao {
                     ON CONFLICT(`playerUUID`) DO UPDATE SET
                         `items` = excluded.`items`;""")) {
                 statement.setString(1, collectableList.owner().toString());
-                statement.setString(2, GSON.toJson(collectableList.expiredItems(), EXPIRED_LIST_TYPE));
+                statement.setString(2, GSON.toJson(collectableList.items(), EXPIRED_LIST_TYPE));
                 statement.executeUpdate();
             } catch (Exception e) {
                 e.printStackTrace();

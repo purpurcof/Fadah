@@ -2,6 +2,7 @@ package info.preva1l.fadah.api;
 
 import info.preva1l.fadah.api.managers.CategoryManager;
 import info.preva1l.fadah.api.managers.ListingManager;
+import info.preva1l.fadah.filters.MatcherArgsRegistry;
 import info.preva1l.fadah.records.Category;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
@@ -38,7 +39,7 @@ public abstract class AuctionHouseAPI {
      * Get the custom item filtering namespacedkey
      *
      * @return namespacedkey
-     * @deprecated replaced with {@link info.preva1l.fadah.processor.ProcessorArgsRegistry} and category matchers
+     * @deprecated replaced with {@link MatcherArgsRegistry} and category matchers
      */
     @Deprecated(since = "2.9", forRemoval = true)
     public NamespacedKey getCustomItemNameSpacedKey() {
@@ -50,7 +51,7 @@ public abstract class AuctionHouseAPI {
      *
      * @param key namespacedkey
      * @since 1.0
-     * @deprecated replaced with {@link info.preva1l.fadah.processor.ProcessorArgsRegistry} and category matchers
+     * @deprecated replaced with {@link MatcherArgsRegistry} and category matchers
      */
     @Deprecated(since = "2.9", forRemoval = true)
     public void setCustomItemNameSpacedKey(NamespacedKey key) {
@@ -157,7 +158,7 @@ public abstract class AuctionHouseAPI {
      */
     @Deprecated(since = "3.0.0")
     public List<CollectableItem> getCollectionBox(OfflinePlayer offlinePlayer) {
-        return collectionBox(offlinePlayer.getUniqueId()).collectableItems();
+        return collectionBox(offlinePlayer.getUniqueId()).items();
     }
 
     /**
@@ -170,7 +171,7 @@ public abstract class AuctionHouseAPI {
      */
     @Deprecated(since = "3.0.0")
     public List<CollectableItem> getCollectionBox(UUID uuid) {
-        return collectionBox(uuid).collectableItems();
+        return collectionBox(uuid).items();
     }
 
     /**
@@ -229,7 +230,7 @@ public abstract class AuctionHouseAPI {
      */
     @Deprecated(since = "3.0.0")
     public List<CollectableItem> getExpiredItems(OfflinePlayer offlinePlayer) {
-        return expiredItems(offlinePlayer.getUniqueId()).expiredItems();
+        return expiredItems(offlinePlayer.getUniqueId()).items();
     }
 
     /**
@@ -242,7 +243,7 @@ public abstract class AuctionHouseAPI {
      */
     @Deprecated(since = "3.0.0")
     public List<CollectableItem> getExpiredItems(UUID uuid) {
-        return expiredItems(uuid).expiredItems();
+        return expiredItems(uuid).items();
     }
 
     /**
@@ -300,7 +301,7 @@ public abstract class AuctionHouseAPI {
      */
     @Deprecated(since = "3.0.0")
     public List<HistoricItem> getHistory(OfflinePlayer offlinePlayer) {
-        return history(offlinePlayer.getUniqueId()).historicItems();
+        return history(offlinePlayer.getUniqueId()).items();
     }
 
     /**
@@ -312,7 +313,7 @@ public abstract class AuctionHouseAPI {
      */
     @Deprecated(since = "3.0.0")
     public List<HistoricItem> getHistory(UUID uuid) {
-        return history(uuid).historicItems();
+        return history(uuid).items();
     }
 
     /**

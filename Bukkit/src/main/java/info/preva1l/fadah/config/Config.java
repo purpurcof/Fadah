@@ -2,7 +2,6 @@ package info.preva1l.fadah.config;
 
 import de.exlll.configlib.*;
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.config.misc.SubEconomy;
 import info.preva1l.fadah.config.misc.TimeLength;
 import info.preva1l.fadah.data.DatabaseType;
 import info.preva1l.fadah.hooks.impl.DiscordHook;
@@ -123,7 +122,7 @@ public class Config {
         private double defaultPrice = 500;
     }
 
-    private List<String> blacklists = List.of("%material% == \"BEDROCK\"", "%material% == \"NETHER_STAR\" && %name%.includes(\"Menu\")");
+    private List<String> blacklists = List.of("%material% == \"BEDROCK\"", "%material% == \"NETHER_STAR\" && %name% includes \"Menu\"");
 
     private Hooks hooks = new Hooks();
 
@@ -175,57 +174,6 @@ public class Config {
             private String token = "MyToken";
             private String org = "MyOrg";
             private String bucket = "Fadah";
-        }
-    }
-
-    private Currency currency = new Currency();
-
-    @Getter
-    @Configuration
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class Currency {
-        private String defaultCurrency = "vault";
-
-        private Vault vault = new Vault();
-
-        @Getter
-        @Configuration
-        @NoArgsConstructor(access = AccessLevel.PRIVATE)
-        public static class Vault {
-            private String name = "Money";
-        }
-
-        private CoinsEngine coinsEngine = new CoinsEngine();
-
-        @Getter
-        @Configuration
-        @NoArgsConstructor(access = AccessLevel.PRIVATE)
-        public static class CoinsEngine {
-            @Comment("Which currencies to use from coins engine.")
-            private List<SubEconomy> currencies = List.of(
-                    new SubEconomy("mob_coins", "Mob Coins"),
-                    new SubEconomy("coins", "Coins"));
-        }
-
-        private RedisEconomy redisEconomy = new RedisEconomy();
-
-        @Getter
-        @Configuration
-        @NoArgsConstructor(access = AccessLevel.PRIVATE)
-        public static class RedisEconomy {
-            @Comment("Which currencies to use from redis economy, if your using the default currency use the vault currency instead.")
-            private List<SubEconomy> currencies = List.of(
-                    new SubEconomy("dollar", "Dollar"),
-                    new SubEconomy("euro", "Euro"));
-        }
-
-        private PlayerPoints playerPoints = new PlayerPoints();
-
-        @Getter
-        @Configuration
-        @NoArgsConstructor(access = AccessLevel.PRIVATE)
-        public static class PlayerPoints {
-            private String name = "Points";
         }
     }
 

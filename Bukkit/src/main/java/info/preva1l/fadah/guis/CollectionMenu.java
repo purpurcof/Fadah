@@ -5,12 +5,14 @@ import info.preva1l.fadah.cache.CacheAccess;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.Menus;
 import info.preva1l.fadah.config.misc.Tuple;
+import info.preva1l.fadah.records.StorageHolder;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
 import info.preva1l.fadah.records.collection.ExpiredItems;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
-import info.preva1l.fadah.utils.TaskManager;
+import info.preva1l.fadah.security.AwareDataService;
+import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.TimeUtil;
 import info.preva1l.fadah.utils.guis.ItemBuilder;
@@ -19,9 +21,14 @@ import info.preva1l.fadah.utils.guis.PaginatedFastInv;
 import info.preva1l.fadah.utils.guis.PaginatedItem;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created on 19/03/2025
@@ -31,8 +38,7 @@ import java.util.List;
 public class CollectionMenu extends PaginatedFastInv {
     protected final OfflinePlayer owner;
     protected final boolean expired;
-
-    private final List<CollectableItem> items;
+    private final ConcurrentMap<CollectableItem, Boolean> processingItems = new ConcurrentHashMap<>();
 
     public CollectionMenu(Player viewer, OfflinePlayer owner, LayoutService.MenuType menuType) {
         super(
@@ -50,12 +56,6 @@ public class CollectionMenu extends PaginatedFastInv {
         this.owner = owner;
         this.expired = menuType == LayoutService.MenuType.EXPIRED_LISTINGS;
 
-        this.items = expired
-                ? CacheAccess.getNotNull(ExpiredItems.class, owner.getUniqueId()).expiredItems()
-                : CacheAccess.getNotNull(CollectionBox.class, owner.getUniqueId()).collectableItems();
-
-        this.items.sort(CollectableItem::compareTo);
-
         fillers();
         setPaginationMappings(getLayout().paginationSlots());
         addNavigationButtons();
@@ -64,58 +64,94 @@ public class CollectionMenu extends PaginatedFastInv {
         addPaginationControls();
     }
 
+    private StorageHolder<CollectableItem> getCurrentItems() {
+        return expired
+                ? CacheAccess.getNotNull(ExpiredItems.class, owner.getUniqueId())
+                : CacheAccess.getNotNull(CollectionBox.class, owner.getUniqueId());
+    }
+
     @Override
     protected void fillPaginationItems() {
-        for (CollectableItem expiredItem : items) {
-            ItemBuilder itemStack = new ItemBuilder(expiredItem.itemStack().clone())
-                    .addLore(getLang().getLore("lore", Tuple.of("%time%", TimeUtil.formatTimeSince(expiredItem.dateAdded()))));
+        List<CollectableItem> items = getCurrentItems().items();
+        items.sort(CollectableItem::compareTo);
 
-            addPaginationItem(new PaginatedItem(itemStack.build(), e -> {
-                TaskManager.Sync.run(Fadah.getInstance(), player, () -> {
-                    if (!stillExists(expiredItem)) return;
+        for (CollectableItem item : items) {
+            ItemBuilder itemStack = new ItemBuilder(item.itemStack().clone())
+                    .addLore(getLang().getLore("lore", Tuple.of("%time%", TimeUtil.formatTimeSince(item.dateAdded()))));
 
-                    int slot = player.getInventory().firstEmpty();
-                    if (slot == -1) {
-                        Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getInventoryFull());
-                        return;
-                    }
-                    removeFromCache(expiredItem);
-                    player.getInventory().setItem(slot, expiredItem.itemStack());
-
-                    updatePagination();
-
-                    // In game logs
-                    boolean isAdmin = player.getUniqueId() != owner.getUniqueId();
-                    HistoricItem.LoggedAction action = expired
-                            ? isAdmin ? HistoricItem.LoggedAction.EXPIRED_ITEM_ADMIN_CLAIM : HistoricItem.LoggedAction.EXPIRED_ITEM_CLAIM
-                            : isAdmin ? HistoricItem.LoggedAction.COLLECTION_BOX_ADMIN_CLAIM : HistoricItem.LoggedAction.COLLECTION_BOX_CLAIM;
-                    HistoricItem historicItem = new HistoricItem(
-                            Instant.now().toEpochMilli(),
-                            action,
-                            expiredItem.itemStack(),
-                            null,
-                            null,
-                            null);
-                    CacheAccess.getNotNull(History.class, owner.getUniqueId()).add(historicItem);
-                });
-            }));
-
+            addPaginationItem(new PaginatedItem(itemStack.build(), e -> handleItemClick(item)));
         }
     }
 
-    private boolean stillExists(CollectableItem item) {
-        if (expired) {
-            return CacheAccess.getNotNull(ExpiredItems.class, owner.getUniqueId()).expiredItems().contains(item);
-        } else {
-            return CacheAccess.getNotNull(CollectionBox.class, owner.getUniqueId()).collectableItems().contains(item);
+    private void handleItemClick(CollectableItem item) {
+        if (processingItems.putIfAbsent(item, true) != null) return;
+
+        try {
+            executeSafely(item, () -> claimItem(item));
+        } finally {
+            processingItems.remove(item);
         }
     }
 
-    private void removeFromCache(CollectableItem item) {
-        if (expired) {
-            CacheAccess.getNotNull(ExpiredItems.class, owner.getUniqueId()).remove(item);
-        } else {
-            CacheAccess.getNotNull(CollectionBox.class, owner.getUniqueId()).remove(item);
+    private void claimItem(CollectableItem item) {
+        List<CollectableItem> currentItems = getCurrentItems().items();
+        if (!currentItems.contains(item)) return;
+
+        Tasks.sync(Fadah.getInstance(), player, () -> {
+            if (!getCurrentItems().contains(item)) return;
+
+            ItemStack itemStack = item.itemStack();
+            if (!tryAddToInventory(player, itemStack)) {
+                Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getInventoryFull());
+                return;
+            }
+
+            getCurrentItems().remove(item);
+            logItemClaim(item);
+            updatePagination();
+        });
+    }
+
+    private boolean tryAddToInventory(Player player, ItemStack item) {
+        int slot = player.getInventory().firstEmpty();
+        if (slot == -1) return false;
+
+        if (player.getInventory().getItem(slot) != null) return false;
+
+        player.getInventory().setItem(slot, item);
+        return true;
+    }
+
+    private void logItemClaim(CollectableItem item) {
+        boolean isAdmin = player.getUniqueId() != owner.getUniqueId();
+        HistoricItem.LoggedAction action = expired
+                ? isAdmin ? HistoricItem.LoggedAction.EXPIRED_ITEM_ADMIN_CLAIM : HistoricItem.LoggedAction.EXPIRED_ITEM_CLAIM
+                : isAdmin ? HistoricItem.LoggedAction.COLLECTION_BOX_ADMIN_CLAIM : HistoricItem.LoggedAction.COLLECTION_BOX_CLAIM;
+
+        HistoricItem historicItem = new HistoricItem(
+                Instant.now().toEpochMilli(),
+                action,
+                item.itemStack(),
+                null,
+                null,
+                false,
+                null
+        );
+
+        CacheAccess.getNotNull(History.class, owner.getUniqueId()).add(historicItem);
+    }
+
+    private void executeSafely(CollectableItem item, Runnable action) {
+        try {
+            if (expired) {
+                var items = CacheAccess.getNotNull(ExpiredItems.class, owner.getUniqueId());
+                AwareDataService.instance.execute(ExpiredItems.class, items, item, action);
+            } else {
+                var items = CacheAccess.getNotNull(CollectionBox.class, owner.getUniqueId());
+                AwareDataService.instance.execute(CollectionBox.class, items, item, action);
+            }
+        } catch (Exception e) {
+            Logger.getLogger("Fadah").log(Level.SEVERE, "Issue in collection menu", e);
         }
     }
 
@@ -123,12 +159,5 @@ public class CollectionMenu extends PaginatedFastInv {
         setItem(getLayout().buttonSlots().getOrDefault(LayoutService.ButtonType.BACK, -1),
                 Menus.i().getBackButton().itemStack(), e ->
                         new ProfileMenu(player, owner).open(player));
-    }
-
-    @Override
-    protected void updatePagination() {
-        this.items.sort(CollectableItem::compareTo);
-
-        super.updatePagination();
     }
 }

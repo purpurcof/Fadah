@@ -9,7 +9,7 @@ import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.records.listing.*;
 import info.preva1l.fadah.utils.serialization.ItemSerializer;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.Type;
@@ -128,7 +128,7 @@ public abstract class CommonSQLListingDao implements Dao<Listing> {
      */
     @Override
     public void update(Listing listing, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("update");
     }
 
     /**

@@ -9,6 +9,7 @@ import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.data.gson.BukkitSerializableAdapter;
 import info.preva1l.fadah.records.history.HistoricItem;
 import info.preva1l.fadah.records.history.History;
+import info.preva1l.fadah.records.history.ImplHistory;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
@@ -17,16 +18,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @RequiredArgsConstructor
 public class MySQLFixerV3 implements V3Fixer {
     private static final Gson GSON = new GsonBuilder()
             .registerTypeHierarchyAdapter(ConfigurationSerializable.class, new BukkitSerializableAdapter())
             .serializeNulls().disableHtmlEscaping().create();
-    private static final Type HISTORY_LIST_TYPE = new TypeToken<ArrayList<HistoricItem>>() {
+    private static final Type HISTORY_LIST_TYPE = new TypeToken<CopyOnWriteArrayList<HistoricItem>>() {
     }.getType();
     private final Fadah plugin;
     private final HikariDataSource dataSource;
@@ -41,8 +41,8 @@ public class MySQLFixerV3 implements V3Fixer {
                 statement.setString(1, player.toString());
                 final ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
-                    List<HistoricItem> items = GSON.fromJson(resultSet.getString("items"), HISTORY_LIST_TYPE);
-                    DataService.getInstance().save(History.class, new History(player, items));
+                    CopyOnWriteArrayList<HistoricItem> items = GSON.fromJson(resultSet.getString("items"), HISTORY_LIST_TYPE);
+                    DataService.getInstance().save(History.class, new ImplHistory(player, items));
                 }
             }
             try (PreparedStatement deleteStatement = connection.prepareStatement("""

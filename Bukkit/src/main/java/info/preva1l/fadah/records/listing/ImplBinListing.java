@@ -7,6 +7,7 @@ import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
+import info.preva1l.fadah.security.AwareDataService;
 import info.preva1l.fadah.utils.Text;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.logging.Level;
 
 @Getter
 public final class ImplBinListing extends ActiveListing implements BinListing {
@@ -47,31 +49,89 @@ public final class ImplBinListing extends ActiveListing implements BinListing {
 
     @Override
     public void purchase(@NotNull Player buyer) {
+        AwareDataService.instance.execute(Listing.class, this, () -> purchase0(buyer));
+    }
+
+    private void purchase0(@NotNull Player buyer) {
         if (!canBuy(buyer)) return;
 
-        // Money Transfer
-        getCurrency().withdraw(buyer, this.getPrice());
-        double taxed = (this.getTax()/100) * this.getPrice();
-        getCurrency().add(Bukkit.getOfflinePlayer(this.getOwner()), this.getPrice() - taxed);
+        double taxedAmount = (this.getTax() / 100) * this.getPrice();
+        double sellerAmount = this.getPrice() - taxedAmount;
 
-        // Remove Listing
+        try {
+            if (!transferFunds(buyer, sellerAmount)) {
+                return;
+            }
+
+            ItemStack itemStack = this.getItemStack().clone();
+            var item = new CollectableItem(itemStack, Instant.now().toEpochMilli());
+            CacheAccess.get(CollectionBox.class, getOwner())
+                    .ifPresentOrElse(
+                            cache -> {
+                                try {
+                                    cache.add(item);
+                                } catch (Exception e) {
+                                    LOGGER.log(Level.WARNING, "Failed to add to cached expired items", e);
+                                }
+                            }, () -> handleCollectionBoxFromDatabase(getOwner(), item)
+                    );
+
+            removeListing();
+
+            sendNotifications(buyer, itemStack, sellerAmount);
+
+        } catch (Exception e) {
+            LOGGER.warning("Purchase failed for listing " + getId() + ": " + e.getMessage());
+            rollbackTransaction(buyer, sellerAmount);
+            throw new RuntimeException("Purchase transaction failed", e);
+        }
+    }
+
+    private boolean transferFunds(@NotNull Player buyer, double sellerAmount) {
+        if (!getCurrency().canAfford(buyer, this.getPrice())) {
+            Lang.sendMessage(buyer, Lang.i().getPrefix() + Lang.i().getErrors().getTooExpensive());
+            return false;
+        }
+
+        if (!getCurrency().withdraw(buyer, this.getPrice())) {
+            Lang.sendMessage(buyer, Lang.i().getPrefix() + "Transaction failed: Unable to withdraw funds.");
+            return false;
+        }
+
+        try {
+            if (!getCurrency().add(Bukkit.getOfflinePlayer(this.getOwner()), sellerAmount)) {
+                getCurrency().add(buyer, this.getPrice());
+                Lang.sendMessage(buyer, Lang.i().getPrefix() + "Transaction failed: Unable to pay seller.");
+                return false;
+            }
+        } catch (Exception e) {
+            getCurrency().add(buyer, this.getPrice());
+            throw e;
+        }
+
+        return true;
+    }
+
+    private void removeListing() {
         CacheAccess.invalidate(Listing.class, this);
         DataService.getInstance().delete(Listing.class, this);
+    }
 
-        // Add to collection box
-        ItemStack itemStack = this.getItemStack().clone();
-        CacheAccess.getNotNull(CollectionBox.class, buyer.getUniqueId()).add(new CollectableItem(itemStack, Instant.now().toEpochMilli()));
-
-        // Notify Both Players
+    private void sendNotifications(@NotNull Player buyer, ItemStack itemStack, double sellerAmount) {
         Lang.sendMessage(buyer, String.join("\n", Lang.i().getNotifications().getNewItem()));
 
-        String itemName = Text.extractItemName(itemStack);
-        String formattedPrice = Config.i().getFormatting().numbers().format(this.getPrice() - taxed);
+        Component itemName = Text.extractItemName(itemStack);
+        String formattedPrice = Config.i().getFormatting().numbers().format(sellerAmount);
         Component message = Text.text(Lang.i().getNotifications().getSale(),
                 Tuple.of("%item%", itemName),
                 Tuple.of("%price%", formattedPrice),
                 Tuple.of("%buyer%", buyer.getName()));
 
         complete(message, buyer);
+    }
+
+    private void rollbackTransaction(@NotNull Player buyer, double sellerAmount) {
+        getCurrency().add(buyer, this.getPrice());
+        getCurrency().withdraw(Bukkit.getOfflinePlayer(this.getOwner()), sellerAmount);
     }
 }

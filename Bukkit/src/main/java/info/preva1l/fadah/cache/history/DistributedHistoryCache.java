@@ -18,13 +18,16 @@ public final class DistributedHistoryCache implements Cache<History> {
 
     public DistributedHistoryCache() {
         final LocalCachedMapOptions<UUID, History> options = LocalCachedMapOptions.<UUID, History>name("history")
-                .cacheSize(1000000)
-                .maxIdle(Duration.ofSeconds(60))
-                .timeToLive(Duration.ofSeconds(60))
+                .cacheSize(0)
+                .timeToLive(Duration.ZERO)
+                .maxIdle(Duration.ZERO)
                 .evictionPolicy(LocalCachedMapOptions.EvictionPolicy.NONE)
                 .syncStrategy(LocalCachedMapOptions.SyncStrategy.UPDATE)
                 .storeMode(LocalCachedMapOptions.StoreMode.LOCALCACHE_REDIS)
-                .expirationEventPolicy(LocalCachedMapOptions.ExpirationEventPolicy.SUBSCRIBE_WITH_KEYSPACE_CHANNEL);
+                .reconnectionStrategy(LocalCachedMapOptions.ReconnectionStrategy.LOAD)
+                .expirationEventPolicy(LocalCachedMapOptions.ExpirationEventPolicy.SUBSCRIBE_WITH_KEYSPACE_CHANNEL)
+                .cacheProvider(LocalCachedMapOptions.CacheProvider.REDISSON)
+                .storeCacheMiss(false);
 
         historicItems = RedisBroker.getRedisson().getLocalCachedMap(options);
     }
@@ -52,7 +55,7 @@ public final class DistributedHistoryCache implements Cache<History> {
 
     @Override
     public @NotNull List<History> getAll() {
-        return new ArrayList<>(historicItems.values());
+        return new ArrayList<>(historicItems.readAllValues());
     }
 
     @Override
@@ -62,6 +65,6 @@ public final class DistributedHistoryCache implements Cache<History> {
 
     @Override
     public int amountByPlayer(@NotNull UUID player) {
-        return historicItems.get(player).historicItems().size();
+        return historicItems.get(player).items().size();
     }
 }

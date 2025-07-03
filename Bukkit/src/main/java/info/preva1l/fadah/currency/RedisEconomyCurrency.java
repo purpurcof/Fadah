@@ -1,7 +1,7 @@
 package info.preva1l.fadah.currency;
 
 import dev.unnm3d.rediseconomy.api.RedisEconomyAPI;
-import info.preva1l.fadah.config.Config;
+import info.preva1l.fadah.config.CurrencySettings;
 import info.preva1l.fadah.config.misc.SubEconomy;
 import lombok.Getter;
 
@@ -17,6 +17,11 @@ public class RedisEconomyCurrency implements MultiCurrency {
     private RedisEconomyAPI api;
 
     @Override
+    public boolean isEnabled() {
+        return CurrencySettings.i().getVault().isEnabled();
+    }
+
+    @Override
     public boolean preloadChecks() {
         api = RedisEconomyAPI.getAPI();
         if (api == null) {
@@ -26,13 +31,14 @@ public class RedisEconomyCurrency implements MultiCurrency {
             CurrencyService.instance.logger.severe("-------------------------------------");
             return false;
         }
-        for (SubEconomy eco : Config.i().getCurrency().getRedisEconomy().getCurrencies()) {
+        for (SubEconomy eco : CurrencySettings.i().getRedisEconomy().getCurrencies()) {
             Currency subCur = new SubCurrency(
                     id + "_" + eco.economy(),
                     eco.displayName(),
+                    eco.symbol(),
                     requiredPlugin,
-                    (p, a) -> getCurrency(eco).withdrawPlayer(p, a),
-                    (p, a) -> getCurrency(eco).depositPlayer(p, a),
+                    (p, a) -> getCurrency(eco).withdrawPlayer(p, a).transactionSuccess(),
+                    (p, a) -> getCurrency(eco).depositPlayer(p, a).transactionSuccess(),
                     p -> getCurrency(eco).getBalance(p),
                     v -> {
                         if (getCurrency(eco) == null) {

@@ -6,11 +6,12 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.ReplaceOptions;
 import info.preva1l.fadah.data.dao.Dao;
 import info.preva1l.fadah.watcher.Watching;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -19,11 +20,16 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 
-@RequiredArgsConstructor
 public class WatchersMongoDao implements Dao<Watching> {
     private static final Gson GSON = new GsonBuilder()
             .serializeNulls().disableHtmlEscaping().create();
-    private final MongoDatabase database;
+    private final MongoCollection<Document> collection;
+
+    public WatchersMongoDao(MongoDatabase database) {
+        this.collection = database.getCollection("watchers");
+
+        collection.createIndex(Indexes.ascending("playerUUID"), new IndexOptions().unique(true));
+    }
 
     /**
      * Get an object from the database by its id.
@@ -34,7 +40,6 @@ public class WatchersMongoDao implements Dao<Watching> {
     @Override
     public Optional<Watching> get(UUID id) {
         try {
-            MongoCollection<Document> collection = database.getCollection("watchers");
             Document document = collection.find(Filters.eq("playerUUID", id.toString())).first();
             if (document == null) {
                 return Optional.empty();
@@ -56,7 +61,6 @@ public class WatchersMongoDao implements Dao<Watching> {
     public List<Watching> getAll() {
         List<Watching> result = new ArrayList<>();
         try {
-            MongoCollection<Document> collection = database.getCollection("watchers");
             FindIterable<Document> documents = collection.find();
             for (Document document : documents) {
                 Watching watching = GSON.fromJson(document.getString("watching"), Watching.class);
@@ -76,10 +80,14 @@ public class WatchersMongoDao implements Dao<Watching> {
     @Override
     public void save(Watching watching) {
         try {
-            MongoCollection<Document> collection = database.getCollection("watchers");
             Document document = new Document("playerUUID", watching.getPlayer().toString())
                     .append("watching", GSON.toJson(watching));
-            collection.replaceOne(Filters.eq("playerUUID", watching.getPlayer().toString()), document, new ReplaceOptions().upsert(true));
+
+            collection.replaceOne(
+                    Filters.eq("playerUUID", watching.getPlayer().toString()),
+                    document,
+                    new ReplaceOptions().upsert(true)
+            );
         } catch (Exception e) {
             getLogger().log(Level.SEVERE, e.getMessage(), e);
         }
@@ -93,7 +101,7 @@ public class WatchersMongoDao implements Dao<Watching> {
      */
     @Override
     public void update(Watching watching, String[] params) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("update");
     }
 
     /**
@@ -103,6 +111,6 @@ public class WatchersMongoDao implements Dao<Watching> {
      */
     @Override
     public void delete(Watching watching) {
-        throw new NotImplementedException();
+        throw new NotImplementedException("delete");
     }
 }
