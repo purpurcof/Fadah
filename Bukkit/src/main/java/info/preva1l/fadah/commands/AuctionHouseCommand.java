@@ -33,6 +33,7 @@ import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import org.jetbrains.annotations.Nullable;
 
 import static org.incendo.cloud.bukkit.parser.OfflinePlayerParser.offlinePlayerParser;
+import static org.incendo.cloud.bukkit.parser.PlayerParser.playerParser;
 import static org.incendo.cloud.parser.standard.EnumParser.enumParser;
 import static org.incendo.cloud.parser.standard.StringParser.greedyStringParser;
 import static org.incendo.cloud.parser.standard.StringParser.stringParser;
@@ -138,6 +139,9 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
 
         toggleCommand(null);
         conf.getToggle().getAliases().forEach(this::toggleCommand);
+
+        openCommand(null);
+        conf.getOpen().getAliases().forEach(this::openCommand);
 
         reloadCommand(null);
         conf.getReload().getAliases().forEach(this::reloadCommand);
@@ -393,6 +397,21 @@ public class AuctionHouseCommand implements InspectSubCommand, AboutSubCommand, 
                         .meta(aliasMeta, alias)
                         .permission("fadah.toggle-status")
                         .handler(this::toggle)
+        );
+    }
+
+    private void openCommand(@Nullable String name) {
+        boolean alias = true;
+        if (name == null) {
+            name = "open";
+            alias = false;
+        }
+        manager.command(
+                builder.literal(name, Description.of(conf.getOpen().getDescription()))
+                        .meta(aliasMeta, alias)
+                        .permission("fadah.open-other")
+                        .required("player", playerParser())
+                        .handler(this::open)
         );
     }
 

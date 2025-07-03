@@ -263,6 +263,16 @@ public class Lang {
             private String disabled = "&c&lDISABLED";
         }
 
+        private Open open = new Open();
+
+        @Getter
+        @Configuration
+        @NoArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class Open {
+            private String description = "Open the auction house menu for another player";
+            private List<String> aliases = List.of();
+        }
+
         private About about = new About();
 
         @Getter

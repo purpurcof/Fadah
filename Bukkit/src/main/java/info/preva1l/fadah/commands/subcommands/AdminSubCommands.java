@@ -2,12 +2,14 @@ package info.preva1l.fadah.commands.subcommands;
 
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
+import info.preva1l.fadah.guis.MainMenu;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.utils.Text;
 import info.preva1l.fadah.utils.guis.FastInvManager;
 import info.preva1l.trashcan.extension.BaseExtension;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.incendo.cloud.context.CommandContext;
 
 /**
@@ -46,5 +48,17 @@ public interface AdminSubCommands {
             ctx.sender().sendMessage(Text.text(Lang.i().getPrefix() + Lang.i().getCommands().getReload().getFail()));
             throw new RuntimeException(e);
         }
+    }
+
+    default void open(CommandContext<CommandSender> ctx) {
+        Player player = ctx.get("player");
+
+        new MainMenu(
+                null,
+                player,
+                null,
+                null,
+                null
+        ).open(player);
     }
 }
