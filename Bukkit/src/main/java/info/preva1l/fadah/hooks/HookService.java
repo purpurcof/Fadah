@@ -16,7 +16,7 @@ public final class HookService {
         Hooker.register(
                 Fadah.class,
                 new HookerOptions(
-                        Fadah.instance.logger,
+                        Fadah.instance.getLogger(),
                         false,
                         runnable -> MultiLib.getAsyncScheduler().runNow(Fadah.instance, t -> runnable.run()),
                         runnable -> Tasks.sync(Fadah.instance, runnable),
