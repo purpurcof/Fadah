@@ -65,7 +65,7 @@ public final class ImplBinListing extends ActiveListing implements BinListing {
 
             ItemStack itemStack = this.getItemStack().clone();
             var item = new CollectableItem(itemStack, Instant.now().toEpochMilli());
-            CacheAccess.get(CollectionBox.class, getOwner())
+            CacheAccess.get(CollectionBox.class, buyer.getUniqueId())
                     .ifPresentOrElse(
                             cache -> {
                                 try {
@@ -73,7 +73,7 @@ public final class ImplBinListing extends ActiveListing implements BinListing {
                                 } catch (Exception e) {
                                     LOGGER.log(Level.WARNING, "Failed to add to cached expired items", e);
                                 }
-                            }, () -> handleCollectionBoxFromDatabase(getOwner(), item)
+                            }, () -> handleCollectionBoxFromDatabase(buyer.getUniqueId(), item)
                     );
 
             removeListing();
