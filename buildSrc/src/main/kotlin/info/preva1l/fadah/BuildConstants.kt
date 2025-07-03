@@ -1,4 +1,4 @@
-package info.preva1l.sentinel
+package info.preva1l.fadah
 
 import org.ajoberstar.grgit.Grgit
 import org.jetbrains.kotlin.konan.file.File
