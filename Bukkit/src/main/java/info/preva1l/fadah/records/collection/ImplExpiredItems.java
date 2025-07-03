@@ -2,9 +2,9 @@ package info.preva1l.fadah.records.collection;
 
 import info.preva1l.fadah.data.DataService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created on 23/06/2025
@@ -13,9 +13,9 @@ import java.util.UUID;
  */
 public final class ImplExpiredItems implements ExpiredItems {
     private final UUID owner;
-    private final List<CollectableItem> collectableItems;
+    private final CopyOnWriteArrayList<CollectableItem> collectableItems;
 
-    public ImplExpiredItems(UUID owner, List<CollectableItem> collectableItems) {
+    public ImplExpiredItems(UUID owner, CopyOnWriteArrayList<CollectableItem> collectableItems) {
         this.owner = owner;
         this.collectableItems = collectableItems;
     }
@@ -27,7 +27,7 @@ public final class ImplExpiredItems implements ExpiredItems {
      * @return the expired items instance.
      */
     public static ExpiredItems empty(UUID owner) {
-        return new ImplExpiredItems(owner, new ArrayList<>());
+        return new ImplExpiredItems(owner, new CopyOnWriteArrayList<>());
     }
 
     @Override

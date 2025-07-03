@@ -2,9 +2,9 @@ package info.preva1l.fadah.records.history;
 
 import info.preva1l.fadah.data.DataService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created on 23/06/2025
@@ -13,9 +13,9 @@ import java.util.UUID;
  */
 public final class ImplHistory implements History {
     private final UUID owner;
-    private final List<HistoricItem> historicItems;
+    private final CopyOnWriteArrayList<HistoricItem> historicItems;
 
-    public ImplHistory(UUID owner, List<HistoricItem> historicItems) {
+    public ImplHistory(UUID owner, CopyOnWriteArrayList<HistoricItem> historicItems) {
         this.owner = owner;
         this.historicItems = historicItems;
     }
@@ -27,7 +27,7 @@ public final class ImplHistory implements History {
      * @return the history instance.
      */
     public static History empty(UUID owner) {
-        return new ImplHistory(owner, new ArrayList<>());
+        return new ImplHistory(owner, new CopyOnWriteArrayList<>());
     }
 
     @Override

@@ -19,17 +19,17 @@ import org.bson.Document;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 
 public class HistoryMongoDao implements Dao<History> {
     private static final Gson GSON = new GsonBuilder()
             .registerTypeHierarchyAdapter(ConfigurationSerializable.class, new BukkitSerializableAdapter())
             .serializeNulls().disableHtmlEscaping().create();
-    private static final Type HISTORY_LIST_TYPE = new TypeToken<ArrayList<HistoricItem>>() {}.getType();
+    private static final Type HISTORY_LIST_TYPE = new TypeToken<CopyOnWriteArrayList<HistoricItem>>() {}.getType();
     private final MongoCollection<Document> collection;
 
     public HistoryMongoDao(MongoDatabase database) {
@@ -50,9 +50,9 @@ public class HistoryMongoDao implements Dao<History> {
             final Document document = collection.find().filter(Filters.eq("playerUUID", id)).first();
             if (document == null) return Optional.empty();
 
-            ArrayList<HistoricItem> items = GSON.fromJson(document.getString("items"), HISTORY_LIST_TYPE);
+            CopyOnWriteArrayList<HistoricItem> items = GSON.fromJson(document.getString("items"), HISTORY_LIST_TYPE);
 
-            if (items == null) items = new ArrayList<>();
+            if (items == null) items = new CopyOnWriteArrayList<>();
 
             return Optional.of(new ImplHistory(id, items));
         } catch (Exception e) {

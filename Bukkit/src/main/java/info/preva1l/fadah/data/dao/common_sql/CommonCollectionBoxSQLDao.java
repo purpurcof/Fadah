@@ -16,10 +16,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created on 20/03/2025
@@ -30,7 +30,7 @@ public abstract class CommonCollectionBoxSQLDao implements Dao<CollectionBox> {
     protected static final Gson GSON = new GsonBuilder()
             .registerTypeHierarchyAdapter(ConfigurationSerializable.class, new BukkitSerializableAdapter())
             .serializeNulls().disableHtmlEscaping().create();
-    protected static final Type COLLECTION_LIST_TYPE = new TypeToken<ArrayList<CollectableItem>>() {}.getType();
+    protected static final Type COLLECTION_LIST_TYPE = new TypeToken<CopyOnWriteArrayList<CollectableItem>>() {}.getType();
 
     /**
      * Get an object from the database by its id.
@@ -48,7 +48,7 @@ public abstract class CommonCollectionBoxSQLDao implements Dao<CollectionBox> {
                 statement.setString(1, id.toString());
                 final ResultSet resultSet = statement.executeQuery();
                 if (resultSet.next()) {
-                    List<CollectableItem> items = GSON.fromJson(resultSet.getString("items"), COLLECTION_LIST_TYPE);
+                    CopyOnWriteArrayList<CollectableItem> items = GSON.fromJson(resultSet.getString("items"), COLLECTION_LIST_TYPE);
                     return Optional.of(new ImplCollectionBox(id, items));
                 }
             }
