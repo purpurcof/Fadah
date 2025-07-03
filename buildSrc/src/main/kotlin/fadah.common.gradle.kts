@@ -1,4 +1,4 @@
-import info.preva1l.sentinel.BuildConstants
+import info.preva1l.fadah.BuildConstants
 import info.preva1l.trashcan.finallyADecent
 import info.preva1l.trashcan.paper
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
