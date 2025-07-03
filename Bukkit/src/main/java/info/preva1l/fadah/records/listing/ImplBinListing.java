@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.logging.Level;
 
 @Getter
 public final class ImplBinListing extends ActiveListing implements BinListing {
@@ -63,15 +64,24 @@ public final class ImplBinListing extends ActiveListing implements BinListing {
             }
 
             ItemStack itemStack = this.getItemStack().clone();
-            CacheAccess.getNotNull(CollectionBox.class, buyer.getUniqueId())
-                    .add(new CollectableItem(itemStack, Instant.now().toEpochMilli()));
+            var item = new CollectableItem(itemStack, Instant.now().toEpochMilli());
+            CacheAccess.get(CollectionBox.class, getOwner())
+                    .ifPresentOrElse(
+                            cache -> {
+                                try {
+                                    cache.add(item);
+                                } catch (Exception e) {
+                                    LOGGER.log(Level.WARNING, "Failed to add to cached expired items", e);
+                                }
+                            }, () -> handleCollectionBoxFromDatabase(getOwner(), item)
+                    );
 
             removeListing();
 
             sendNotifications(buyer, itemStack, sellerAmount);
 
         } catch (Exception e) {
-            System.err.println("Purchase failed for listing " + getId() + ": " + e.getMessage());
+            LOGGER.warning("Purchase failed for listing " + getId() + ": " + e.getMessage());
             rollbackTransaction(buyer, sellerAmount);
             throw new RuntimeException("Purchase transaction failed", e);
         }
@@ -121,12 +131,7 @@ public final class ImplBinListing extends ActiveListing implements BinListing {
     }
 
     private void rollbackTransaction(@NotNull Player buyer, double sellerAmount) {
-        try {
-            getCurrency().add(buyer, this.getPrice());
-            getCurrency().withdraw(Bukkit.getOfflinePlayer(this.getOwner()), sellerAmount);
-        } catch (Exception rollbackException) {
-            System.err.println("CRITICAL: Rollback failed for listing " + getId() +
-                    " - manual intervention required: " + rollbackException.getMessage());
-        }
+        getCurrency().add(buyer, this.getPrice());
+        getCurrency().withdraw(Bukkit.getOfflinePlayer(this.getOwner()), sellerAmount);
     }
 }

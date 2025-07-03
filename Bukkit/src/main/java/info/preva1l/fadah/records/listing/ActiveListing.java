@@ -10,9 +10,7 @@ import info.preva1l.fadah.data.DataService;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
-import info.preva1l.fadah.records.collection.CollectableItem;
-import info.preva1l.fadah.records.collection.ExpiredItems;
-import info.preva1l.fadah.records.collection.ImplExpiredItems;
+import info.preva1l.fadah.records.collection.*;
 import info.preva1l.fadah.security.AwareDataService;
 import info.preva1l.fadah.utils.Tasks;
 import info.preva1l.fadah.utils.logging.TransactionLogger;
@@ -28,7 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class ActiveListing extends BaseListing {
-    private static final Logger LOGGER = Logger.getLogger(ActiveListing.class.getName());
+    protected static final Logger LOGGER = Logger.getLogger(ActiveListing.class.getName());
 
     protected ActiveListing(@NotNull UUID id, @NotNull UUID owner, @NotNull String ownerName,
                             @NotNull ItemStack itemStack, @NotNull String categoryID, @NotNull String currency,
@@ -91,6 +89,23 @@ public abstract class ActiveListing extends BaseListing {
                         ExpiredItems expiredItems = items.orElseGet(() -> ImplExpiredItems.empty(getOwner()));
                         expiredItems.add(collectableItem);
                         return DataService.getInstance().save(ExpiredItems.class, expiredItems);
+                    })
+                    .exceptionally(throwable -> {
+                        LOGGER.log(Level.SEVERE, "Failed to save expired items to database", throwable);
+                        return null;
+                    });
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error handling expired items from database", e);
+        }
+    }
+
+    protected void handleCollectionBoxFromDatabase(UUID owner, CollectableItem collectableItem) {
+        try {
+            DataService.getInstance().get(CollectionBox.class, owner)
+                    .thenCompose(items -> {
+                        CollectionBox collectionBox = items.orElseGet(() -> ImplCollectionBox.empty(owner));
+                        collectionBox.add(collectableItem);
+                        return DataService.getInstance().save(CollectionBox.class, collectionBox);
                     })
                     .exceptionally(throwable -> {
                         LOGGER.log(Level.SEVERE, "Failed to save expired items to database", throwable);

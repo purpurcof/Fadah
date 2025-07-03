@@ -10,7 +10,6 @@ import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
 import info.preva1l.fadah.records.collection.CollectableItem;
 import info.preva1l.fadah.records.collection.CollectionBox;
-import info.preva1l.fadah.records.collection.ImplCollectionBox;
 import info.preva1l.fadah.security.AwareDataService;
 import info.preva1l.fadah.utils.Text;
 import lombok.Getter;
@@ -251,24 +250,13 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
 
             CacheAccess.get(CollectionBox.class, winningBid.bidder())
                     .ifPresentOrElse(
-                            cache -> cache.add(collectableItem),
-                            () -> {
+                            cache -> {
                                 try {
-                                    DataService.getInstance()
-                                            .get(CollectionBox.class, winningBid.bidder())
-                                            .thenCompose(items -> {
-                                                CollectionBox box = items.orElseGet(() -> ImplCollectionBox.empty(winningBid.bidder()));
-                                                box.add(collectableItem);
-                                                return DataService.getInstance().save(CollectionBox.class, box);
-                                            })
-                                            .exceptionally(throwable -> {
-                                                LOGGER.log(Level.SEVERE, "Failed to save collection box", throwable);
-                                                return null;
-                                            });
+                                    cache.add(collectableItem);
                                 } catch (Exception e) {
-                                    LOGGER.log(Level.SEVERE, "Failed to handle collection box", e);
+                                    LOGGER.log(Level.WARNING, "Failed to add to cached expired items", e);
                                 }
-                            }
+                            }, () -> handleCollectionBoxFromDatabase(winningBid.bidder(), collectableItem)
                     );
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to add item to collection", e);

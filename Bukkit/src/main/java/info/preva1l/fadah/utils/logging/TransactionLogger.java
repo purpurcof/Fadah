@@ -39,7 +39,11 @@ public class TransactionLogger {
                 null
         );
 
-        CacheAccess.getNotNull(History.class, listing.getOwner()).add(historicItem);
+        CacheAccess.get(History.class, listing.getOwner())
+                .ifPresentOrElse(
+                        cache -> cache.add(historicItem),
+                        () -> fetchAndSaveHistory(listing.getOwner(), historicItem)
+                );
 
         // Log file logs
         String logMessage = "[NEW LISTING] Seller: %s (%s), Price: %.2f, ItemStack: %s".formatted(
