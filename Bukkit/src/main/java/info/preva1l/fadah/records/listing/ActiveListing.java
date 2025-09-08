@@ -22,31 +22,36 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public abstract class ActiveListing extends BaseListing {
     protected static final Logger LOGGER = Logger.getLogger(ActiveListing.class.getName());
 
+    protected final AtomicBoolean ended = new AtomicBoolean(false);
+
     protected ActiveListing(@NotNull UUID id, @NotNull UUID owner, @NotNull String ownerName,
-                            @NotNull ItemStack itemStack, @NotNull String categoryID, @NotNull String currency,
+                            @NotNull ItemStack itemStack, @NotNull String currency,
                             double tax, long creationDate, long deletionDate) {
-        super(id, owner, ownerName, itemStack, categoryID, currency, tax, creationDate, deletionDate);
+        super(id, owner, ownerName, itemStack, currency, tax, creationDate, deletionDate);
     }
 
     @Override
-    public void expire(boolean force) {
-        AwareDataService.instance.execute(Listing.class, this, () -> expire0(force));
+    public CompletableFuture<Void> expire(boolean force) {
+        return AwareDataService.instance.execute(Listing.class, this, () -> expire0(force));
     }
 
     private void expire0(boolean force) {
         try {
-            if (System.currentTimeMillis() < deletionDate && !force) return;
+            if (System.currentTimeMillis() <= deletionDate && !force) return;
 
             removeListing();
             addToExpiredItems();
             logExpiration();
             fireExpirationEvent();
+            ended.set(true);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error expiring listing: " + getId(), e);
         }
@@ -141,11 +146,11 @@ public abstract class ActiveListing extends BaseListing {
     }
 
     @Override
-    public void cancel(@NotNull Player canceller) {
-        AwareDataService.instance.execute(Listing.class, this, () -> cancel0(canceller));
+    public CompletableFuture<Void> cancel(@NotNull Player canceller) {
+        return AwareDataService.instance.execute(Listing.class, this, () -> cancel0(canceller));
     }
 
-    private void cancel0(@NotNull Player canceller) {
+    protected void cancel0(@NotNull Player canceller) {
         try {
             sendCancellationMessage(canceller);
             removeListing();
@@ -154,7 +159,7 @@ public abstract class ActiveListing extends BaseListing {
             boolean isAdmin = !this.isOwner(canceller);
             logCancellation(isAdmin);
             fireCancellationEvent(isAdmin);
-
+            ended.set(true);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error cancelling listing: " + getId(), e);
         }
@@ -249,7 +254,7 @@ public abstract class ActiveListing extends BaseListing {
                 return false;
             }
 
-            if (System.currentTimeMillis() >= getDeletionDate()) {
+            if (System.currentTimeMillis() >= getDeletionDate() || ended.get()) {
                 Lang.sendMessage(player, Lang.i().getPrefix() + Lang.i().getErrors().getDoesNotExist());
                 return false;
             }
@@ -258,6 +263,20 @@ public abstract class ActiveListing extends BaseListing {
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error checking if player can buy listing", e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isActive() {
+        try {
+            if (CacheAccess.get(Listing.class, getId()).isEmpty()) return false;
+            if (System.currentTimeMillis() >= getDeletionDate()) return false;
+            if (ended.get()) return true;
+
+            return true;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error checking if listing is active", e);
             return false;
         }
     }
@@ -272,7 +291,7 @@ public abstract class ActiveListing extends BaseListing {
             notifySeller(message);
             logSale(buyer);
             firePurchaseEvent(buyer);
-
+            ended.set(true);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error completing listing sale", e);
         }

@@ -27,9 +27,10 @@ repositories {
 
 dependencies {
     implementation(project(":API"))
-    trashcan("1.2.1")
+    trashcan()
 
     library(libs.bundles.databases)
+    library(libs.redisson)
 
     library(libs.multilib)
     library(libs.anvilgui) { setRemapped(true) }
@@ -67,7 +68,7 @@ paper {
     main = rootProject.group.toString() + ".Fadah"
     loader = "info.preva1l.fadah.trashcan.extension.libloader.BaseLibraryLoader"
     foliaSupported = true
-    apiVersion = "1.19"
+    apiVersion = "1.21"
 
     load = PluginLoadOrder.POSTWORLD
 

@@ -1,7 +1,6 @@
 package info.preva1l.fadah.guis;
 
 import info.preva1l.fadah.Fadah;
-import info.preva1l.fadah.config.Categories;
 import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.Menus;
@@ -114,7 +113,7 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
 
     private boolean passesCategoryFilter(Listing listing) {
         if (category == null) return true;
-        return listing.getCategoryID().equals(category.id());
+        return listing.getCategory().equals(category);
     }
 
     @Override
@@ -142,34 +141,34 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
     private void handleListingClick(InventoryClickEvent event, Listing listing, boolean isShulkerBox, boolean isBidListing) {
         if (processingListings.putIfAbsent(listing, true) != null) return;
 
-        try {
-            Player clicker = (Player) event.getWhoClicked();
+        Player clicker = (Player) event.getWhoClicked();
 
-            if (event.isShiftClick() && canCancelListing(clicker, listing)) {
-                listing.cancel(clicker);
+        if (event.isShiftClick() && canCancelListing(clicker, listing)) {
+            listing.cancel(clicker).thenRun(() -> {
                 updatePagination();
-                return;
-            }
-
-            if (event.isRightClick() && isShulkerBox) {
-                new ShulkerBoxPreviewMenu(listing, () -> open(player)).open(player);
-                return;
-            }
-
-            if (!listing.canBuy(player)) return;
-
-            if (isBidListing) {
-                new PlaceBidMenu((BidListing) listing, player, () -> open(player)).open(player);
-            } else {
-                new ConfirmPurchaseMenu((BinListing) listing, player, () -> open(player)).open(player);
-            }
-        } finally {
-            processingListings.remove(listing);
+                processingListings.remove(listing);
+            });
+            return;
         }
+
+        if (event.isRightClick() && isShulkerBox) {
+            new ShulkerBoxPreviewMenu(listing, () -> open(player)).open(player);
+            return;
+        }
+
+        if (!listing.canBuy(player)) return;
+
+        if (isBidListing) {
+            new PlaceBidMenu((BidListing) listing, player, () -> open(player)).open(player);
+        } else {
+            new ConfirmPurchaseMenu((BinListing) listing, player, () -> open(player)).open(player);
+        }
+
+        processingListings.remove(listing);
     }
 
     private boolean canCancelListing(Player player, Listing listing) {
-        return player.hasPermission("fadah.manage.active-listings") || listing.isOwner(player);
+        return (player.hasPermission("fadah.manage.active-listings") || listing.isOwner(player)) && listing.isActive();
     }
 
     private ItemStack buildItem(Listing listing, boolean isBidListing, boolean isShulkerBox) {
@@ -180,7 +179,7 @@ public abstract class BrowseMenu extends ScrollBarFastInv {
         ItemBuilder itemStack = new ItemBuilder(listing.getItemStack().clone())
                 .addLore(getLang().getLore(player, "listing.lore-body",
                         Tuple.of("%seller%", listing.getOwnerName()),
-                        Tuple.of("%category%", Text.removeColorCodes(Categories.getCatName(listing.getCategoryID()))),
+                        Tuple.of("%category%", Text.removeColorCodes(listing.getCategory().name())),
                         Tuple.of("%mode%", buyMode),
                         Tuple.of("%symbol%", listing.getCurrency().getSymbol()),
                         Tuple.of("%price%", Config.i().getFormatting().numbers().format(listing.getPrice())),

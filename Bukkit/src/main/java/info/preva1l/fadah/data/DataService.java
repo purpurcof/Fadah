@@ -50,7 +50,7 @@ public final class DataService {
     private DatabaseHandler handler;
 
     private DataService() {
-        threadPool = Executors.newCachedThreadPool();
+        threadPool = Executors.newVirtualThreadPerTaskExecutor();
         databaseHandlers.put(DatabaseType.SQLITE, SQLiteHandler.class);
         databaseHandlers.put(DatabaseType.MARIADB, MySQLHandler.class);
         databaseHandlers.put(DatabaseType.MYSQL, MySQLHandler.class);
@@ -113,7 +113,7 @@ public final class DataService {
         }, threadPool);
     }
 
-    public <T> CompletableFuture<Void> update(Class<T> clazz, T t, String[] params) {
+    public <T> CompletableFuture<Void> update(Class<T> clazz, T t, Map<String, ?> params) {
         if (!isConnected()) {
             logger.severe("Tried to perform database action when the database is not connected!");
             return CompletableFuture.completedFuture(null);

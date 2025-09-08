@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 
@@ -26,9 +27,9 @@ public final class ImplBinListing extends ActiveListing implements BinListing {
     private final double price;
 
     public ImplBinListing(@NotNull UUID id, @NotNull UUID owner, @NotNull String ownerName,
-                          @NotNull ItemStack itemStack, @NotNull String categoryID, @NotNull String currency, double price,
+                          @NotNull ItemStack itemStack, @NotNull String currency, double price,
                           double tax, long creationDate, long deletionDate) {
-        super(id, owner, ownerName, itemStack, categoryID, currency, tax, creationDate, deletionDate);
+        super(id, owner, ownerName, itemStack, currency, tax, creationDate, deletionDate);
         this.price = price;
     }
 
@@ -44,12 +45,12 @@ public final class ImplBinListing extends ActiveListing implements BinListing {
 
     @Override
     public StaleListing getAsStale() {
-        return new StaleListing(id, owner, ownerName, itemStack, categoryID, currencyId, price, tax, creationDate, deletionDate, new ConcurrentSkipListSet<>());
+        return new StaleListing(id, owner, ownerName, itemStack, currencyId, price, tax, creationDate, deletionDate, new ConcurrentSkipListSet<>(), categoryID);
     }
 
     @Override
-    public void purchase(@NotNull Player buyer) {
-        AwareDataService.instance.execute(Listing.class, this, () -> purchase0(buyer));
+    public CompletableFuture<Void> purchase(@NotNull Player buyer) {
+        return AwareDataService.instance.execute(Listing.class, this, () -> purchase0(buyer));
     }
 
     private void purchase0(@NotNull Player buyer) {
@@ -59,9 +60,7 @@ public final class ImplBinListing extends ActiveListing implements BinListing {
         double sellerAmount = this.getPrice() - taxedAmount;
 
         try {
-            if (!transferFunds(buyer, sellerAmount)) {
-                return;
-            }
+            if (!transferFunds(buyer, sellerAmount)) return;
 
             ItemStack itemStack = this.getItemStack().clone();
             var item = new CollectableItem(itemStack, Instant.now().toEpochMilli());

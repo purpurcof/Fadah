@@ -5,6 +5,7 @@ import info.preva1l.fadah.config.Config;
 import info.preva1l.fadah.config.Lang;
 import info.preva1l.fadah.config.misc.Tuple;
 import info.preva1l.fadah.data.DataService;
+import info.preva1l.fadah.data.dao.common_sql.CommonSQLListingDao;
 import info.preva1l.fadah.multiserver.Broker;
 import info.preva1l.fadah.multiserver.Message;
 import info.preva1l.fadah.multiserver.Payload;
@@ -20,7 +21,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,9 +37,9 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
     private final ConcurrentSkipListSet<Bid> bids;
 
     public ImplBidListing(@NotNull UUID id, @NotNull UUID owner, @NotNull String ownerName,
-                          @NotNull ItemStack itemStack, @NotNull String categoryID, @NotNull String currency, double startingBid,
+                          @NotNull ItemStack itemStack, @NotNull String currency, double startingBid,
                           double tax, long creationDate, long deletionDate, ConcurrentSkipListSet<Bid> bids) {
-        super(id, owner, ownerName, itemStack, categoryID, currency, tax, creationDate, deletionDate);
+        super(id, owner, ownerName, itemStack, currency, tax, creationDate, deletionDate);
 
         if (startingBid <= 0) {
             throw new IllegalArgumentException("Starting bid must be positive");
@@ -76,8 +79,8 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
 
     @Override
     public StaleListing getAsStale() {
-        return new StaleListing(id, owner, ownerName, itemStack, categoryID, currencyId,
-                getCurrentBid().bidAmount(), tax, creationDate, deletionDate, bids);
+        return new StaleListing(id, owner, ownerName, itemStack, currencyId,
+                getCurrentBid().bidAmount(), tax, creationDate, deletionDate, bids, categoryID);
     }
 
     @Override
@@ -100,13 +103,13 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
      * @param bidAmount the amount of the bid
      */
     @Override
-    public void newBid(@NotNull Player bidder, double bidAmount) {
+    public CompletableFuture<Void> newBid(@NotNull Player bidder, double bidAmount) {
         if (bidAmount <= 0) {
             Lang.sendMessage(bidder, Lang.i().getPrefix() + Lang.i().getErrors().getBidTooLow());
-            return;
+            return CompletableFuture.completedFuture(null);
         }
 
-        AwareDataService.instance.execute(Listing.class, this, () -> newBid0(bidder, bidAmount));
+        return AwareDataService.instance.execute(Listing.class, this, () -> newBid0(bidder, bidAmount));
     }
 
     private void newBid0(@NotNull Player bidder, double bidAmount) {
@@ -129,6 +132,7 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
 
             sendBidConfirmation(bidder, bidAmount);
             handlePreviousBidder(mostRecentBid, bidAmount);
+            updateListing();
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error processing new bid", e);
@@ -192,18 +196,13 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
     }
 
     @Override
-    public void completeBidding() {
-        AwareDataService.instance.execute(Listing.class, this, this::completeBidding0);
+    public CompletableFuture<Void> completeBidding() {
+        return AwareDataService.instance.execute(Listing.class, this, this::completeBidding0);
     }
 
     private void completeBidding0() {
         try {
-            if (bids == null || bids.isEmpty()) {
-                expire();
-                return;
-            }
-
-            Bid winningBid = bids.first();
+            Bid winningBid = getCurrentBid();
 
             if (ZERO_UUID.equals(winningBid.bidder())) {
                 expire();
@@ -218,6 +217,15 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error completing bidding", e);
         }
+    }
+
+    @Override
+    protected void cancel0(@NotNull Player canceller) {
+        Bid lastBid = getCurrentBid();
+        if (!ZERO_UUID.equals(lastBid.bidder())) {
+            getCurrency().add(Bukkit.getOfflinePlayer(lastBid.bidder()), lastBid.bidAmount());
+        }
+        super.cancel0(canceller);
     }
 
     private void processSellerPayment(@NotNull Bid winningBid) {
@@ -239,6 +247,15 @@ public final class ImplBidListing extends ActiveListing implements BidListing {
             DataService.getInstance().delete(Listing.class, this);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to remove listing", e);
+            throw e;
+        }
+    }
+
+    private void updateListing() {
+        try {
+            DataService.getInstance().update(Listing.class, this, Map.of("bids", CommonSQLListingDao.bidToJsonString(this.getBids())));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to update listing", e);
             throw e;
         }
     }

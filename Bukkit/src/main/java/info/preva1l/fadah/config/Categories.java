@@ -26,6 +26,15 @@ import java.util.*;
 @SuppressWarnings("FieldMayBeFinal")
 public class Categories {
     private static Categories instance;
+    private static Category NONE_CATEGORY = new Category(
+            "_none_",
+            Lang.i().getWords().getNone(),
+            999999999,
+            0,
+            Material.AIR,
+            List.of(),
+            List.of()
+    );
 
     private static final YamlConfigurationProperties PROPERTIES = YamlConfigurationProperties.newBuilder()
             .charset(StandardCharsets.UTF_8)
@@ -46,10 +55,10 @@ public class Categories {
                             "&7▪ &fHoes"
                     ),
                     List.of(
-                            "%material%.endsWith(\"_AXE\")",
-                            "%material%.endsWith(\"_PICKAXE\")",
-                            "%material%.endsWith(\"_HOE\")",
-                            "%material%.endsWith(\"_SHOVEL\")"
+                            "%material% endsWith \"_AXE\"",
+                            "%material% endsWith \"_PICKAXE\"",
+                            "%material% endsWith \"_HOE\"",
+                            "%material% endsWith \"_SHOVEL\""
                     )
             ),
             new Category(
@@ -65,11 +74,11 @@ public class Categories {
                             "&7▪ &fShields"
                     ),
                     List.of(
-                            "%material%.endsWith(\"_SWORD\")",
-                            "%material%.endsWith(\"_BOOTS\")",
-                            "%material%.endsWith(\"_LEGGINGS\")",
-                            "%material%.endsWith(\"_CHESTPLATE\")",
-                            "%material%.endsWith(\"_HELMET\")",
+                            "%material% endsWith \"_SWORD\"",
+                            "%material% endsWith \"_BOOTS\"",
+                            "%material% endsWith \"_LEGGINGS\"",
+                            "%material% endsWith \"_CHESTPLATE\"",
+                            "%material% endsWith \"_HELMET\"",
                             "%material% == \"BOW\""
                     )
             ),
@@ -95,7 +104,7 @@ public class Categories {
                     ),
                     List.of(
                             "%material% == \"SPAWNER\"",
-                            "%material%.endsWith(\"_SPAWN_EGG\")"
+                            "%material% endsWith \"_SPAWN_EGG\""
                     )
             ),
             new Category(
@@ -110,13 +119,13 @@ public class Categories {
                     List.of(
                             "%material% == \"COARSE_DIRT\"",
                             "%material% == \"TERRACOTTA\"",
-                            "%material%.endsWith(\"_WOOL\")",
-                            "%material%.endsWith(\"_TERRACOTTA\")",
-                            "%material%.endsWith(\"_CONCRETE\")",
-                            "%material%.endsWith(\"_CONCRETE_POWDER\")",
+                            "%material% endsWith \"_WOOL\"",
+                            "%material% endsWith \"_TERRACOTTA\"",
+                            "%material% endsWith \"_CONCRETE\"",
+                            "%material% endsWith \"_CONCRETE_POWDER\"",
                             "%material% == \"GLASS\"",
-                            "%material%.endsWith(\"_GLASS\")",
-                            "%material%.endsWith(\"_GLASS_PANE\")"
+                            "%material% endsWith \"_GLASS\"",
+                            "%material% endsWith \"_GLASS_PANE\""
                     )
             ),
             new Category(
@@ -129,7 +138,7 @@ public class Categories {
                             "&fRedstone components."
                     ),
                     List.of(
-                            "%material%.includes(\"REDSTONE\")",
+                            "%material% contains \"REDSTONE\"",
                             "%material% == \"REPEATER\"",
                             "%material% == \"COMPARATOR\""
                     )
@@ -168,22 +177,13 @@ public class Categories {
     private final SortedSet<Category> customViaApi = new TreeSet<>();
 
     public static SortedSet<Category> getCategories() {
-        return i().sortedCache;
+        SortedSet<Category> categories = i().sortedCache;
+        categories.removeIf(it -> it.id().equals("_none_"));
+        return categories;
     }
 
     public static Optional<Category> getCategory(String id) {
         return i().sortedCache.stream().filter(category -> category.id().equals(id)).findFirst();
-    }
-
-    public static String getCatName(String id) {
-        if (id.equals("_none_")) {
-            return Lang.i().getWords().getNone();
-        }
-        Category category = getCategory(id).orElse(null);
-        if (category == null) {
-            return Lang.i().getWords().getNone();
-        }
-        return category.name();
     }
 
     public static String getCategoryForItem(ItemStack item) {
@@ -211,6 +211,7 @@ public class Categories {
     @ExtensionReload
     public static void reload() {
         instance = YamlConfigurations.load(new File(Fadah.getInstance().getDataFolder(), "categories.yml").toPath(), Categories.class, PROPERTIES);
+        instance.categories.add(NONE_CATEGORY);
         instance.sortedCache.clear();
         instance.sortedCache.addAll(instance.categories);
         instance.sortedCache.addAll(instance.customViaApi);
@@ -222,6 +223,7 @@ public class Categories {
         }
 
         instance = YamlConfigurations.update(new File(Fadah.getInstance().getDataFolder(), "categories.yml").toPath(), Categories.class, PROPERTIES);
+        instance.categories.add(NONE_CATEGORY);
         instance.sortedCache.clear();
         instance.sortedCache.addAll(instance.categories);
         instance.sortedCache.addAll(instance.customViaApi);
