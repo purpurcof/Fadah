@@ -47,6 +47,7 @@ public final class ImplPost extends Post {
         if (bypassTax) listingBuilder.tax(0.0);
 
         Listing listing = listingBuilder.build();
+        if (listing.getCategoryID().equals("_none_")) return PostResult.RESTRICTED_ITEM;
         if (isRestrictedItem(listing.getItemStack())) return PostResult.RESTRICTED_ITEM;
 
         if (!bypassMaxListings && player != null) {
