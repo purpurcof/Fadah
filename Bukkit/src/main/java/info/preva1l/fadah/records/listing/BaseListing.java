@@ -3,9 +3,11 @@ package info.preva1l.fadah.records.listing;
 import info.preva1l.fadah.config.Categories;
 import info.preva1l.fadah.records.Category;
 import lombok.Getter;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -61,7 +63,8 @@ public abstract class BaseListing implements Listing {
         Category category = Categories.getCategory(categoryID).orElse(null);
         if (category == null) {
             categoryID = Categories.getCategoryForItem(itemStack);
-            category = Categories.getCategory(categoryID).orElseThrow();
+            category = Categories.getCategory(categoryID)
+                    .orElse(new Category("_none_", "N/A", 0, 0, Material.AIR, List.of(), List.of()));
         }
 
         return category;
